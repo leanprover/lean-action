@@ -1,0 +1,99 @@
+name: "Lean Action - CI for Lean Projects"
+description: |
+  Standard CI for Lean projects. 
+  Steps:
+    - install elan
+    - get Mathlib cache (optional, must be downstream of Mathlib)
+    - lake build
+    - lake test (optional)
+    - lake exe runLinter (optional, must be downstream of Std)
+    - check reservoir eligibility (optional)
+inputs:
+  test:
+    description: |
+      Run lake test.
+      Allowed values: "true" or "false".
+      If test input is not provided, tests will run by default.
+    required: false
+    default: "true"
+  mathlib-cache:
+    description: |
+      Run "lake exe cache get" before build.
+      Project must be downstream of Mathlib.
+      Allowed values: "true" or "false".
+      If mathlib-cache input is not provided, the action will attempt to automatically detect if the project is downstream of Mathlib.
+    required: false
+    default: ""
+  lint-module:
+    description: |
+      Run "lake exe runLinter" on the specified module.
+      Project must be downstream of Std.
+      Allowed values: name of module to lint.
+      If lint-module input is not provided, linter will not run.
+    required: false
+    default: ""
+  check-reservoir-eligibility:
+    description: |
+      Check if the repository is eligible for the reservoir.
+      Allowed values: "true" or "false".
+      If check-reservoir-elibility input is not provided, the action will not check for reservoir eligibility.
+    required: false
+    default: "false"
+runs:
+  using: "composite"
+  steps:
+    - name: install elan
+      run: ${{ github.action_path }}/scripts/install_elan.sh
+      shell: bash
+
+    - uses: actions/checkout@v4
+
+    - uses: actions/cache@v4
+      with:
+        path: .lake
+        key: ${{ runner.os }}-lake-${{ github.sha }}
+        # if no cache hit, fall back to the (latest) previous cache
+        restore-keys: ${{ runner.os }}-lake-
+
+    - name: detect mathlib
+      # only detect Mathlib if the user did not provide the mathlib-cache input
+      if: ${{ inputs.mathlib-cache == '' }}
+      id: detect-mathlib
+      run: ${{ github.action_path }}/scripts/detect_mathlib.sh
+      shell: bash
+
+    - name: get mathlib cache
+      # only get the cache if Mathlib was detected by detect-mathlib step or if the user explicitly set mathlib-cache to true
+      if: ${{ steps.detect-mathlib.outputs.DETECTED_MATHLIB == 'true' || inputs.mathlib-cache == 'true' }}
+      run: lake exe cache get
+      shell: bash
+
+    - name: build ${{ github.repository }}
+      run: lake build
+      shell: bash
+
+    - uses: actions/cache/save@v4
+      with:
+        path: .lake
+        key: ${{ runner.os }}-lake-${{ github.sha }}
+
+    - name: test ${{ github.repository }}
+      if: ${{ inputs.test == 'true' }}
+      run: lake test
+      shell: bash
+
+    - name: lint ${{ github.repository }}
+      # only run linter if the user provided a module to lint
+      if: ${{ inputs.lint-module != '' }}
+      run: lake exe runLinter ${{ inputs.lint-module }}
+      shell: bash
+
+    - name: check reservoir eligibility
+      if: ${{ inputs.check-reservoir-eligibility == 'true' }}
+      # Passes in the private status, number of stars, and license id of the repository to check_reservoir_eligibility.sh script
+      run: |
+        ${{ github.action_path }}/scripts/check_reservoir_eligibility.sh \
+          "${{ github.event.repository.private }}"\
+          "${{ github.event.repository.stargazers_count }}"\
+          "${{ github.event.repository.license.spdx_id }}"
+      shell: bash
