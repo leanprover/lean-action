@@ -39,6 +39,14 @@ inputs:
       If check-reservoir-elibility input is not provided, the action will not check for reservoir eligibility.
     required: false
     default: "false"
+  lean4checker:
+    description: |
+      Check environment with lean4checker
+      Allowed values: "true" or "false".
+      If lean4checker input is not provided, the action will not check environment with lean4checker.
+    required: false
+    default: "false"
+
 runs:
   using: "composite"
   steps:
@@ -96,4 +104,9 @@ runs:
           "${{ github.event.repository.private }}"\
           "${{ github.event.repository.stargazers_count }}"\
           "${{ github.event.repository.license.spdx_id }}"
+      shell: bash
+
+    - name: check environment with lean4checker
+      if: ${{ inputs.lean4checker == 'true' }}
+      run: ${{ github.action_path }}/scripts/run_lean4checker.sh
       shell: bash
