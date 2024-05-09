@@ -14,7 +14,7 @@ function check_license() {
   SPDX_DATA_URL="https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
 
   # Fetch the SPDX license list and filter by licenseId and isOsiApproved
-  license=$(curl -s $SPDX_DATA_URL | jq -r '.licenses[] | select(.licenseId == "'$id'" and .isOsiApproved == true)')
+  license=$(curl -s "$SPDX_DATA_URL" | jq -r --arg id "$id" '.licenses[] | select(.licenseId == $id and .isOsiApproved == true)')
   if [ -n "$license" ]; then
       return 0
   else
