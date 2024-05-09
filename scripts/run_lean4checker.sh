@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "Checking environment with lean4checker"
 
 
