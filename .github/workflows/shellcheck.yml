@@ -2,13 +2,8 @@ name: ShellCheck
 on:
   push:
     branches:
-      - 'master'
-    paths:
-      - '.github/**'
+      - 'main'
   pull_request:
-    paths:
-      - '.github/**'
-  merge_group:
 
 jobs:
     lint:

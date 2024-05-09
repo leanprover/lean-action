@@ -2,13 +2,12 @@ name: Actionlint
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
     paths:
       - '.github/**'
   pull_request:
     paths:
       - '.github/**'
-  merge_group:
 
 jobs:
   actionlint:
