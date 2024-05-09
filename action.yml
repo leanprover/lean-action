@@ -43,7 +43,7 @@ inputs:
     description: |
       Check environment with lean4checker
       Allowed values: "true" or "false".
-      If lean4checker input is not provided, the action will not check environment with lean4checker.
+      If lean4checker input is not provided, the action will not check the environment with lean4checker.
     required: false
     default: "false"
 
