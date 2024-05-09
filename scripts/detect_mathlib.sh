@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "Trying to detect if project is downstream of Mathlib."
 
 # Check if the lakefile.lean file contains "require mathlib"
