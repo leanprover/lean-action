@@ -1,0 +1,15 @@
+name: ShellCheck
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+
+jobs:
+    lint:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+        - name: Run ShellCheck
+          uses: azohra/shell-linter@v0.6.0

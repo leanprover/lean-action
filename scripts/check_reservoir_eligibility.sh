@@ -14,7 +14,7 @@ function check_license() {
   SPDX_DATA_URL="https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
 
   # Fetch the SPDX license list and filter by licenseId and isOsiApproved
-  license=$(curl -s $SPDX_DATA_URL | jq -r '.licenses[] | select(.licenseId == "'$id'" and .isOsiApproved == true)')
+  license=$(curl -s "$SPDX_DATA_URL" | jq -r --arg id "$id" '.licenses[] | select(.licenseId == $id and .isOsiApproved == true)')
   if [ -n "$license" ]; then
       return 0
   else
@@ -24,7 +24,7 @@ function check_license() {
 }
 
 # Check if the license_id is a valid SPDX license and assign exit code
-if ! check_license $license_id; then
+if ! check_license "$license_id"; then
   echo "Package is ineligible for Reservoir because the repository does not contain a valid SPDX license."
   exit_code=1
 fi
@@ -36,13 +36,13 @@ if [ ! -f "lake-manifest.json" ]; then
 fi
 
 # Check if the repository is private
-if [ $private == "true" ]; then
+if [ "$private" == "true" ]; then
   echo "Package is ineligible for Reservoir because the repository is private."
   exit_code=1
 fi
 
 # Check if the repository has less than 2 stars
-if [ $number_of_stars -lt 2 ]; then
+if [ "$number_of_stars" -lt 2 ]; then
   echo "Package is ineligible for Reservoir because the repository has less than 2 stars."
   exit_code=1
 fi
