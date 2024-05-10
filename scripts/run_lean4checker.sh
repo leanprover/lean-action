@@ -7,10 +7,13 @@ echo "Checking environment with lean4checker"
 echo "Cloning and building lean4checker"
 git clone https://github.com/leanprover/lean4checker
 
+# build and test lean4checker in a subshell
 (
+toolchain-version=$(cat lean-toolchain | cut -d: -f 2)
+echo "Detected toolchain version: $toolchain-version"
 cd lean4checker || exit
 git config --global advice.detachedHead false # turn off git warning about detached head
-git checkout toolchain/v4.7.0
+git checkout "$toolchain-version"
 cp ../lean-toolchain .
 
 # build lean4checker and test lean4checker
