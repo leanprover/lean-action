@@ -13,7 +13,7 @@ git clone https://github.com/leanprover/lean4checker
 toolchain_version=$(< lean-toolchain cut -d: -f 2)
 echo "Detected toolchain version: $toolchain_version"
 cd lean4checker || exit
-git config --global advice.detachedHead false # turn off git warning about detached head
+git config advice.detachedHead false # turn off git warning about detached head
 git checkout "$toolchain_version"
 cp ../lean-toolchain .
 

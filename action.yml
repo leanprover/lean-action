@@ -36,12 +36,14 @@ inputs:
     description: |
       Check if the repository is eligible for the reservoir.
       Allowed values: "true" or "false".
-      If check-reservoir-elibility input is not provided, the action will not check for reservoir eligibility.
+      If check-reservoir-eligibility input is not provided, the action will not check for reservoir eligibility.
     required: false
     default: "false"
   lean4checker:
     description: |
-      Check environment with lean4checker
+      Check environment with lean4checker.
+      Lean version must be 4.8 or higher.
+      The version of lean4checker is automatically detected using `lean-toolchain`.
       Allowed values: "true" or "false".
       If lean4checker input is not provided, the action will not check the environment with lean4checker.
     required: false
