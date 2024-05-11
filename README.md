@@ -51,7 +51,6 @@ jobs:
     # Allowed values: "true" or "false".
     # Default: false
     check-reservoir-eligibility: false
-
     
     # Check environment with lean4checker.
     # Lean version must be 4.8 or higher.
