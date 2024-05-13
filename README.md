@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
       # uses lean standard action with all default input values
       - uses: leanprover/lean-action
 ```
