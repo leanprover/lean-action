@@ -79,3 +79,18 @@ jobs:
     test: false
     mathlib-cache: false
 ```
+
+## Keep the action updated with `dependabot`
+
+In order to receive notification when this action is updated (and any others used in your repo), add the file `.github/dependabot.yml` with the contents:
+
+```yaml
+version: 2
+updates:
+  - package-ecosystem: "github-actions" 
+    directory: "/"
+    schedule:
+      interval: "daily"
+```
+
+See the [dependabot documentation](https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file) for all configuration options.
