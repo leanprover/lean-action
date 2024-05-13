@@ -42,7 +42,7 @@ jobs:
     mathlib-cache: ""
 
     # Run "lake exe runLinter" on the specified module.
-    # Project must be downstream of Std.
+    # Project must be downstream of Batteries.
     # Allowed values: name of module to lint.
     # If lint-module input is not provided, linter will not run.
     lint-module: ""
