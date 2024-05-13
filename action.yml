@@ -56,8 +56,6 @@ runs:
       run: ${{ github.action_path }}/scripts/install_elan.sh
       shell: bash
 
-    - uses: actions/checkout@v4
-
     - uses: actions/cache@v4
       with:
         path: .lake
