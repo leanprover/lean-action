@@ -17,5 +17,4 @@ else
   echo "Project is not downstream of Mathlib. Skipping Mathlib cache."
 fi
 
-
 echo "::endgroup::"
