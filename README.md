@@ -81,8 +81,9 @@ jobs:
 ```
 
 ## Keep the action updated with `dependabot`
+Because Lean is under heavy development, changes to Lean or Lake could break outdated versions of `lean-action`. You can configure [dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates) to automatically create a PR to update `lean-action` when a new stable version is released. 
 
-In order to receive notification when this action is updated (and any others used in your repo), add the file `.github/dependabot.yml` with the contents:
+Here is an example `.github/dependabot.yml` which configures `dependabot` to check daily for updates to all GitHub actions in your repository:
 
 ```yaml
 version: 2
