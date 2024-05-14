@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+# Group logging using the ::group:: workflow command
+echo "::group::lean4checker"
 echo "Checking environment with lean4checker"
 
 # clone lean4checker
@@ -28,3 +30,5 @@ lake build
 # run lean4checker
 echo "Running lean4checker"
 lake env lean4checker/.lake/build/bin/lean4checker
+
+echo "::endgroup::"

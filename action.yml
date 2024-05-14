@@ -73,11 +73,17 @@ runs:
     - name: get mathlib cache
       # only get the cache if Mathlib was detected by detect-mathlib step or if the user explicitly set mathlib-cache to true
       if: ${{ steps.detect-mathlib.outputs.DETECTED_MATHLIB == 'true' || inputs.mathlib-cache == 'true' }}
-      run: lake exe cache get
+      run: |
+        echo "::group::Mathlib Cache"
+        lake exe cache get
+        echo "::endgroup::"
       shell: bash
 
     - name: build ${{ github.repository }}
-      run: lake build
+      run: |
+        echo "::group::Lake Build"
+        lake build
+        echo "::endgroup::"
       shell: bash
 
     - uses: actions/cache/save@v4
@@ -87,13 +93,19 @@ runs:
 
     - name: test ${{ github.repository }}
       if: ${{ inputs.test == 'true' }}
-      run: lake test
+      run: |
+        echo "::group::Lake Test"
+        lake test
+        echo "::endgroup::"
       shell: bash
 
     - name: lint ${{ github.repository }}
       # only run linter if the user provided a module to lint
       if: ${{ inputs.lint-module != '' }}
-      run: lake exe runLinter ${{ inputs.lint-module }}
+      run: |
+        echo "::group::Lint"
+        lake exe runLinter ${{ inputs.lint-module }}
+        echo "::endgroup::"
       shell: bash
 
     - name: check reservoir eligibility
