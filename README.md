@@ -23,13 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       # uses lean standard action with all default input values
-      - uses: leanprover/lean-action
+      - uses: leanprover/lean-action@v1-alpha
 ```
 
 ## Usage
 
 ```yaml
-- uses: leanprover/lean-action
+- uses: leanprover/lean-action@v1-alpha
   with:
     # Run lake test.
     # Allowed values: "true" or "false".
@@ -66,7 +66,7 @@ jobs:
 ### Lint the `MyModule` module and check package for reservoir eligibility
 
 ```yaml
-- uses: leanprover/lean-action
+- uses: leanprover/lean-action@v1-alpha
   with:
     lint-module: MyModule
     check-reservoir-eligibility: true
@@ -75,7 +75,7 @@ jobs:
 ### Don't run `lake test` or use Mathlib cache
 
 ```yaml
-- uses: leanprover/lean-action
+- uses: leanprover/lean-action@v1-alpha
   with:
     test: false
     mathlib-cache: false
