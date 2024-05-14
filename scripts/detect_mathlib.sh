@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Group logging using the ::group:: workflow command
+echo "::group::Mathlib Detection"
 echo "Trying to detect if project is downstream of Mathlib."
 
 # define mathlib dependency patterns for lakefile.lean and lakefile.toml
@@ -14,3 +16,6 @@ if grep -q "$dot_lean_pattern" lakefile.lean || grep -Pzq "$dot_toml_pattern" la
 else
   echo "Project is not downstream of Mathlib. Skipping Mathlib cache."
 fi
+
+
+echo "::endgroup::"

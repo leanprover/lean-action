@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Group logging using the ::group:: workflow command
+echo "::group::Reservoir Eligibility Check"
+
 # Assign the arguments from github action to named variables
 private=$1
 number_of_stars=$2
@@ -50,4 +53,6 @@ fi
 if [ $exit_code -eq 0 ]; then
   echo "Package is eligible for Reservoir."
 fi
+
+echo "::endgroup::"
 exit $exit_code
