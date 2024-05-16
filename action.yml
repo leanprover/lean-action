@@ -70,6 +70,17 @@ runs:
       run: ${{ github.action_path }}/scripts/detect_mathlib.sh
       shell: bash
 
+    - name: log info
+      env:
+        DETECTED_MATHLIB: ${{ steps.detect-mathlib.outputs.DETECTED_MATHLIB || "unknown" }}
+      run: |
+        echo "::group::Log info"        
+        echo "Project uses mathlib: $DETECTED_MATHLIB"
+        lean --version          
+        lake --version
+        echo "::endgroup::"
+      shell: bash
+
     - name: get mathlib cache
       # only get the cache if Mathlib was detected by detect-mathlib step or if the user explicitly set mathlib-cache to true
       if: ${{ steps.detect-mathlib.outputs.DETECTED_MATHLIB == 'true' || inputs.mathlib-cache == 'true' }}
