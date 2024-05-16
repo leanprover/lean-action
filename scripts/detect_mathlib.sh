@@ -14,6 +14,7 @@ if grep -q "$dot_lean_pattern" lakefile.lean || grep -Pzq "$dot_toml_pattern" la
   echo "DETECTED_MATHLIB=true" >> "$GITHUB_OUTPUT"
   echo "Project is downstream of Mathlib. Using Mathlib cache."
 else
+  echo "DETECTED_MATHLIB=false" >> "$GITHUB_OUTPUT"
   echo "Project is not downstream of Mathlib. Skipping Mathlib cache."
 fi
 
