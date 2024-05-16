@@ -19,4 +19,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - run tests with `lake test`
 - automatically detect `mathlib` dependency and run `lake exe get cache`
 - detect [Reservoir eligibility](https://reservoir.lean-lang.org/inclusion-criteria)
-- check for environment hacking with  lean4checker
+- check for environment hacking with lean4checker
