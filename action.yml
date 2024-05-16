@@ -72,7 +72,7 @@ runs:
 
     - name: log info
       env:
-        DETECTED_MATHLIB: ${{ steps.detect-mathlib.outputs.DETECTED_MATHLIB || "unknown" }}
+        DETECTED_MATHLIB: ${{ steps.detect-mathlib.outputs.DETECTED_MATHLIB }}
       run: |
         echo "::group::Log info"        
         echo "Project uses mathlib: $DETECTED_MATHLIB"
