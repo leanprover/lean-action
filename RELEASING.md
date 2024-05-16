@@ -1,5 +1,5 @@
 # General notes
-`lean-action` use git tags and [semantic versioning](https://semver.org/) for release management. For example: `v1`, `v2.7.1`, `v2-beta`.
+`lean-action` uses git tags and [semantic versioning](https://semver.org/) for release management. For example: `v1`, `v2.7.1`, `v2-beta`.
 
 In short:
 - If a release changes the API of the inputs to `lean-action` or contains changes which would break backwards compatibility, bump the major version.
@@ -16,8 +16,9 @@ For more information about releasing GitHub actions see the [Using tags for rele
 - Test `lean-action` by pointing an existing test repository to the new version with `uses: leanprover/lean-action@v{RELEASE_VERSION}`.
 - Make any minor commits related to the release on the release branch.
 - Once the release has been validated, create a new release with release notes and a git tag `v{RELEASE_VERSION}` (e.g `v2.7.1`).
+- Update `CHANGELOG.md` by adding a new section, e.g., `## v2.7.1` at the top of the file followed by a bullet list of the release notes.
 - In the case of a minor or patch version, move the major version tag to the latest version
-- If you made additional commits on the release branch, merge the release branch back into `main`.
+- If there are additional commits on the release branch, merge the release branch back into `main`.
 - Make an announcement to the Lean community.
 
 ## Special notes for major releases
