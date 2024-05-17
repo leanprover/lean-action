@@ -16,7 +16,7 @@ For more information about releasing GitHub actions see the [Using tags for rele
     - Test `lean-action` by pointing an existing test repository to the new version with `uses: leanprover/lean-action@v{RELEASE_VERSION}`.
     - Make any minor commits related to the release on the release branch.
 - Once the release has been validated, create a new release with release notes copied from the `## Unreleased` section of `CHANGELOG.md` and a git tag `v{RELEASE_VERSION}` (e.g `v2.7.1`).
-- In the case of a minor or patch version, move the major version tag to the latest version
+- In the case of a minor or patch version, move the major version tag to the latest version. This can be done by manually running the "Update major version tag" workflow.
 - Update `CHANGELOG.md` with a new section with the release name and date directly below the `## Unreleased` header, e.g., `## v2.7.1 - 2024-12-21` .
     - If you made updates to the release notes in the GitHub release, add them to `CHANGELOG.md`.
 - If there are additional commits on the release branch, merge the release branch back into `main`.
