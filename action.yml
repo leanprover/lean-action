@@ -87,10 +87,10 @@ runs:
 
     - name: build ${{ github.repository }}
       env: 
-          BUILD-ARGS: ${{ inputs.build-args }}
+          BUILD_ARGS: ${{ inputs.build-args }}
       run: |
         echo "::group::Lake Build"
-        lake build "$BUILD-ARGS"
+        lake build "$BUILD_ARGS"
         echo "::endgroup::"
       shell: bash
 
