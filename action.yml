@@ -22,14 +22,14 @@ inputs:
       For example, `build-args: "--quiet"` will run `lake build --quiet`.
     required: false
     default: ""
-  mathlib-cache:
+  use-mathlib-cache:
     description: |
-      Run "lake exe cache get" before build.
-      Project must be downstream of Mathlib.
-      Allowed values: "true" or "false".
-      If mathlib-cache input is not provided, the action will attempt to automatically detect if the project is downstream of Mathlib.
+      By default, `lean-action` attempts to automatically detect a Mathlib dependency and run `lake exe cache get` accordingly.
+      Setting `use-mathlib-cache` will override automatic detection and run (or not run) `lake exe cache get`.
+      Project must be downstream of Mathlib to use the Mathlib cache.
+      Allowed values: "true" | "false" | "auto".
     required: false
-    default: ""
+    default: "auto"
   lint-module:
     description: |
       Run "lake exe runLinter" on the specified module.
@@ -71,14 +71,14 @@ runs:
 
     - name: detect mathlib
       # only detect Mathlib if the user did not provide the mathlib-cache input
-      if: ${{ inputs.mathlib-cache == '' }}
+      if: ${{ inputs.use-mathlib-cache == 'auto' }}
       id: detect-mathlib
       run: ${{ github.action_path }}/scripts/detect_mathlib.sh
       shell: bash
 
     - name: get mathlib cache
       # only get the cache if Mathlib was detected by detect-mathlib step or if the user explicitly set mathlib-cache to true
-      if: ${{ steps.detect-mathlib.outputs.DETECTED_MATHLIB == 'true' || inputs.mathlib-cache == 'true' }}
+      if: ${{ steps.detect-mathlib.outputs.DETECTED_MATHLIB == 'true' || inputs.use-mathlib-cache == 'true' }}
       run: |
         echo "::group::Mathlib Cache"
         lake exe cache get
