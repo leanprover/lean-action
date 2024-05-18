@@ -16,6 +16,12 @@ inputs:
       If test input is not provided, tests will run by default.
     required: false
     default: "true"
+  build-args:
+    description: |
+      Build arguments to pass to `lake build {args}`.
+      For example, `build-args: "--quiet"` will run `lake build --quiet`.
+    required: false
+    default: ""
   mathlib-cache:
     description: |
       Run "lake exe cache get" before build.
@@ -80,9 +86,11 @@ runs:
       shell: bash
 
     - name: build ${{ github.repository }}
+      env: 
+          BUILD_ARGS: ${{ inputs.build-args }}
       run: |
         echo "::group::Lake Build"
-        lake build
+        lake build "$BUILD_ARGS"
         echo "::endgroup::"
       shell: bash
 

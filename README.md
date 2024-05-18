@@ -35,6 +35,10 @@ jobs:
     # Allowed values: "true" or "false".
     # Default: true
     test: true
+    
+    # Build arguments to pass to `lake build {args}`.
+    # For example, `build-args: "--quiet"` will run `lake build --quiet`.
+    build-args: ""
 
     # Run "lake exe cache get" before build.
     # Project must be downstream of Mathlib.
@@ -79,6 +83,14 @@ jobs:
   with:
     test: false
     mathlib-cache: false
+```
+
+### Run lake build with `--wfail`
+
+```yaml
+- uses: leanprover/lean-action@v1-alpha
+  with:
+    build-args: "--wfail"
 ```
 
 ## Keep the action updated with `dependabot`

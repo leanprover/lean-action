@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - logs are grouped by step for better readability
+- `build-args` input to specify arguments to pass to `lake build`
 
 ### Changed
 - `lean-action` no longer contains an `actions/checkout` step
