@@ -40,11 +40,11 @@ jobs:
     # For example, `build-args: "--quiet"` will run `lake build --quiet`.
     build-args: ""
 
-    # Run "lake exe cache get" before build.
-    # Project must be downstream of Mathlib.
-    # Allowed values: "true" or "false".
-    # If mathlib-cache input is not provided, the action will attempt to automatically detect if the project is downstream of Mathlib.
-    mathlib-cache: ""
+    # By default, `lean-action` attempts to automatically detect a Mathlib dependency and run `lake exe cache get` accordingly.
+    # Setting `use-mathlib-cache` will override automatic detection and run (or not run) `lake exe cache get`.
+    # Project must be downstream of Mathlib to use the Mathlib cache.
+    # Allowed values: "true" | "false" | "auto".
+    use-mathlib-cache: "auto"
 
     # Run "lake exe runLinter" on the specified module.
     # Project must be downstream of Batteries.
@@ -82,7 +82,7 @@ jobs:
 - uses: leanprover/lean-action@v1-alpha
   with:
     test: false
-    mathlib-cache: false
+    use-mathlib-cache: false
 ```
 
 ### Run lake build with `--wfail`

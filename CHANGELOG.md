@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `lean-action` no longer contains an `actions/checkout` step
+- `mathlib-cache` renamed to `get-mathlib-cache`
 
 ## v1-alpha - 2024-05-12
 
