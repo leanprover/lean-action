@@ -1,6 +1,9 @@
 name: Functional Tests
 
-on: [push, workflow_dispatch]
+on: 
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   no-lake-test:
