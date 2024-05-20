@@ -35,7 +35,7 @@ jobs:
     # Allowed values: "true" or "false".
     # Default: true
     test: true
-    
+
     # Build arguments to pass to `lake build {args}`.
     # For example, `build-args: "--quiet"` will run `lake build --quiet`.
     build-args: ""
@@ -91,6 +91,24 @@ jobs:
 - uses: leanprover/lean-action@v1-alpha
   with:
     build-args: "--wfail"
+```
+
+### Run additional steps after `lean-action` using the Lean environment
+
+After calling `lean-action` you can leverage the Lean environment in later workflow steps.
+
+For example, `leanprover-community/import-graph` uses the setup from `lean-action` to test the `graph` executable with `lake exe graph`:
+
+```lean
+    steps:
+      - uses: leanprover/lean-action@v1-alpha
+        with:
+          check-reservoir-eligibility: true
+      # use setup from lean-action to perform the following steps
+      - name: verify `lake exe graph` works
+        run: |
+          lake exe graph
+          rm import_graph.dot
 ```
 
 ## Projects which use `lean-action`
