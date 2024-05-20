@@ -93,6 +93,10 @@ jobs:
     build-args: "--wfail"
 ```
 
+## Projects which use `lean-action`
+- [leanprover-community/aesop](https://github.com/leanprover-community/aesop/blob/master/.github/workflows/build.yml#L16)
+- [leanprover-community/import-graph](https://github.com/leanprover-community/import-graph/blob/main/.github/workflows/build.yml#L8)
+
 ## Keep the action updated with `dependabot`
 Because Lean is under heavy development, changes to Lean or Lake could break outdated versions of `lean-action`. You can configure [dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates) to automatically create a PR to update `lean-action` when a new stable version is released. 
 
