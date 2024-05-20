@@ -99,16 +99,16 @@ After calling `lean-action` you can leverage the Lean environment in later workf
 
 For example, `leanprover-community/import-graph` uses the setup from `lean-action` to test the `graph` executable with `lake exe graph`:
 
-```lean
-    steps:
-      - uses: leanprover/lean-action@v1-alpha
-        with:
-          check-reservoir-eligibility: true
-      # use setup from lean-action to perform the following steps
-      - name: verify `lake exe graph` works
-        run: |
-          lake exe graph
-          rm import_graph.dot
+```yaml
+steps:
+  - uses: leanprover/lean-action@v1-alpha
+    with:
+      check-reservoir-eligibility: true
+  # use setup from lean-action to perform the following steps
+  - name: verify `lake exe graph` works
+    run: |
+      lake exe graph
+      rm import_graph.dot
 ```
 
 ## Projects which use `lean-action`
