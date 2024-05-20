@@ -34,11 +34,13 @@ jobs:
       - name: create dummy test
         if: ${{ matrix.lake-test == 'true' }}
         run: |
-          echo "@[test_runner]" >> lakefile.lean
-          echo "script dummy_test do" >> lakefile.lean
-          echo "  println! \"Running fake tests...\"" >> lakefile.lean
-          echo "  println! \"Fake tests passed!\"" >> lakefile.lean
-          echo "  return 0" >> lakefile.lean
+          {
+            echo "@[test_runner]"
+            echo "script dummy_test do"
+            echo "  println! \"Running fake tests...\""
+            echo "  println! \"Fake tests passed!\""
+            echo "  return 0" 
+          } >> lakefile.lean
 
       - name: ls and pwd
         run: |
