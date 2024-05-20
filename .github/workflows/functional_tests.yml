@@ -1,8 +1,12 @@
 name: Functional Tests
 
-on: 
+on:
   pull_request:
     branches: [main]
+    paths:
+      - "scripts/**"
+      - "action.yml"
+      - ".github/workflows/functional_tests.yml"
   workflow_dispatch:
 
 jobs:
@@ -23,7 +27,6 @@ jobs:
           ./elan-init -y --default-toolchain leanprover/lean4:v4.8.0-rc1
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
-      
       - uses: actions/checkout@v4
 
       - name: create standalone project
