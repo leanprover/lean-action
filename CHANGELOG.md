@@ -6,13 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1-beta - 2024-05-21
+
 ### Added
 - logs are grouped by step for better readability
-- `build-args` input to specify arguments to pass to `lake build`
+- new `build-args` input to specify arguments to pass to `lake build`
+- install elan step logs `lean --version` and `lake --version`
 
 ### Changed
 - `lean-action` no longer contains an `actions/checkout` step
 - `mathlib-cache` renamed to `get-mathlib-cache`
+
+### Fixed
+- improved default value for `get-mathlib-cache`
 
 ## v1-alpha - 2024-05-12
 
