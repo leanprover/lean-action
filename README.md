@@ -23,13 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       # uses lean standard action with all default input values
-      - uses: leanprover/lean-action@v1-alpha
+      - uses: leanprover/lean-action@v1-beta
 ```
 
 ## Usage
 
 ```yaml
-- uses: leanprover/lean-action@v1-alpha
+- uses: leanprover/lean-action@v1-beta
   with:
     # Run lake test.
     # Allowed values: "true" or "false".
@@ -70,7 +70,7 @@ jobs:
 ### Lint the `MyModule` module and check package for reservoir eligibility
 
 ```yaml
-- uses: leanprover/lean-action@v1-alpha
+- uses: leanprover/lean-action@v1-beta
   with:
     lint-module: MyModule
     check-reservoir-eligibility: true
@@ -79,7 +79,7 @@ jobs:
 ### Don't run `lake test` or use Mathlib cache
 
 ```yaml
-- uses: leanprover/lean-action@v1-alpha
+- uses: leanprover/lean-action@v1-beta
   with:
     test: false
     use-mathlib-cache: false
@@ -88,7 +88,7 @@ jobs:
 ### Run lake build with `--wfail`
 
 ```yaml
-- uses: leanprover/lean-action@v1-alpha
+- uses: leanprover/lean-action@v1-beta
   with:
     build-args: "--wfail"
 ```
@@ -101,7 +101,7 @@ For example, `leanprover-community/import-graph` uses the setup from `lean-actio
 
 ```yaml
 steps:
-  - uses: leanprover/lean-action@v1-alpha
+  - uses: leanprover/lean-action@v1-beta
     with:
       check-reservoir-eligibility: true
   # use setup from lean-action to perform the following steps
