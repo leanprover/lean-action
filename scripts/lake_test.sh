@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "::group::Lake Test"
+echo "::group::Lake Test Output"
 # Get the directory of the script
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 

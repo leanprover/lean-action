@@ -2,7 +2,7 @@
 set -e
 
 # Group logging using the ::group:: workflow command
-echo "::group::lean4checker"
+echo "::group::lean4checker Output"
 echo "Checking environment with lean4checker"
 
 # clone lean4checker

@@ -59,7 +59,9 @@ runs:
   using: "composite"
   steps:
     - name: install elan
-      run: ${{ github.action_path }}/scripts/install_elan.sh
+      run: |
+        : Install Elan
+        ${{ github.action_path }}/scripts/install_elan.sh
       shell: bash
 
     - uses: actions/cache@v4
@@ -73,25 +75,32 @@ runs:
       # only detect Mathlib if the user did not provide the mathlib-cache input
       if: ${{ inputs.use-mathlib-cache == 'auto' }}
       id: detect-mathlib
-      run: ${{ github.action_path }}/scripts/detect_mathlib.sh
+      run: |
+        : Detect Mathlib
+        ${{ github.action_path }}/scripts/detect_mathlib.sh
       shell: bash
 
     - name: get mathlib cache
       # only get the cache if Mathlib was detected by detect-mathlib step or if the user explicitly set mathlib-cache to true
       if: ${{ steps.detect-mathlib.outputs.DETECTED_MATHLIB == 'true' || inputs.use-mathlib-cache == 'true' }}
       run: |
+        : Get Mathlib Cache
         echo "::group::Mathlib Cache"
         lake exe cache get
         echo "::endgroup::"
+        echo
       shell: bash
 
     - name: build ${{ github.repository }}
       env: 
           BUILD_ARGS: ${{ inputs.build-args }}
       run: |
-        echo "::group::Lake Build"
+        : Lake Build
+        echo "::group::Lake Build Output"
         lake build "$BUILD_ARGS"
         echo "::endgroup::"
+        echo
+        echo
       shell: bash
 
     - uses: actions/cache/save@v4
@@ -102,6 +111,7 @@ runs:
     - name: test ${{ github.repository }}
       if: ${{ inputs.test == 'true' }}
       run: |
+        : Lake Test
         ${{ github.action_path }}/scripts/lake_test.sh
       shell: bash
 
@@ -109,15 +119,18 @@ runs:
       # only run linter if the user provided a module to lint
       if: ${{ inputs.lint-module != '' }}
       run: |
+        : Batteries Linter
         echo "::group::Lint"
         lake exe runLinter ${{ inputs.lint-module }}
         echo "::endgroup::"
+        echo
       shell: bash
 
     - name: check reservoir eligibility
       if: ${{ inputs.check-reservoir-eligibility == 'true' }}
       # Passes in the private status, number of stars, and license id of the repository to check_reservoir_eligibility.sh script
       run: |
+        : Check Reservoir Eligibility
         ${{ github.action_path }}/scripts/check_reservoir_eligibility.sh \
           "${{ github.event.repository.private }}"\
           "${{ github.event.repository.stargazers_count }}"\
@@ -126,5 +139,7 @@ runs:
 
     - name: check environment with lean4checker
       if: ${{ inputs.lean4checker == 'true' }}
-      run: ${{ github.action_path }}/scripts/run_lean4checker.sh
+      run: |
+        : Check Environment with lean4checker
+        ${{ github.action_path }}/scripts/run_lean4checker.sh
       shell: bash

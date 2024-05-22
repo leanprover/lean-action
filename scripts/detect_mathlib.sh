@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Group logging using the ::group:: workflow command
-echo "::group::Mathlib Detection"
+echo "::group::Detect Mathlib Output"
 echo "Trying to detect if project is downstream of Mathlib."
 
 # define mathlib dependency patterns for lakefile.lean and lakefile.toml
