@@ -102,9 +102,7 @@ runs:
     - name: test ${{ github.repository }}
       if: ${{ inputs.test == 'true' }}
       run: |
-        echo "::group::Lake Test"
-        lake test
-        echo "::endgroup::"
+        ${{ github.action_path }}/scripts/lake_test.sh
       shell: bash
 
     - name: lint ${{ github.repository }}
