@@ -54,6 +54,13 @@ inputs:
       If lean4checker input is not provided, the action will not check the environment with lean4checker.
     required: false
     default: "false"
+  use-github-cache:
+    description: |
+      Enable GitHub caching.
+      Allowed values: "true" or "false".
+      If use-github-cache input is not provided, `lean-action` will use GitHub caching by default.
+    required: false
+    default: "true"
 
 runs:
   using: "composite"
@@ -63,6 +70,7 @@ runs:
       shell: bash
 
     - uses: actions/cache@v4
+      if: ${{ inputs.use-github-cache == 'true' }}
       with:
         path: .lake
         key: ${{ runner.os }}-lake-${{ github.sha }}
@@ -95,6 +103,7 @@ runs:
       shell: bash
 
     - uses: actions/cache/save@v4
+      if: ${{ inputs.use-github-cache == 'true' }}
       with:
         path: .lake
         key: ${{ runner.os }}-lake-${{ github.sha }}
