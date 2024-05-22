@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  no-lake-test:
+  lake-init:
     runs-on: ubuntu-latest
     strategy:
       matrix:
