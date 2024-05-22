@@ -32,3 +32,4 @@ echo "Running lean4checker"
 lake env lean4checker/.lake/build/bin/lean4checker
 
 echo "::endgroup::"
+echo

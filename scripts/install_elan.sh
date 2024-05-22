@@ -11,3 +11,4 @@ echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 "$HOME"/.elan/bin/lake --version
 
 echo "::endgroup::"
+echo

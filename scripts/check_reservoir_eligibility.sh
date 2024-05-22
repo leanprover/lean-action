@@ -55,4 +55,5 @@ if [ $exit_code -eq 0 ]; then
 fi
 
 echo "::endgroup::"
+echo
 exit $exit_code

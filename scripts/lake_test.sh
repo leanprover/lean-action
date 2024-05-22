@@ -15,3 +15,4 @@ fi
 lake test
 
 echo "::endgroup::"
+echo

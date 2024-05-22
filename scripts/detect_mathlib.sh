@@ -22,3 +22,4 @@ else
 fi
 
 echo "::endgroup::"
+echo
