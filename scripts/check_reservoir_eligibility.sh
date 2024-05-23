@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Group logging using the ::group:: workflow command
-echo "::group::Reservoir Eligibility Check"
+echo "::group::Reservoir Eligibility Check Output"
 
 # Assign the arguments from github action to named variables
 private=$1
@@ -55,4 +55,5 @@ if [ $exit_code -eq 0 ]; then
 fi
 
 echo "::endgroup::"
+echo
 exit $exit_code
