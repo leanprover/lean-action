@@ -100,7 +100,6 @@ runs:
         lake build "$BUILD_ARGS"
         echo "::endgroup::"
         echo
-        echo
       shell: bash
 
     - uses: actions/cache/save@v4
