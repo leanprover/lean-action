@@ -48,7 +48,7 @@ jobs:
     # Default: "auto"
     use-mathlib-cache: ""
 
-    # Run "lake exe runLinter {lint-module}" on the specified module.
+    # Run `lake exe runLinter {lint-module}` on the specified module.
     # Project must be downstream of Batteries.
     # Allowed values: name of module to lint.
     # By default, `lean-action` will not run the linter.
