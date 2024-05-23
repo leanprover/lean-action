@@ -32,38 +32,39 @@ jobs:
 - uses: leanprover/lean-action@v1-beta
   with:
     # Run lake test.
-    # Allowed values: "true" or "false".
+    # Allowed values: "true" | "false".
     # Default: true
-    test: true
+    test: ""
 
-    # Build arguments to pass to `lake build {args}`.
+    # Build arguments to pass to `lake build {build-args}`.
     # For example, `build-args: "--quiet"` will run `lake build --quiet`.
+    # By default, `lean-action` calls `lake build` with no arguments
     build-args: ""
 
     # By default, `lean-action` attempts to automatically detect a Mathlib dependency and run `lake exe cache get` accordingly.
     # Setting `use-mathlib-cache` will override automatic detection and run (or not run) `lake exe cache get`.
     # Project must be downstream of Mathlib to use the Mathlib cache.
     # Allowed values: "true" | "false" | "auto".
-    use-mathlib-cache: "auto"
+    # Default: "auto"
+    use-mathlib-cache: ""
 
-    # Run "lake exe runLinter" on the specified module.
+    # Run "lake exe runLinter {lint-module}" on the specified module.
     # Project must be downstream of Batteries.
     # Allowed values: name of module to lint.
-    # If lint-module input is not provided, linter will not run.
+    # By default, `lean-action` will not run the linter.
     lint-module: ""
 
     # Check if the repository is eligible for the reservoir.
-    # Allowed values: "true" or "false".
-    # Default: false
-    check-reservoir-eligibility: false
+    # Allowed values: "true" | "false".
+    # Default: "false"
+    check-reservoir-eligibility: ""
     
     # Check environment with lean4checker.
     # Lean version must be 4.8 or higher.
     # The version of lean4checker is automatically detected using `lean-toolchain`.
-    # Allowed values: "true" or "false".
-    # Default: false
-    lean4checker: false 
-
+    # Allowed values: "true" | "false".
+    # Default: "false"
+    lean4checker: ""
     
     # Enable GitHub caching.
     # Allowed values: "true" or "false".
