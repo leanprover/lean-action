@@ -33,12 +33,12 @@ jobs:
   with:
     # Run lake test.
     # Allowed values: "true" | "false".
-    # Default: true
+    # Default: "true"
     test: ""
 
     # Build arguments to pass to `lake build {build-args}`.
     # For example, `build-args: "--quiet"` will run `lake build --quiet`.
-    # By default, `lean-action` calls `lake build` with no arguments
+    # By default, `lean-action` calls `lake build` with no arguments.
     build-args: ""
 
     # By default, `lean-action` attempts to automatically detect a Mathlib dependency and run `lake exe cache get` accordingly.

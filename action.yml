@@ -8,6 +8,7 @@ description: |
     - lake test (optional)
     - lake exe runLinter (optional, must be downstream of Batteries)
     - check reservoir eligibility (optional)
+    - check environment with lean4checker (optional)
 inputs:
   test:
     description: |
@@ -20,7 +21,7 @@ inputs:
     description: |
       Build arguments to pass to `lake build {build-args}`.
       For example, `build-args: "--quiet"` will run `lake build --quiet`.
-      By default, `lean-action` calls `lake build` with no arguments
+      By default, `lean-action` calls `lake build` with no arguments.
     required: false
     default: ""
   use-mathlib-cache:
