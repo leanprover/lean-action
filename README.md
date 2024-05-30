@@ -26,7 +26,8 @@ jobs:
       - uses: leanprover/lean-action@v1-beta
 ```
 
-## Usage
+## Customization
+`lean-action` provides optional configuration inputs to customize the behavior for your specific workflow.
 
 ```yaml
 - uses: leanprover/lean-action@v1-beta
