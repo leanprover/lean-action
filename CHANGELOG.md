@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - new `use-github-cache` input to specify if `lean-action` should use `actions/cache` to cache the `.lake` folder
 
+### Changed
+_ upgrade elan version to `v3.1.1`
+
 ## v1-beta - 2024-05-21
 
 ### Added
