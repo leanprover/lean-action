@@ -54,3 +54,4 @@ jobs:
         uses: ./
         with:
           test: ${{ matrix.lake-test }}
+          use-github-cache: false

@@ -63,6 +63,12 @@ jobs:
     # Allowed values: "true" or "false".
     # Default: false
     lean4checker: false 
+
+    
+    # Enable GitHub caching.
+    # Allowed values: "true" or "false".
+    # If use-github-cache input is not provided, the action will use GitHub caching by default.
+    use-github-cache: true
 ```
 
 ## Examples
