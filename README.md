@@ -55,7 +55,7 @@ jobs:
     # By default, `lean-action` will not run the linter.
     lint-module: ""
 
-    # Check if the repository is eligible for the reservoir.
+    # Check if the repository is eligible for the Reservoir.
     # Allowed values: "true" | "false".
     # Default: "false"
     check-reservoir-eligibility: ""
