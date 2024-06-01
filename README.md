@@ -69,6 +69,11 @@ jobs:
     # Allowed values: "true" or "false".
     # If use-github-cache input is not provided, the action will use GitHub caching by default.
     use-github-cache: true
+
+    # The directory where `lean-action` will look for a Lake package and run `lake build`, etc.
+    # Allowed values: a valid directory containing a Lake package.
+    # If lake-package-directory is not provided, `lean-action` will use the root directory of the repository by default.
+    lake-package-directory: ""
 ```
 
 ## Examples
