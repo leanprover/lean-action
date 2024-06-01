@@ -70,7 +70,8 @@ jobs:
     # Enable GitHub caching.
     # Allowed values: "true" or "false".
     # If use-github-cache input is not provided, the action will use GitHub caching by default.
-    use-github-cache: true
+    # Default: "true"
+    use-github-cache: ""
 ```
 
 ## Examples
