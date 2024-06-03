@@ -12,27 +12,28 @@ If release notes should include changes introduced by your PR, add a bullet to t
 The `lean-action` repository contains a set of functional tests
 to ensure changes do not introduce regressions to existing functionality.
 
-Tests are maintained as GitHub actions in the `.github/functional_tests` folder. 
+Tests are maintained as GitHub actions in the `.github/functional_tests` directory. 
 
-Currently the only entry point for functional tests is the `.github/workflow/functional_tests.yml` workflow,
+As of now, the only entrypoint for functional tests is the `.github/workflow/functional_tests.yml` workflow,
 which runs when a PR proposes changes to critical files in the `lean-action` repository.
 In the future, we will likely introduce additional entrypoints for tests,
-such as a test suite only run on release candidates.
+such as a more comprehensive test suite for release candidates.
 
 ### Creating a new test
 If your changes to `lean-action` introduce new functionality, you should add a new functional test if possible.
 Here are the steps to create a new test:
-- create a new action corresponding to a test
-    - create a subdirectory in `.github/functional_tests` named after the test
-    - create an `action.yml` GitHub action file contained within the directory which initializes the test and calls `lean-action`
-        - see the `.github/functional_tests/lake_init` directory for an example
-        - see the [creating a composite action](https://docs.github.com/en/actions/creating-actions/creating-a-composite-action) guide on the GitHub docs for more information)
-- create a new job in `.github/workflows/functional_tests.yml` which calls the action
+- Create a new action corresponding to a test.
+    - Create a subdirectory in `.github/functional_tests` named after the test.
+    - Create an `action.yml` GitHub action file contained within the directory which initializes the test and calls `lean-action`.
+        - Write a meaningful description of what use cases your test covers.
+        - If appropriate, you can parameterize your test with action inputs for more flexibility (see the `.github/functional_tests/lake_init` directory for an example).
+        - For more information on the action syntax see [creating a composite action](https://docs.github.com/en/actions/creating-actions/creating-a-composite-action).
+- Create a new job in `.github/workflows/functional_tests.yml` which calls the action.
 
 ### Running functional tests locally with `act`
 `lean-action` developers can leverage [act](https://github.com/nektos/act) to run tests locally.
-Here are two useful `act` commands:
 
+Here are two useful commands:
 - Run all tests locally: `act workflow_dispatch '.github/workflows/functional_tests.yml'`.
 - Run a specific test by running a job within the `functional_tests.yml` workflow:
 `act workflow_dispatch -j {job-name} -W '.github/workflows/functional_tests.yml'`,
