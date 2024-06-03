@@ -26,4 +26,4 @@ runs:
       with:
         test: false
         use-github-cache: false
-        lake-package-directory: subdirectory
+        lake-package-directory: "a_subdirectory"
