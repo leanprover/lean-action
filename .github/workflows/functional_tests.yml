@@ -28,3 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/functional_tests/lake_test
+  subdirectory-lake-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/functional_tests/subdirectory_lake_package
