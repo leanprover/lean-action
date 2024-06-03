@@ -15,6 +15,7 @@ runs:
       run: |
         lake init dummytest
         ls
+      shell: bash
     
     - name: create dummy test
       run: |
@@ -25,6 +26,7 @@ runs:
           echo "  println! \"Fake tests passed!\""
           echo "  return 0" 
         } >> lakefile.lean
+      shell: bash
 
     - name: "run `lean-action` with `lake test`" 
       uses: ./
