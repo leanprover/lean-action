@@ -7,6 +7,7 @@ on:
       - "scripts/**"
       - "action.yml"
       - ".github/workflows/functional_tests.yml"
+      - ".github/functional_tests/**"
   workflow_dispatch:
 
 jobs:
@@ -14,44 +15,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # run with and without `lake test'
-        lake-test: ["true", "false"]
         # run for standalone package and one which depends on mathlib
-        lake-init-command: ["init standalone", "init mathdep math"]
+        # see ./github/functional_tests/lake_init/action.yml for more details on lake-init-arguments
+        lake-init-arguments: ["standalone", "mathdep math"]
     steps:
-      # TODO: once `lean-action` supports just setup use it here
-      - name: install elan
-        run: |
-          set -o pipefail
-          curl -sSfL https://github.com/leanprover/elan/releases/download/v1.4.2/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
-          ./elan-init -y --default-toolchain leanprover/lean4:v4.8.0-rc1
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-
       - uses: actions/checkout@v4
-
-      - name: create standalone project
-        run: |
-          lake ${{ matrix.lake-init-command }}
-          ls
-
-      - name: create dummy test
-        if: ${{ matrix.lake-test == 'true' }}
-        run: |
-          {
-            echo "@[test_runner]"
-            echo "script dummy_test do"
-            echo "  println! \"Running fake tests...\""
-            echo "  println! \"Fake tests passed!\""
-            echo "  return 0" 
-          } >> lakefile.lean
-
-      - name: ls and pwd
-        run: |
-          ls
-          pwd
-
-      - name: "run `lean-action` with on `lake ${{matrix.lake-init-command}}` with test: ${{ matrix.lake-test }}"
-        uses: ./
+      - uses: ./.github/functional_tests/lake_init
         with:
-          test: ${{ matrix.lake-test }}
-          use-github-cache: false
+          lake-init-arguments: ${{ matrix.lake-init-arguments}}
+  lake-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/functional_tests/lake_test
