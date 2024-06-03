@@ -6,7 +6,7 @@ on:
     paths:
       - "scripts/**"
       - "action.yml"
-      - ".github/workflows/functional_tests.yml"
+      - ".github/workflows/functional_tests/lake-init.yml"
   workflow_dispatch:
 
 jobs:
