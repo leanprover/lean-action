@@ -15,7 +15,6 @@ runs:
     - name: create lake package
       run: |
         lake init dummytest
-        ls
       shell: bash
     
     - name: create dummy test
