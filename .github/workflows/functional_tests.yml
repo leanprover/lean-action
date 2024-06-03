@@ -15,7 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # run for standalone package and one which depends on mathlib
+        # run `lean-action` on a package generated with `lake init` for:
+        #  - a standalone package
+        #  - a package with a mathlib dependency
+        #  - a package with a `lakefile.toml` file
         # see ./github/functional_tests/lake_init/action.yml for more details on lake-init-arguments
         lake-init-arguments: ["standalone", "mathdep math", "tomltest .toml"]
     steps:
