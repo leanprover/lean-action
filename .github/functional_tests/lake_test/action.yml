@@ -1,0 +1,33 @@
+name: 'Lake Test Functional Tests'
+description: 'Run `lean-action` with `lake test` and a dummy test_runner'
+runs: 
+  using: 'composite'
+  steps:
+    # TODO: once `lean-action` supports just setup, use it here
+    - name: install elan
+      run: |
+        set -o pipefail
+        curl -sSfL https://github.com/leanprover/elan/releases/download/v1.4.2/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
+        ./elan-init -y --default-toolchain leanprover/lean4:v4.8.0-rc1
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+    - name: create lake package
+      run: |
+        lake init dummytest
+        ls
+    
+    - name: create dummy test
+      run: |
+        {
+          echo "@[test_runner]"
+          echo "script dummy_test do"
+          echo "  println! \"Running fake tests...\""
+          echo "  println! \"Fake tests passed!\""
+          echo "  return 0" 
+        } >> lakefile.lean
+
+    - name: "run `lean-action` with `lake test`" 
+      uses: ./
+      with:
+        test: true
+        use-github-cache: false
