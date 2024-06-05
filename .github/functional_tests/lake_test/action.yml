@@ -1,6 +1,6 @@
 name: 'Lake Test Functional Tests'
 description: 'Run `lean-action` with `lake test` and a dummy test_runner'
-runs: 
+runs:
   using: 'composite'
   steps:
     # TODO: once `lean-action` supports just setup, use it here
@@ -16,7 +16,7 @@ runs:
       run: |
         lake init dummytest
       shell: bash
-    
+
     - name: create dummy test
       run: |
         {
@@ -24,12 +24,12 @@ runs:
           echo "script dummy_test do"
           echo "  println! \"Running fake tests...\""
           echo "  println! \"Fake tests passed!\""
-          echo "  return 0" 
+          echo "  return 0"
         } >> lakefile.lean
       shell: bash
 
-    - name: "run `lean-action` with `lake test`" 
+    - name: "run `lean-action` with `lake test`"
       uses: ./
       with:
-        test: true
+        test: "auto"
         use-github-cache: false
