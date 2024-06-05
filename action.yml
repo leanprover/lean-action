@@ -1,6 +1,6 @@
 name: "Lean Action - CI for Lean Projects"
 description: |
-  Standard CI for Lean projects. 
+  Standard CI for Lean projects.
   Steps:
     - install elan
     - get Mathlib cache (optional, must be downstream of Mathlib)
@@ -12,10 +12,10 @@ inputs:
   test:
     description: |
       Run lake test.
-      Allowed values: "true" or "false".
-      If test input is not provided, tests will run by default.
+      Allowed values: "auto" | "false".
+      If test runner is provided, tests will run by default.
     required: false
-    default: "true"
+    default: "auto"
   build-args:
     description: |
       Build arguments to pass to `lake build {args}`.
@@ -100,7 +100,7 @@ runs:
       shell: bash
 
     - name: build ${{ github.repository }}
-      env: 
+      env:
           BUILD_ARGS: ${{ inputs.build-args }}
       run: |
         : Lake Build
@@ -117,7 +117,7 @@ runs:
         key: ${{ runner.os }}-lake-${{ github.sha }}
 
     - name: test ${{ github.repository }}
-      if: ${{ inputs.test == 'true' }}
+      if: ${{ inputs.test == 'auto' }}
       run: |
         : Lake Test
         ${{ github.action_path }}/scripts/lake_test.sh
