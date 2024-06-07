@@ -66,10 +66,12 @@ outputs:
     description: |
       The status of the `lake build`.
       Allowed values: "SUCCESS" or "FAILURE".
+    value: ${{ steps.build.outputs.build-status }}
   test-status:
     description: |
       The status of the `lake test`.
       Allowed values: "SUCCESS" or "FAILURE".
+    value: ${{ steps.test.outputs.test-status }}
 
 runs:
   using: "composite"
@@ -109,6 +111,7 @@ runs:
       shell: bash
 
     - name: build ${{ github.repository }}
+      id: build
       env: 
           BUILD_ARGS: ${{ inputs.build-args }}
       run: |
@@ -123,6 +126,7 @@ runs:
         key: ${{ runner.os }}-lake-${{ github.sha }}
 
     - name: test ${{ github.repository }}
+      id: test
       if: ${{ inputs.test == 'true' }}
       run: |
         : Lake Test
