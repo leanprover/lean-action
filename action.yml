@@ -61,6 +61,15 @@ inputs:
       If use-github-cache input is not provided, `lean-action` will use GitHub caching by default.
     required: false
     default: "true"
+outputs:
+  build-status:
+    description: |
+      The status of the `lake build`.
+      Allowed values: "SUCCESS" or "FAILURE".
+  test-status:
+    description: |
+      The status of the `lake test`.
+      Allowed values: "SUCCESS" or "FAILURE".
 
 runs:
   using: "composite"

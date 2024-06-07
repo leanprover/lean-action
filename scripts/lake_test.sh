@@ -13,9 +13,9 @@ if ! lake check-test; then
 fi
 
 if lake test; then
-    echo "TEST_STATUS=SUCCESS" >>"$GITHUB_OUTPUT"
+    echo "test-status=SUCCESS" >>"$GITHUB_OUTPUT"
 else
-    echo "TEST_STATUS=FAILURE" >>"$GITHUB_OUTPUT"
+    echo "test-status=FAILURE" >>"$GITHUB_OUTPUT"
 fi
 
 echo "::endgroup::"

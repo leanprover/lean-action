@@ -30,8 +30,8 @@ runs:
 
     - name: verify BUILD_STATUS output
       env:
-        OUTPUT_NAME: "BUILD_STATUS"
+        OUTPUT_NAME: "build-status"
         EXPECTED_VALUE: "SUCCESS"
-        ACTUAL_VALUE: ${{ steps.lean-action.outputs.BUILD_STATUS }}
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.build-status }}
       run: .github/functional_tests/test_helpers/verify_action_outputs.sh
       shell: bash
