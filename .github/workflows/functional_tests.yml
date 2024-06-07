@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  lake-init:
+  lake-init-success:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -23,11 +23,17 @@ jobs:
         lake-init-arguments: ["standalone", "mathdep math", "tomltest .toml"]
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/lake_init
+      - uses: ./.github/functional_tests/lake_init_success
         with:
           lake-init-arguments: ${{ matrix.lake-init-arguments}}
-  lake-test:
+  lake-test-success:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/lake_test
+      - uses: ./.github/functional_tests/lake_test_success
+  
+  lake-test-failure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/functional_tests/lake_test_failure

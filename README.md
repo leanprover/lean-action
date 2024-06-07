@@ -71,6 +71,15 @@ jobs:
     use-github-cache: true
 ```
 
+## Output Parameters
+`lean-action` provides output parameters for downstream steps.
+
+### `BUILD_STATUS`
+Values: "SUCCESS" | "FAILURE"
+
+### `TEST_STATUS`
+Values: "SUCCESS" | "FAILURE" 
+
 ## Examples
 
 ### Lint the `MyModule` module and check package for reservoir eligibility
@@ -115,6 +124,23 @@ steps:
     run: |
       lake exe graph
       rm import_graph.dot
+```
+
+### Use `TEST_STATUS` output parameter in downstream step
+
+```yaml
+- name: "run `lean-action` with `lake test`" 
+  id: lean-action
+  uses: leanprover/lean-action@v1-beta
+  continue-on-error: true
+  with:
+    test: true
+
+
+- name: verify lean-action outputs
+  env:
+    TEST_STATUS: ${{ steps.lean-action.outputs.TEST_STATUS }}
+  run: echo "Test status: $TEST_STATUS"
 ```
 
 ## Projects which use `lean-action`

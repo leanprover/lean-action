@@ -21,8 +21,16 @@ runs:
         lake init ${{ inputs.lake-init-arguments }}
       shell: bash
 
-    - name: "run `lean-action`" 
+    - name: "run `lean-action`"
+      id: lean-action
       uses: ./
       with:
         test: false
         use-github-cache: false
+
+    - name: verify BUILD_STATUS output
+      env:
+        OUTPUT_NAME: "BUILD_STATUS"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.BUILD_STATUS }}
+      run: .github/functional_tests/test_helpers/verify_action_outputs.sh

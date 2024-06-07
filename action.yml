@@ -104,10 +104,7 @@ runs:
           BUILD_ARGS: ${{ inputs.build-args }}
       run: |
         : Lake Build
-        echo "::group::Lake Build Output"
-        lake build "$BUILD_ARGS"
-        echo "::endgroup::"
-        echo
+        ${{ github.action_path }}/scripts/lake_build.sh
       shell: bash
 
     - uses: actions/cache/save@v4

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - new `use-github-cache` input to specify if `lean-action` should use `actions/cache` to cache the `.lake` folder
+- `BUILD_STATUS` and `TEST_STATUS` output parameters
 
 ### Changed
 - upgrade elan version to `v3.1.1`
