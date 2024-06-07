@@ -34,3 +34,4 @@ runs:
         EXPECTED_VALUE: "SUCCESS"
         ACTUAL_VALUE: ${{ steps.lean-action.outputs.BUILD_STATUS }}
       run: .github/functional_tests/test_helpers/verify_action_outputs.sh
+      shell: bash
