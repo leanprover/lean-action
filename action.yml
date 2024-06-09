@@ -65,12 +65,12 @@ outputs:
   build-status:
     description: |
       The status of the `lake build`.
-      Allowed values: "SUCCESS" or "FAILURE".
+      Allowed values: "SUCCESS" | "FAILURE".
     value: ${{ steps.build.outputs.build-status }}
   test-status:
     description: |
       The status of the `lake test`.
-      Allowed values: "SUCCESS" or "FAILURE".
+      Allowed values: "SUCCESS" | "FAILURE".
     value: ${{ steps.test.outputs.test-status }}
 
 runs:

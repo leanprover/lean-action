@@ -136,7 +136,6 @@ steps:
   with:
     test: true
 
-
 - name: verify lean-action outputs
   env:
     TEST_STATUS: ${{ steps.lean-action.outputs.TEST_STATUS }}

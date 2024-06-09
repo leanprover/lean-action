@@ -31,7 +31,7 @@ runs:
     - name: "run `lean-action` with `lake test`" 
       id: lean-action
       uses: ./
-      continue-on-error: true
+      continue-on-error: true # required so that the action does not fail the workflow
       with:
         test: true
         use-github-cache: false
