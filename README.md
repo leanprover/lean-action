@@ -75,10 +75,10 @@ jobs:
 `lean-action` provides output parameters for downstream steps.
 
 ### `BUILD_STATUS`
-Values: "SUCCESS" | "FAILURE"
+Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
 
 ### `TEST_STATUS`
-Values: "SUCCESS" | "FAILURE" 
+Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
 
 ## Examples
 

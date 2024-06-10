@@ -65,13 +65,13 @@ outputs:
   build-status:
     description: |
       The status of the `lake build`.
-      Allowed values: "SUCCESS" | "FAILURE".
-    value: ${{ steps.build.outputs.build-status }}
+      Allowed values: "NOT_RUN" | "SUCCESS" | "FAILURE".
+    value: ${{ steps.set-output-parameters.outputs.build-status }}
   test-status:
     description: |
       The status of the `lake test`.
-      Allowed values: "SUCCESS" | "FAILURE".
-    value: ${{ steps.test.outputs.test-status }}
+      Allowed values: "NOT_RUN" | "SUCCESS" | "FAILURE".
+    value: ${{ steps.set-output-parameters.outputs.test-status }}
 
 runs:
   using: "composite"
@@ -160,4 +160,16 @@ runs:
       run: |
         : Check Environment with lean4checker
         ${{ github.action_path }}/scripts/run_lean4checker.sh
+      shell: bash
+
+    # This step sets the output parameters for the entirety of `lean-action`
+    # based on the outputs of the previous steps
+    - name: set output parameters
+      id: set-output-parameters
+      env:
+        BUILD_STATUS: ${{ steps.build.outputs.build-status }}
+        TEST_STATUS: ${{ steps.test.outputs.test-status }}
+      run: |
+        : Set Output Parameters
+        ${{ github.action_path }}/scripts/set_output_parameters.sh
       shell: bash
