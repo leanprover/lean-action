@@ -72,15 +72,28 @@ jobs:
 ```
 
 ## Output Parameters
-`lean-action` provides output parameters for downstream steps.
+`lean-action` provides the following output parameters for downstream steps:
 
-### `BUILD_STATUS`
-Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
+- `build-status` -- Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
+- `test-status` -- Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
 
-### `TEST_STATUS`
-Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
+### Example: Use `test-status` output parameter in downstream step
 
-## Examples
+```yaml
+- name: "run `lean-action` with `lake test`" 
+  id: lean-action
+  uses: leanprover/lean-action@v1-beta
+  continue-on-error: true
+  with:
+    test: true
+
+- name: verify lean-action outputs
+  env:
+    TEST_STATUS: ${{ steps.lean-action.outputs.test-status }}
+  run: echo "Test status: $TEST_STATUS"
+```
+
+## Additional Examples
 
 ### Lint the `MyModule` module and check package for reservoir eligibility
 
@@ -126,21 +139,6 @@ steps:
       rm import_graph.dot
 ```
 
-### Use `TEST_STATUS` output parameter in downstream step
-
-```yaml
-- name: "run `lean-action` with `lake test`" 
-  id: lean-action
-  uses: leanprover/lean-action@v1-beta
-  continue-on-error: true
-  with:
-    test: true
-
-- name: verify lean-action outputs
-  env:
-    TEST_STATUS: ${{ steps.lean-action.outputs.TEST_STATUS }}
-  run: echo "Test status: $TEST_STATUS"
-```
 
 ## Projects which use `lean-action`
 - [leanprover-community/aesop](https://github.com/leanprover-community/aesop/blob/master/.github/workflows/build.yml#L16)
