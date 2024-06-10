@@ -35,8 +35,8 @@ Here are the steps to create a new test:
         - Write a meaningful description of what use cases your test covers.
         - If appropriate, you can parameterize your test with action inputs for more flexibility (see the `.github/functional_tests/lake_init` directory for an example).
         - For more information on the action syntax, see [creating a composite action](https://docs.github.com/en/actions/creating-actions/creating-a-composite-action).
+    - Create a final step in your test which verifies the outputs of `lean-action` using `verify_action_outputs.sh`.
 - Create a new job in `.github/workflows/functional_tests.yml` with a call to the newly created action.
-
 
 ### Running functional tests locally with `act`
 `lean-action` developers can leverage [act](https://github.com/nektos/act) to run tests locally.

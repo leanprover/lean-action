@@ -87,7 +87,7 @@ jobs:
   with:
     test: true
 
-- name: verify lean-action outputs
+- name: log `lean-action` `test-status` output
   env:
     TEST_STATUS: ${{ steps.lean-action.outputs.test-status }}
   run: echo "Test status: $TEST_STATUS"
