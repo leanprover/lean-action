@@ -166,6 +166,7 @@ runs:
     # based on the outputs of the previous steps
     - name: set output parameters
       id: set-output-parameters
+      if: always()
       env:
         BUILD_STATUS: ${{ steps.build.outputs.build-status }}
         TEST_STATUS: ${{ steps.test.outputs.test-status }}
