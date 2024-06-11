@@ -74,9 +74,10 @@ jobs:
 ## Output Parameters
 `lean-action` provides the following output parameters for downstream steps:
 
-- `build-status` -- Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
-- `test-status` -- Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
-
+- `build-status` 
+  - Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
+- `test-status`
+  - Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
 ### Example: Use `test-status` output parameter in downstream step
 
 ```yaml
