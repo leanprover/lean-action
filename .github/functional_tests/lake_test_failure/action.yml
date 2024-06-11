@@ -45,6 +45,7 @@ runs:
         else
           echo "lean-action outcome is ${{steps.lean-action.outcome}} as expected"
         fi
+      shell: bash
       
     - name: verify lean-action outputs
       env:
