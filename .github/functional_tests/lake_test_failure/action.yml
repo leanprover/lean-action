@@ -36,21 +36,26 @@ runs:
         test: true
         use-github-cache: false
 
-  
-    - name: verify lean-action outcome
-      run: |
-        if [ "${{ steps.lean-action.outcome }}" != "failure" ]; then
-          echo "Expected lean-action outcome to be 'failure', but got '${{ steps.lean-action.outcome }}'"
-          exit 1
-        else
-          echo "lean-action outcome is ${{steps.lean-action.outcome}} as expected"
-        fi
+    - name: verify `lean-action` outcome failure
+      env:
+        OUTPUT_NAME: "lean-action outcome"
+        EXPECTED_VALUE: "failure"
+        ACTUAL_VALUE: ${{ steps.lean-action.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
       
+    - name: verify BUILD_STATUS output
+      env:
+        OUTPUT_NAME: "build-status"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.build-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
     - name: verify lean-action outputs
       env:
         OUTPUT_NAME: "test-status"
         EXPECTED_VALUE: "FAILURE"
         ACTUAL_VALUE: ${{ steps.lean-action.outputs.test-status }}
-      run: .github/functional_tests/test_helpers/verify_action_outputs.sh
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash

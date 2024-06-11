@@ -35,10 +35,18 @@ runs:
         test: true
         use-github-cache: false
     
+    - name: verify `lean-action` outcome success
+      env:
+        OUTPUT_NAME: "lean-action.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
     - name: verify lean-action outputs
       env:
         OUTPUT_NAME: "test-status"
         EXPECTED_VALUE: "SUCCESS"
         ACTUAL_VALUE: ${{ steps.lean-action.outputs.test-status }}
-      run: .github/functional_tests/test_helpers/verify_action_outputs.sh
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
