@@ -1,6 +1,21 @@
 #!/bin/bash
+set -e
 
 echo "::group::Lake Test Output"
+
+handle_exit() {
+    exit_status=$?
+    if [ $exit_status -ne 0 ]; then
+        echo "test-status=FAILURE" >>"$GITHUB_OUTPUT"
+    else
+        echo "test-status=SUCCESS" >>"$GITHUB_OUTPUT"
+    fi
+    echo "::endgroup::"
+    echo
+}
+
+trap handle_exit EXIT
+
 # Get the directory of the script
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
@@ -12,11 +27,4 @@ if ! lake check-test; then
     exit 1
 fi
 
-if lake test; then
-    echo "test-status=SUCCESS" >>"$GITHUB_OUTPUT"
-else
-    echo "test-status=FAILURE" >>"$GITHUB_OUTPUT"
-fi
-
-echo "::endgroup::"
-echo
+lake test

@@ -35,6 +35,16 @@ runs:
       with:
         test: true
         use-github-cache: false
+
+  
+    - name: verify lean-action outcome
+      run: |
+        if [ "${{ steps.lean-action.outcome }}" != "failure" ]; then
+          echo "Expected lean-action outcome to be 'failure', but got '${{ steps.lean-action.outcome }}'"
+          exit 1
+        else
+          echo "lean-action outcome is ${{steps.lean-action.outcome}} as expected"
+        fi
       
     - name: verify lean-action outputs
       env:
