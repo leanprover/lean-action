@@ -21,5 +21,4 @@ handle_exit() {
 
 trap handle_exit EXIT
 
-# run `lake build $BUILD_ARGS` and set the build-status output parameter accordingly
 lake build "$BUILD_ARGS"

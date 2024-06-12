@@ -44,7 +44,7 @@ runs:
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
       
-    - name: verify BUILD_STATUS output
+    - name: verify `lake build` success
       env:
         OUTPUT_NAME: "build-status"
         EXPECTED_VALUE: "SUCCESS"
@@ -52,7 +52,7 @@ runs:
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
 
-    - name: verify lean-action outputs
+    - name: verify `lake test` failure
       env:
         OUTPUT_NAME: "test-status"
         EXPECTED_VALUE: "FAILURE"
