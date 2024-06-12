@@ -61,6 +61,13 @@ inputs:
       If use-github-cache input is not provided, `lean-action` will use GitHub caching by default.
     required: false
     default: "true"
+  lake-package-directory:
+    description: |
+      The directory where `lean-action` will look for a Lake package and run `lake build`, etc.
+      Allowed values: a valid directory containing a Lake package.
+      If lake-package-directory is not provided, `lean-action` will use the root directory of the repository by default.
+    required: false
+    default: "."
 outputs:
   build-status:
     description: |
@@ -72,14 +79,6 @@ outputs:
       The status of the `lake test` step.
       Allowed values: "SUCCESS" | "FAILURE" | "NOT_RUN".
     value: ${{ steps.set-output-parameters.outputs.test-status }}
-
-  lake-package-directory:
-    description: |
-      The directory where `lean-action` will look for a Lake package and run `lake build`, etc.
-      Allowed values: a valid directory containing a Lake package.
-      If lake-package-directory is not provided, `lean-action` will use the root directory of the repository by default.
-    required: false
-    default: "."
 
 runs:
   using: "composite"
