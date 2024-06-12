@@ -22,6 +22,7 @@ runs:
       shell: bash
 
     - name: "run `lean-action`" 
+      id: lean-action
       uses: ./
       with:
         test: false
