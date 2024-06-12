@@ -61,6 +61,17 @@ inputs:
       If use-github-cache input is not provided, `lean-action` will use GitHub caching by default.
     required: false
     default: "true"
+outputs:
+  build-status:
+    description: |
+      The status of the `lake build` step.
+      Allowed values: "SUCCESS" | "FAILURE" | "NOT_RUN".
+    value: ${{ steps.set-output-parameters.outputs.build-status }}
+  test-status:
+    description: |
+      The status of the `lake test` step.
+      Allowed values: "SUCCESS" | "FAILURE" | "NOT_RUN".
+    value: ${{ steps.set-output-parameters.outputs.test-status }}
 
   lake-package-directory:
     description: |
@@ -111,14 +122,12 @@ runs:
       working-directory: ${{ inputs.lake-package-directory }}
 
     - name: build ${{ github.repository }}
+      id: build
       env: 
           BUILD_ARGS: ${{ inputs.build-args }}
       run: |
         : Lake Build
-        echo "::group::Lake Build Output"
-        lake build "$BUILD_ARGS"
-        echo "::endgroup::"
-        echo
+        ${{ github.action_path }}/scripts/lake_build.sh
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}
 
@@ -129,6 +138,7 @@ runs:
         key: ${{ runner.os }}-lake-${{ github.sha }}
 
     - name: test ${{ github.repository }}
+      id: test
       if: ${{ inputs.test == 'true' }}
       run: |
         : Lake Test
@@ -167,3 +177,16 @@ runs:
         ${{ github.action_path }}/scripts/run_lean4checker.sh
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}
+
+    # This step sets the output parameters for the entirety of `lean-action`
+    # based on the outputs of the previous steps
+    - name: set output parameters
+      id: set-output-parameters
+      if: always() # always run this step even if previous steps fail
+      env:
+        BUILD_STATUS: ${{ steps.build.outputs.build-status }}
+        TEST_STATUS: ${{ steps.test.outputs.test-status }}
+      run: |
+        : Set Output Parameters
+        ${{ github.action_path }}/scripts/set_output_parameters.sh
+      shell: bash

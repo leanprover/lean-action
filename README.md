@@ -76,7 +76,30 @@ jobs:
     lake-package-directory: ""
 ```
 
-## Examples
+## Output Parameters
+`lean-action` provides the following output parameters for downstream steps:
+
+- `build-status` 
+  - Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
+- `test-status`
+  - Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
+### Example: Use `test-status` output parameter in downstream step
+
+```yaml
+- name: "run `lean-action` with `lake test`" 
+  id: lean-action
+  uses: leanprover/lean-action@v1-beta
+  continue-on-error: true
+  with:
+    test: true
+
+- name: log `lean-action` `test-status` output
+  env:
+    TEST_STATUS: ${{ steps.lean-action.outputs.test-status }}
+  run: echo "Test status: $TEST_STATUS"
+```
+
+## Additional Examples
 
 ### Lint the `MyModule` module and check package for reservoir eligibility
 
@@ -121,6 +144,7 @@ steps:
       lake exe graph
       rm import_graph.dot
 ```
+
 
 ## Projects which use `lean-action`
 - [leanprover-community/aesop](https://github.com/leanprover-community/aesop/blob/master/.github/workflows/build.yml#L16)
