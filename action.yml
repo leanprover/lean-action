@@ -61,6 +61,13 @@ inputs:
       If use-github-cache input is not provided, `lean-action` will use GitHub caching by default.
     required: false
     default: "true"
+  lake-package-directory:
+    description: |
+      The directory where `lean-action` will look for a Lake package and run `lake build`, etc.
+      Allowed values: a valid directory containing a Lake package.
+      If lake-package-directory is not provided, `lean-action` will use the root directory of the repository by default.
+    required: false
+    default: "."
 outputs:
   build-status:
     description: |
@@ -81,11 +88,12 @@ runs:
         : Install Elan
         ${{ github.action_path }}/scripts/install_elan.sh
       shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
 
     - uses: actions/cache@v4
       if: ${{ inputs.use-github-cache == 'true' }}
       with:
-        path: .lake
+        path: ${{ inputs.lake-package-directory }}/.lake
         key: ${{ runner.os }}-lake-${{ github.sha }}
         # if no cache hit, fall back to the (latest) previous cache
         restore-keys: ${{ runner.os }}-lake-
@@ -98,6 +106,7 @@ runs:
         : Detect Mathlib
         ${{ github.action_path }}/scripts/detect_mathlib.sh
       shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
 
     - name: get mathlib cache
       # only get the cache if Mathlib was detected by detect-mathlib step or if the user explicitly set mathlib-cache to true
@@ -109,6 +118,7 @@ runs:
         echo "::endgroup::"
         echo
       shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
 
     - name: build ${{ github.repository }}
       id: build
@@ -118,11 +128,12 @@ runs:
         : Lake Build
         ${{ github.action_path }}/scripts/lake_build.sh
       shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
 
     - uses: actions/cache/save@v4
       if: ${{ inputs.use-github-cache == 'true' }}
       with:
-        path: .lake
+        path: ${{ inputs.lake-package-directory }}/.lake
         key: ${{ runner.os }}-lake-${{ github.sha }}
 
     - name: test ${{ github.repository }}
@@ -132,6 +143,7 @@ runs:
         : Lake Test
         ${{ github.action_path }}/scripts/lake_test.sh
       shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
 
     - name: lint ${{ github.repository }}
       # only run linter if the user provided a module to lint
@@ -143,6 +155,7 @@ runs:
         echo "::endgroup::"
         echo
       shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
 
     - name: check reservoir eligibility
       if: ${{ inputs.check-reservoir-eligibility == 'true' }}
@@ -154,6 +167,7 @@ runs:
           "${{ github.event.repository.stargazers_count }}"\
           "${{ github.event.repository.license.spdx_id }}"
       shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
 
     - name: check environment with lean4checker
       if: ${{ inputs.lean4checker == 'true' }}
@@ -161,6 +175,7 @@ runs:
         : Check Environment with lean4checker
         ${{ github.action_path }}/scripts/run_lean4checker.sh
       shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
 
     # This step sets the output parameters for the entirety of `lean-action`
     # based on the outputs of the previous steps
