@@ -10,13 +10,30 @@ description: |
     - check reservoir eligibility (optional)
     - check environment with lean4checker (optional)
 inputs:
-  test:
+  auto-config:
     description: |
-      Run lake test.
-      Allowed values: "true" | "false".
-      If test input is not provided, tests will run by default.
+      Automatically configure `lean-action` based on the Lake workspace.
+      When set to "true", `lean-action` will use the Lake workspace to determine
+      the set of features to run on the repository, such as `lake build` and `lake test`.
+      Even when set to "true", the user can still override the auto configuration
+      with the `build` and `test` inputs.
+      Allowed values: "true" or "false".
     required: false
     default: "true"
+  build:
+    description: |
+      Run `lake build`.
+      Note, this input takes precedence over `auto-config`.
+      Allowed values: "true" | "false" | "default".
+    required: false
+    default: "default"
+  test:
+    description: |
+      Run `lake test`.
+      Note, this input takes precedence over `auto-config`.
+      Allowed values: "true" | "false" | "default".
+    required: false
+    default: "default"
   build-args:
     description: |
       Build arguments to pass to `lake build {build-args}`.
@@ -82,13 +99,24 @@ outputs:
 
 runs:
   using: "composite"
-  steps:
+  steps: 
     - name: install elan
       run: |
         : Install Elan
         ${{ github.action_path }}/scripts/install_elan.sh
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}
+
+    - name: configure `lean-action`
+      id: config
+      env:
+        AUTO_CONFIG: ${{ inputs.auto-config }}
+        BUILD: ${{ inputs.build }}
+        TEST: ${{ inputs.test }}
+      run: |
+        : Configure Lean Action
+        ${{ github.action_path }}/scripts/config.sh
+      shell: bash
 
     - uses: actions/cache@v4
       if: ${{ inputs.use-github-cache == 'true' }}
@@ -122,6 +150,7 @@ runs:
 
     - name: build ${{ github.repository }}
       id: build
+      if: ${{ steps.config.outputs.run-lake-build == 'true'}}
       env: 
           BUILD_ARGS: ${{ inputs.build-args }}
       run: |
@@ -138,7 +167,7 @@ runs:
 
     - name: test ${{ github.repository }}
       id: test
-      if: ${{ inputs.test == 'true' }}
+      if: ${{ steps.config.outputs.run-lake-test == 'true'}}
       run: |
         : Lake Test
         ${{ github.action_path }}/scripts/lake_test.sh
