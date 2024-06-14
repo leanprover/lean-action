@@ -21,4 +21,13 @@ else
     echo "test-status=$TEST_STATUS" >>"$GITHUB_OUTPUT"
 fi
 
+# If the LINT_STATUS environment variable is not set,
+# set the `lint-status` output parameter to NOT_RUN
+# Otherwise, set it to the output of the `lake lint` step (the LINT_STATUS environment variable)
+if [ "$LINT_STATUS" = "" ]; then
+    echo "lint-status=NOT_RUN" >>"$GITHUB_OUTPUT"
+else
+    echo "lint-status=$LINT_STATUS" >>"$GITHUB_OUTPUT"
+fi
+
 echo "::endgroup::"

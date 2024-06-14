@@ -74,6 +74,22 @@ jobs:
         with:
           toolchain: ${{ env.toolchain }}
 
+  lake-lint-success:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/functional_tests/lake_lint_success
+        with:
+          toolchain: ${{ env.toolchain }}
+  
+  lake-lint-failure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/functional_tests/lake_lint_failure
+        with:
+          toolchain: ${{ env.toolchain }}
+
   lake-check-test-failure:
     runs-on: ubuntu-latest
     steps:
