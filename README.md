@@ -26,7 +26,7 @@ jobs:
       - uses: leanprover/lean-action@v1-beta
 ```
 
-## Selecting which features of `lean-action`
+## Configuring which features `lean-action` runs
 
 Most use cases only require a subset of `lean-action`'s features
 in a specific GitHub workflow.
@@ -40,8 +40,14 @@ To support these use cases,
 ### Directly specifying a desired feature with specific feature inputs
 Each feature of `lean-action` has a corresponding input which users can set to `true` or `false`.
 These inputs are the first place `lean-action` looks.
-If one of these is set `lean-action` will try to run the corresponding step.
+When a feature input is set `lean-action` will try to run the corresponding step.
 If `lean-action` is unable to successfully run the step, `lean-action` will fail.
+
+`lean-action` provides the following feature inputs:
+- `build`
+- `test`
+- `check-reservoir-eligibility`
+- `lean4checker`
 
 ### Automatic configuration
 After checking the feature inputs `lean-action` uses the `auto-config` input
@@ -50,6 +56,10 @@ When `auto-config: true`, `lean-action` will use the Lake workspace to detect ta
 and run the corresponding Lake command.
 When `auto-config: false`, `lean-action` will only run features specified through the feature inputs.
 Users can combine `auto-config` with specific feature inputs to override the automatic configuration of `lean-action`.
+
+`lean-action` can automatically configure the following features:
+- `build`
+- `test`
 
 ### Breaking up `lean-action` across workflows
 Sometimes it is useful to break up usage of `lean-action`
