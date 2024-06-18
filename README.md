@@ -96,6 +96,16 @@ To be certain `lean-action` uses a feature, specify the desire feature with a fe
 ```yaml
 - uses: leanprover/lean-action@v1-beta
   with:
+    
+    # Automatically configure `lean-action` based on the Lake workspace.
+    # When set to "true", `lean-action` will use the Lake workspace to determine
+    # the set of features to run on the repository, such as `lake build` and `lake test`.
+    # Even when set to "true", the user can still override the auto configuration
+    # with the `build` and `test` inputs.
+    # Allowed values: "true" or "false".
+    # Default: "true"
+    auto-config: ""
+
     # Run lake test.
     # Allowed values: "true" | "false".
     # Default: "true"
