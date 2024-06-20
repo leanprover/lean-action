@@ -1,0 +1,61 @@
+name: 'Lake Test Failure'
+description: 'Run `lean-action` with `lake test` with a failing dummy test_runner'
+runs: 
+  using: 'composite'
+  steps:
+    # TODO: once `lean-action` supports just setup, use it here
+    - name: install elan
+      run: |
+        set -o pipefail
+        curl -sSfL https://github.com/leanprover/elan/releases/download/v3.1.1/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
+        ./elan-init -y --default-toolchain leanprover/lean4:v4.8.0-rc1
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: create lake package
+      run: |
+        lake init dummytest
+      shell: bash 
+
+    - name: create failing dummy test
+      run: |
+        {
+          echo "@[test_runner]"
+          echo "script dummy_test do"
+          echo "  println! \"Running fake tests...\""
+          echo "  println! \"Fake tests failed!\""
+          echo "  return 1" 
+        } >> lakefile.lean
+      shell: bash
+
+    - name: "run `lean-action` with `lake test`" 
+      id: lean-action
+      uses: ./
+      continue-on-error: true # required so that the action does not fail the workflow
+      with:
+        test: true
+        use-github-cache: false
+
+    - name: verify `lean-action` outcome failure
+      env:
+        OUTPUT_NAME: "lean-action outcome"
+        EXPECTED_VALUE: "failure"
+        ACTUAL_VALUE: ${{ steps.lean-action.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+      
+    - name: verify `lake build` success
+      env:
+        OUTPUT_NAME: "build-status"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.build-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify `lake test` failure
+      env:
+        OUTPUT_NAME: "test-status"
+        EXPECTED_VALUE: "FAILURE"
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.test-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash

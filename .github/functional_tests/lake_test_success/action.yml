@@ -1,0 +1,52 @@
+name: 'Lake Test Success'
+description: 'Run `lean-action` with `lake test` and a successful dummy test_runner'
+runs: 
+  using: 'composite'
+  steps:
+    # TODO: once `lean-action` supports just setup, use it here
+    - name: install elan
+      run: |
+        set -o pipefail
+        curl -sSfL https://github.com/leanprover/elan/releases/download/v3.1.1/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
+        ./elan-init -y --default-toolchain leanprover/lean4:v4.8.0-rc1
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: create lake package
+      run: |
+        lake init dummytest
+      shell: bash
+
+    - name: create successful dummy test
+      run: |
+        {
+          echo "@[test_runner]"
+          echo "script dummy_test do"
+          echo "  println! \"Running fake tests...\""
+          echo "  println! \"Fake tests passed!\""
+          echo "  return 0" 
+        } >> lakefile.lean
+      shell: bash
+
+    - name: "run `lean-action` with `lake test`" 
+      id: lean-action
+      uses: ./
+      with:
+        test: true
+        use-github-cache: false
+    
+    - name: verify `lean-action` outcome success
+      env:
+        OUTPUT_NAME: "lean-action.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify `lake test` success
+      env:
+        OUTPUT_NAME: "test-status"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.test-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
