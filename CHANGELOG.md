@@ -6,16 +6,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1-beta.1 - 2024-06-21
+
 ### Added
 - new `use-github-cache` input to specify if `lean-action` should use `actions/cache` to cache the `.lake` folder
 - `build-status` and `test-status` output parameters
-- new `lake-package-directory` input to specify the directory to run Lake commands.
+- new `lake-package-directory` input to specify the directory to run Lake commands. 
 This input will enable users to use `lean-action` when Lake packages are contained in repository subdirectories.
 
 ### Changed
 - upgrade elan version to `v3.1.1`
+- run `lake check-test` before running `lake test`
+- improved log readability with explicit log group naming and additional white space
 
-## v1-beta - 2024-05-21
+### Fixed
+- remove misleading .toml error message in mathlib detection
+- remove `elan-init` file after elan installation
+
+## v1-beta.0 - 2024-05-21
 
 ### Added
 - logs are grouped by step for better readability
