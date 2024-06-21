@@ -105,10 +105,15 @@ To be certain `lean-action` uses a feature, specify the desire feature with a fe
     # Allowed values: "true" or "false".
     # Default: "true"
     auto-config: ""
+    
+    # Run `lake build`.
+    # Note, this input takes precedence over `auto-config`.
+    # Allowed values: "true" | "false" | "default".
+    build: ""
 
-    # Run lake test.
-    # Allowed values: "true" | "false".
-    # Default: "true"
+    # Run `lake test`.
+    # Note, this input takes precedence over `auto-config`.
+    # Allowed values: "true" | "false" | "default".
     test: ""
 
     # Build arguments to pass to `lake build {build-args}`.
