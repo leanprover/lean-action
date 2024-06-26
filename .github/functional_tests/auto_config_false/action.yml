@@ -21,17 +21,6 @@ runs:
         lake init autoconfigtest
       shell: bash
 
-    - name: create successful dummy test
-      run: |
-        {
-          echo "@[test_runner]"
-          echo "script dummy_test do"
-          echo "  println! \"Running fake tests...\""
-          echo "  println! \"Fake tests passed!\""
-          echo "  return 0" 
-        } >> lakefile.lean
-      shell: bash
-
     - name: "run `lean-action` with `auto-config: false`" 
       id: lean-action
       uses: ./

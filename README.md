@@ -32,15 +32,16 @@ Most use cases only require a subset of `lean-action`'s features
 in a specific GitHub workflow.
 Additionally, you may want to break up usage of `lean-action`
 across multiple workflows with different triggers,
-e.g., one workflow for PRs and another workflow schedule by a cron job.
+e.g., one workflow for PRs and another workflow scheduled by a cron job.
 
 To support these use cases,
 `lean-action` provides inputs to specify the subset of desired features of `lean-action`.
 
 ### Directly specifying a desired feature with specific feature inputs
 Each feature of `lean-action` has a corresponding input which users can set to `true` or `false`.
-These inputs are the first place `lean-action` looks.
-When a feature input is set `lean-action` will try to run the corresponding step.
+Specific feature inputs have the highest precedence
+when `lean-action` determines which features to run.
+When a feature input is set `lean-action` will always try to run the corresponding step.
 If `lean-action` is unable to successfully run the step, `lean-action` will fail.
 
 `lean-action` provides the following feature inputs:
@@ -50,11 +51,11 @@ If `lean-action` is unable to successfully run the step, `lean-action` will fail
 - `lean4checker`
 
 ### Automatic configuration
-After checking the feature inputs `lean-action` uses the `auto-config` input
-to determine if it should use the Lake workspace to decide which features to use automatically.
+After feature inputs, `lean-action` uses the `auto-config` input
+to determine if it should use the Lake workspace to decide which steps to run automatically.
 When `auto-config: true`, `lean-action` will use the Lake workspace to detect targets
 and run the corresponding Lake command.
-When `auto-config: false`, `lean-action` will only run features specified through the feature inputs.
+When `auto-config: false`, `lean-action` will only run features specified directly through specific feature inputs.
 Users can combine `auto-config` with specific feature inputs to override the automatic configuration of `lean-action`.
 
 `lean-action` can automatically configure the following features:
@@ -64,15 +65,15 @@ Users can combine `auto-config` with specific feature inputs to override the aut
 ### Breaking up `lean-action` across workflows
 Sometimes it is useful to break up usage of `lean-action`
 across multiple workflows with different triggers,
-e.g., one workflow for PRs and another workflow schedule by a cron job.
-`auto-config: false` allows users to run a specific subset of features of `lean-action`.
+e.g., one workflow for PRs and another workflow scheduled by a cron job.
+`auto-config: false` allows users to run only a specific subset of features of `lean-action`.
 
 For example, run only `lean4checker` in a cron job workflow:
 
 ```yaml
 - name: "run `lean-action` with only `lean4checker: true`"
   id: lean-action
-  uses: ./
+  uses: leanprover/lean-action@v1-beta
   with:
     auto-config: false
     lean4checker: true
@@ -88,7 +89,7 @@ and you configure `lean-action` with `test: true`, `lean-action` will fail.
 However the same improperly configured `test_driver` may not cause a `lean-action` failure with `auto-config: true`,
 because `lean-action` may not detect the `test_driver` in the Lake workspace.
 
-To be certain `lean-action` uses a feature, specify the desire feature with a feature input.
+To be certain `lean-action` runs a step, specify the desire feature with a feature input.
 
 ## Customization
 `lean-action` provides optional configuration inputs to customize the behavior for your specific workflow.
