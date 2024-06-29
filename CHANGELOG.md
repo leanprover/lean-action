@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+- new `auto-config` input to configure `lean-action` to use the Lake workspace to decide which steps to run
+
 ## v1-beta.1 - 2024-06-21
 
 ### Added

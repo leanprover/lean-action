@@ -29,7 +29,6 @@ runs:
       id: lean-action
       uses: ./
       with:
-        test: false
         use-github-cache: false
         lake-package-directory: "a_subdirectory"
 

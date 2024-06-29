@@ -1,0 +1,85 @@
+name: 'Auto Config False Functional Test'
+description: |
+  Run `lean-action` with `auto-config: false` and no feature inputs.
+  Verify that build and test steps do not run.
+  Run `lean-action` with `auto-config: false` and `lean4checker: true`.
+  Verify that build and tests steps do not run and action succeeds.
+runs: 
+  using: 'composite'
+  steps:
+    # TODO: once `lean-action` supports just setup, use it here
+    - name: install elan
+      run: |
+        set -o pipefail
+        curl -sSfL https://github.com/leanprover/elan/releases/download/v3.1.1/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
+        ./elan-init -y --default-toolchain leanprover/lean4:v4.8.0-rc1
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: create lake package
+      run: |
+        lake init autoconfigtest
+      shell: bash
+
+    - name: "run `lean-action` with `auto-config: false`" 
+      id: lean-action
+      uses: ./
+      with:
+        auto-config: false
+        use-github-cache: false
+    
+    - name: verify `lean-action` outcome success
+      env:
+        OUTPUT_NAME: "lean-action.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify `lake build` not run
+      env:
+        OUTPUT_NAME: "build-status"
+        EXPECTED_VALUE: "NOT_RUN"
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.build-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify `lake test` not run
+      env:
+        OUTPUT_NAME: "test-status"
+        EXPECTED_VALUE: "NOT_RUN"
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.test-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+      
+    - name: "run `lean-action` with `auto-config: false` and `lean4checker: true`"
+      id: lean-action-lean4checker
+      uses: ./
+      with:
+        auto-config: false
+        lean4checker: true
+        use-github-cache: false
+
+    - name: verify `lean-action` outcome success
+      env:
+        OUTPUT_NAME: "lean-action.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action-lean4checker.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify `lake build` not run
+      env:
+        OUTPUT_NAME: "build-status"
+        EXPECTED_VALUE: "NOT_RUN"
+        ACTUAL_VALUE: ${{ steps.lean-action-lean4checker.outputs.build-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify `lake test` not run
+      env:
+        OUTPUT_NAME: "test-status"
+        EXPECTED_VALUE: "NOT_RUN"
+        ACTUAL_VALUE: ${{ steps.lean-action-lean4checker.outputs.test-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
