@@ -94,9 +94,9 @@ runs:
       if: ${{ inputs.use-github-cache == 'true' }}
       with:
         path: ${{ inputs.lake-package-directory }}/.lake
-        key: ${{ runner.os }}-lake-${{ github.sha }}
-        # if no cache hit, fall back to the (latest) previous cache
-        restore-keys: ${{ runner.os }}-lake-
+        key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+        # if no cache hit, fall back to the cache with same lean-toolchain and lake-manifest.json
+        restore-keys: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
 
     - name: detect mathlib
       # only detect Mathlib if the user did not provide the mathlib-cache input
@@ -134,7 +134,7 @@ runs:
       if: ${{ inputs.use-github-cache == 'true' }}
       with:
         path: ${{ inputs.lake-package-directory }}/.lake
-        key: ${{ runner.os }}-lake-${{ github.sha }}
+        key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
 
     - name: test ${{ github.repository }}
       id: test
