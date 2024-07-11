@@ -27,7 +27,8 @@ runs:
           echo "script dummy_test do"
           echo "  println! \"Running fake tests...\""
           echo "  println! \"Fake tests passed!\""
-          echo "  return 0" 
+          echo "  return 0"
+          echo ""
         } >> lakefile.lean
       shell: bash
 
