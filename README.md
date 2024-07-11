@@ -26,15 +26,95 @@ jobs:
       - uses: leanprover/lean-action@v1-beta
 ```
 
+## Configuring which features `lean-action` runs
+
+Most use cases only require a subset of `lean-action`'s features
+in a specific GitHub workflow.
+Additionally, you may want to break up usage of `lean-action`
+across multiple workflows with different triggers,
+e.g., one workflow for PRs and another workflow scheduled by a cron job.
+
+To support these use cases,
+`lean-action` provides inputs to specify the subset of desired features of `lean-action`.
+
+### Directly specifying a desired feature with specific feature inputs
+Each feature of `lean-action` has a corresponding input which users can set to `true` or `false`.
+Specific feature inputs have the highest precedence
+when `lean-action` determines which features to run.
+When a feature input is set `lean-action` will always try to run the corresponding step.
+If `lean-action` is unable to successfully run the step, `lean-action` will fail.
+
+`lean-action` provides the following feature inputs:
+- `build`
+- `test`
+- `check-reservoir-eligibility`
+- `lean4checker`
+
+### Automatic configuration
+After feature inputs, `lean-action` uses the `auto-config` input
+to determine if it should use the Lake workspace to decide which steps to run automatically.
+When `auto-config: true`, `lean-action` will use the Lake workspace to detect targets
+and run the corresponding Lake command.
+When `auto-config: false`, `lean-action` will only run features specified directly through specific feature inputs.
+Users can combine `auto-config` with specific feature inputs to override the automatic configuration of `lean-action`.
+
+`lean-action` can automatically configure the following features:
+- `build`
+- `test`
+
+### Breaking up `lean-action` across workflows
+Sometimes it is useful to break up usage of `lean-action`
+across multiple workflows with different triggers,
+e.g., one workflow for PRs and another workflow scheduled by a cron job.
+`auto-config: false` allows users to run only a specific subset of features of `lean-action`.
+
+For example, run only `lean4checker` in a cron job workflow:
+
+```yaml
+- name: "run `lean-action` with only `lean4checker: true`"
+  id: lean-action
+  uses: leanprover/lean-action@v1-beta
+  with:
+    auto-config: false
+    lean4checker: true
+```
+
+### Differences between using `auto-config` and feature inputs
+When you specify a feature with a feature input, `lean-action` will fail if it can't complete that step.
+However, if you use `auto-config`,
+`lean-action` will only fail if it detects a target in the Lake workspace and the detected target fails.
+
+For example, if the `lakefile.lean` contains an improperly configured `test_driver` target
+and you configure `lean-action` with `test: true`, `lean-action` will fail.
+However the same improperly configured `test_driver` may not cause a `lean-action` failure with `auto-config: true`,
+because `lean-action` may not detect the `test_driver` in the Lake workspace.
+
+To be certain `lean-action` runs a step, specify the desire feature with a feature input.
+
 ## Customization
 `lean-action` provides optional configuration inputs to customize the behavior for your specific workflow.
 
 ```yaml
 - uses: leanprover/lean-action@v1-beta
   with:
-    # Run lake test.
-    # Allowed values: "true" | "false".
+    
+    # Automatically configure `lean-action` based on the Lake workspace.
+    # When set to "true", `lean-action` will use the Lake workspace to determine
+    # the set of features to run on the repository, such as `lake build` and `lake test`.
+    # Even when set to "true", the user can still override the auto configuration
+    # with the `build` and `test` inputs.
+    # Allowed values: "true" or "false".
     # Default: "true"
+    auto-config: ""
+    
+    # Run `lake build`.
+    # Note, this input takes precedence over `auto-config`.
+    # Allowed values: "true" | "false" | "default".
+    build: ""
+
+    # Run `lake test`.
+    # Note, this input takes precedence over `auto-config`.
+    # Allowed values: "true" | "false" | "default".
     test: ""
 
     # Build arguments to pass to `lake build {build-args}`.

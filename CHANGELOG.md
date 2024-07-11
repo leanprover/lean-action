@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `build-status` and `test-status` output parameters
 - new `lake-package-directory` input to specify the directory to run Lake commands. 
 This input will enable users to use `lean-action` when Lake packages are contained in repository subdirectories.
+- new `auto-config` input to configure `lean-action` to use the Lake workspace to decide which steps to run
 
 ### Changed
 - upgrade elan version to `v3.1.1`
