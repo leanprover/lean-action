@@ -51,12 +51,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/functional_tests/auto_config_true
+        with:
+          toolchain: ${{ env.toolchain }}
 
   auto-config-false:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/functional_tests/auto_config_false
+        with:
+          toolchain: ${{ env.toolchain }}
 
   lake-test-success:
     runs-on: ubuntu-latest
@@ -79,6 +83,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/functional_tests/lake_check_test_failure
+        with:
+          toolchain: ${{ env.toolchain }}
 
   subdirectory-lake-package:
     runs-on: ubuntu-latest

@@ -2,6 +2,10 @@ name: 'Lake Check Test Failure'
 description: |
   Run `lean-action` with `test: true` without a test_driver in the Lake workspace.
   Verify `lean-action` fails and `lake build` and `lake test` are not run.
+inputs:
+  toolchain:
+    description: 'Toolchain to use for the test'
+    required: true
 runs: 
   using: 'composite'
   steps:

@@ -4,6 +4,10 @@ description: |
   Verify that build and test steps do not run.
   Run `lean-action` with `auto-config: false` and `lean4checker: true`.
   Verify that build and tests steps do not run and action succeeds.
+inputs:
+  toolchain:
+    description: 'Toolchain to use for the test'
+    required: true
 runs: 
   using: 'composite'
   steps:

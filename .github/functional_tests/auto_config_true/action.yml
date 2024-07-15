@@ -3,6 +3,10 @@ description: |
   Run `lean-action` with `auto-config: true` and no feature inputs
   on a package generated with `lake init` and a dummy test runner added.
   Verify `lake build` and `lake test` run successfully.
+inputs:
+  toolchain:
+    description: 'Toolchain to use for the test'
+    required: true
 runs: 
   using: 'composite'
   steps:
