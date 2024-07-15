@@ -3,6 +3,10 @@ description: |
   Run `lean-action` with `auto-config: true` and no feature inputs
   on a package generated with `lake init` and a dummy test runner added.
   Verify `lake build` and `lake test` run successfully.
+inputs:
+  toolchain:
+    description: 'Toolchain to use for the test'
+    required: true
 runs: 
   using: 'composite'
   steps:
@@ -11,7 +15,7 @@ runs:
       run: |
         set -o pipefail
         curl -sSfL https://github.com/leanprover/elan/releases/download/v3.1.1/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
-        ./elan-init -y --default-toolchain leanprover/lean4:v4.8.0-rc1
+        ./elan-init -y --default-toolchain ${{ inputs.toolchain }}
         echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       shell: bash
 
