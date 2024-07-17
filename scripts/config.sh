@@ -35,7 +35,6 @@ if [ "$LINT" = "true" ]; then
     if ! lake check-lint; then
         echo "lake check-lint failed -> exiting with status 1"
         echo "::error::lake check-lint failed: could not find a lint driver"
-        cat "$SCRIPT_DIR"/step_summaries/lake_check_error.md >>"$GITHUB_STEP_SUMMARY"
         exit 1
     else
         echo "lake check-lint succeeded -> will run lake lint"
