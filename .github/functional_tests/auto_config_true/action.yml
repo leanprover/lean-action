@@ -42,7 +42,7 @@ runs:
           echo "script dummy_lint do"
           echo "  println! \"Running fake lints...\""
           echo "  println! \"Fake lints passed!\""
-          echo "  return 0" 
+          echo "  return 0"
         } >> lakefile.lean
       shell: bash
       
