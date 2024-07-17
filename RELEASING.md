@@ -10,10 +10,15 @@ A major version tag is maintained for each version which points to the latest ve
 
 For more information about releasing GitHub actions see the [Using tags for release management](https://docs.github.com/en/actions/creating-actions/about-custom-actions#using-tags-for-release-management) section of the GitHub custom actions documentation.
 
-## Steps to create a release
-- Create an issue to track creating the release.
+## Creating a release
+To create a release create an issue title `{RELEASE_VERSION} release`
+with the `.github/issue_templates/release_template.md` template
+and the `release` GitHug issue label.
+Follow the steps in the issue template.
+
+Here is an outline of the release process. There are more details in the release issue template.
 - Create a `release/v{RELEASE_VERSION}` branch (e.g. `release/v2.7.1`).
-    - Test `lean-action` by pointing an existing test repository to the new version with `uses: leanprover/lean-action@v{RELEASE_VERSION}`.
+    - Run the `functional_test.yml` workflow on `release/lean-action@v{RELEASE_VERSION}`.
     - Make any minor commits related to the release on the release branch.
 - Once the release has been validated, create a new release with release notes copied from the `## Unreleased` section of `CHANGELOG.md` and a git tag `v{RELEASE_VERSION}` (e.g `v2.7.1`).
 - In the case of a minor or patch version, move the major version tag to the latest version
