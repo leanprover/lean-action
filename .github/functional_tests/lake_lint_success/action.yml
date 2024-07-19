@@ -1,8 +1,5 @@
-name: 'Auto Config True Functional Test'
-description: |
-  Run `lean-action` with `auto-config: true` and no feature inputs
-  on a package generated with `lake init` and a dummy test runner added.
-  Verify `lake build` and `lake test` run successfully.
+name: 'Lake Lint Success'
+description: 'Run `lean-action` with `lake lint` and a successful dummy lint_driver'
 inputs:
   toolchain:
     description: 'Toolchain to use for the test'
@@ -21,18 +18,7 @@ runs:
 
     - name: create lake package
       run: |
-        lake init autoconfigtest
-      shell: bash
-
-    - name: create successful dummy test
-      run: |
-        {
-          echo "@[test_runner]"
-          echo "script dummy_test do"
-          echo "  println! \"Running fake tests...\""
-          echo "  println! \"Fake tests passed!\""
-          echo "  return 0"
-        } >> lakefile.lean
+        lake init dummylint
       shell: bash
 
     - name: create successful dummy lint
@@ -42,15 +28,15 @@ runs:
           echo "script dummy_lint do"
           echo "  println! \"Running fake lints...\""
           echo "  println! \"Fake lints passed!\""
-          echo "  return 0"
+          echo "  return 0" 
         } >> lakefile.lean
       shell: bash
-      
-    - name: "run `lean-action` with `lake test`" 
+
+    - name: "run `lean-action` with `lake lint`" 
       id: lean-action
       uses: ./
       with:
-        auto-config: true
+        lint: true
         use-github-cache: false
     
     - name: verify `lean-action` outcome success
@@ -61,22 +47,6 @@ runs:
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
 
-    - name: verify `lake build` success
-      env:
-        OUTPUT_NAME: "build-status"
-        EXPECTED_VALUE: "SUCCESS"
-        ACTUAL_VALUE: ${{ steps.lean-action.outputs.build-status }}
-      run: .github/functional_tests/test_helpers/verify_action_output.sh
-      shell: bash
-
-    - name: verify `lake test` success
-      env:
-        OUTPUT_NAME: "test-status"
-        EXPECTED_VALUE: "SUCCESS"
-        ACTUAL_VALUE: ${{ steps.lean-action.outputs.test-status }}
-      run: .github/functional_tests/test_helpers/verify_action_output.sh
-      shell: bash
-      
     - name: verify `lake lint` success
       env:
         OUTPUT_NAME: "lint-status"

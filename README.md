@@ -47,6 +47,7 @@ If `lean-action` is unable to successfully run the step, `lean-action` will fail
 `lean-action` provides the following feature inputs:
 - `build`
 - `test`
+- `lint`
 - `check-reservoir-eligibility`
 - `lean4checker`
 
@@ -61,6 +62,7 @@ Users can combine `auto-config` with specific feature inputs to override the aut
 `lean-action` can automatically configure the following features:
 - `build`
 - `test`
+- `lint`
 
 ### Breaking up `lean-action` across workflows
 Sometimes it is useful to break up usage of `lean-action`
@@ -116,6 +118,11 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Note, this input takes precedence over `auto-config`.
     # Allowed values: "true" | "false" | "default".
     test: ""
+    
+    # Run `lake lint`.
+    # Note, this input takes precedence over `auto-config`.
+    # Allowed values: "true" | "false" | "default".
+    lint: ""
 
     # Build arguments to pass to `lake build {build-args}`.
     # For example, `build-args: "--quiet"` will run `lake build --quiet`.
@@ -128,12 +135,6 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Allowed values: "true" | "false" | "auto".
     # Default: "auto"
     use-mathlib-cache: ""
-
-    # Run `lake exe runLinter {lint-module}` on the specified module.
-    # Project must be downstream of Batteries.
-    # Allowed values: name of module to lint.
-    # By default, `lean-action` will not run the linter.
-    lint-module: ""
 
     # Check if the repository is eligible for the Reservoir.
     # Allowed values: "true" | "false".
@@ -184,12 +185,11 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 
 ## Additional Examples
 
-### Lint the `MyModule` module and check package for reservoir eligibility
+### Check package for reservoir eligibility
 
 ```yaml
 - uses: leanprover/lean-action@v1-beta
   with:
-    lint-module: MyModule
     check-reservoir-eligibility: true
 ```
 
