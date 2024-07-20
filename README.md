@@ -1,6 +1,6 @@
 # lean-action - CI for Lean Projects
 
-lean-action provides steps to build, test, and lint [Lean](https://github.com/leanprover/lean4) projects on Github
+lean-action provides steps to build, test, and lint [Lean](https://github.com/leanprover/lean4) projects on GitHub
 
 ## Quick Setup
 
@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       # uses lean standard action with all default input values
-      - uses: leanprover/lean-action@v1-beta
+      - uses: leanprover/lean-action@v1
 ```
 
 ## Configuring which features `lean-action` runs
@@ -75,7 +75,7 @@ For example, run only `lean4checker` in a cron job workflow:
 ```yaml
 - name: "run `lean-action` with only `lean4checker: true`"
   id: lean-action
-  uses: leanprover/lean-action@v1-beta
+  uses: leanprover/lean-action@v1
   with:
     auto-config: false
     lean4checker: true
@@ -97,7 +97,7 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 `lean-action` provides optional configuration inputs to customize the behavior for your specific workflow.
 
 ```yaml
-- uses: leanprover/lean-action@v1-beta
+- uses: leanprover/lean-action@v1
   with:
     
     # Automatically configure `lean-action` based on the Lake workspace.
@@ -172,7 +172,7 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 ```yaml
 - name: "run `lean-action` with `lake test`" 
   id: lean-action
-  uses: leanprover/lean-action@v1-beta
+  uses: leanprover/lean-action@v1
   continue-on-error: true
   with:
     test: true
@@ -188,7 +188,7 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 ### Check package for reservoir eligibility
 
 ```yaml
-- uses: leanprover/lean-action@v1-beta
+- uses: leanprover/lean-action@v1
   with:
     check-reservoir-eligibility: true
 ```
@@ -196,7 +196,7 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 ### Don't run `lake test` or use Mathlib cache
 
 ```yaml
-- uses: leanprover/lean-action@v1-beta
+- uses: leanprover/lean-action@v1
   with:
     test: false
     use-mathlib-cache: false
@@ -205,7 +205,7 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 ### Run lake build with `--wfail`
 
 ```yaml
-- uses: leanprover/lean-action@v1-beta
+- uses: leanprover/lean-action@v1
   with:
     build-args: "--wfail"
 ```
@@ -218,7 +218,7 @@ For example, `leanprover-community/import-graph` uses the setup from `lean-actio
 
 ```yaml
 steps:
-  - uses: leanprover/lean-action@v1-beta
+  - uses: leanprover/lean-action@v1
     with:
       check-reservoir-eligibility: true
   # use setup from lean-action to perform the following steps
