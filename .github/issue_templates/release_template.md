@@ -9,8 +9,8 @@ Before creating an issue with this template,
     - [ ] Run `functional_tests.yml` workflow on `release/{{SPECIFIC_RELEASE}}`.
 - [ ] Create a GitHub release of `release/{{SPECIFIC_RELEASE}}` with a `{{SPECIFIC_RELEASE}}` tag.
     - [ ] Copy the release notes from the ## Unreleased section of CHANGELOG.md.
+    - [ ] After the release is created, verify a git tag named `{{SPECIFIC_RELEASE}}` is pointing to the `release/{{SPECIFIC_RELEASE}}` branch
 - Git tag manipulation.
-    - [ ] Create a git tag named `{{SPECIFIC_RELEASE}}` pointing to the `release/{{SPECIFIC_RELEASE}}` branch
     - [ ] {{REMOVE IF NOT MAJOR RELEASE}} Create a new git tag named `{{MAJOR_RELEASE}}`.
     - [ ] Move the `{{MAJOR_RELEASE}}` tag to point to `release/{{SPECIFIC_RELEASE}}`.
 - [ ] Verify action with `uses: leanprover/lean-action@{{SPECIFIC_RELEASE}}` in test repo as a sanity check.

@@ -13,7 +13,7 @@ For more information about releasing GitHub actions see the [Using tags for rele
 ## Creating a release
 To create a release create an issue title `{RELEASE_VERSION} release`
 with the `.github/issue_templates/release_template.md` template
-and the `release` GitHug issue label.
+and the `release` GitHub issue label.
 Follow the steps in the issue template.
 
 Here is an outline of the release process. There are more details in the release issue template.
