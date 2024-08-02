@@ -11,14 +11,14 @@ on:
   workflow_dispatch:
     inputs:
       toolchain:
-        description: 'The Lean toolchain to use when running the tests.'
+        description: "The Lean toolchain to use when running the tests."
         required: false
-        default: 'leanprover/lean4:v4.9.0'
+        default: "leanprover/lean4:v4.10.0"
 
 # This environment variable is nessecary in addition ot the workflow_dispatch input
 # because the workflow_dispatch input is not available when the workflow is triggered by a pull request
 env:
-  toolchain: ${{ github.event.inputs.toolchain || 'leanprover/lean4:v4.9.0' }}
+  toolchain: ${{ github.event.inputs.toolchain || 'leanprover/lean4:v4.10.0' }}
 
 jobs:
   lake-init-success:
@@ -45,7 +45,7 @@ jobs:
       - uses: ./.github/functional_tests/lake_init_failure
         with:
           toolchain: ${{ env.toolchain }}
-  
+
   auto-config-true:
     runs-on: ubuntu-latest
     steps:
@@ -69,7 +69,7 @@ jobs:
       - uses: ./.github/functional_tests/lake_test_success
         with:
           toolchain: ${{ env.toolchain }}
-  
+
   lake-test-failure:
     runs-on: ubuntu-latest
     steps:
@@ -85,7 +85,7 @@ jobs:
       - uses: ./.github/functional_tests/lake_lint_success
         with:
           toolchain: ${{ env.toolchain }}
-  
+
   lake-lint-failure:
     runs-on: ubuntu-latest
     steps:
