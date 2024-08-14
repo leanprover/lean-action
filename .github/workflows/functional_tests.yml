@@ -109,3 +109,13 @@ jobs:
       - uses: ./.github/functional_tests/subdirectory_lake_package
         with:
           toolchain: ${{ env.toolchain }}
+  
+  macos-runner:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/functional_tests/lake_init_success
+        with:
+          lake-init-arguments: "standalone"
+          toolchain: ${{ env.toolchain }}
+
