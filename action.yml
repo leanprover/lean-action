@@ -143,7 +143,7 @@ runs:
 
     - name: get mathlib cache
       # only get the cache if Mathlib was detected by detect-mathlib step or if the user explicitly set mathlib-cache to true
-      if: ${{ steps.detect-mathlib.outputs.DETECTED_MATHLIB == 'true' || inputs.use-mathlib-cache == 'true' }}
+      if: ${{ steps.detect-mathlib.outputs.detected-mathlib == 'true' || inputs.use-mathlib-cache == 'true' }}
       run: |
         : Get Mathlib Cache
         echo "::group::Mathlib Cache"
