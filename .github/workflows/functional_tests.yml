@@ -61,6 +61,14 @@ jobs:
       - uses: ./.github/functional_tests/auto_config_false
         with:
           toolchain: ${{ env.toolchain }}
+  
+  detect-mathlib:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/functional_tests/mathlib_dependency
+        with:
+          toolchain: ${{ env.toolchain }}
 
   lake-test-success:
     runs-on: ubuntu-latest
