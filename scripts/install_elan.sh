@@ -4,7 +4,6 @@
 echo "::group::Elan Installation Output"
 
 set -o pipefail
-# curl -sSfL https://github.com/leanprover/elan/releases/download/v3.1.1/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
 curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf |
   sh -s -- -y --default-toolchain none
 rm -f elan-init
