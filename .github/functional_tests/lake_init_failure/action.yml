@@ -18,6 +18,7 @@ runs:
     - name: create lake package with `lake init`
       run: |
         lake init failingpackage
+        lake update
       shell: bash
 
     - name: introduce a syntax error in `lakefile.lean`

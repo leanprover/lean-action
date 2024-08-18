@@ -21,6 +21,7 @@ runs:
     - name: create lake package
       run: |
         lake init autoconfigtest
+        lake update
       shell: bash
 
     - name: create successful dummy test

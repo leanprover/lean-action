@@ -22,6 +22,7 @@ runs:
         mkdir a_subdirectory
         cd a_subdirectory
         lake init subdirpackage
+        lake update
       shell: bash
 
     - name: "run `lean-action`" 

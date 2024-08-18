@@ -21,6 +21,7 @@ runs:
     - name: create lake package with `lake init ${{ inputs.lake-init-arguments }}`
       run: |
         lake init ${{ inputs.lake-init-arguments }}
+        lake update
       shell: bash
 
     - name: "run `lean-action`"
