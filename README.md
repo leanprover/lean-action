@@ -4,7 +4,7 @@ lean-action provides steps to build, test, and lint [Lean](https://github.com/le
 
 ## Quick Setup
 
-To setup lean-action to run on pushes and pull request in your repo, create the following `ci.yml` file the `.github/workflows`
+To setup `lean-action` to run on pushes and pull request in your repo, create the following `ci.yml` file the `.github/workflows`
 
 ```yml
 name: CI
@@ -26,6 +26,11 @@ jobs:
       - uses: leanprover/lean-action@v1
 ```
 
+> [!IMPORTANT]
+`lean-action` is tested on `ubuntu-latest` and `macos-latest` GitHub-hosted runners,
+and should support Unix-based runners in general.
+Currently, `lean-action` does not support window runners.
+
 ## Configuring which features `lean-action` runs
 
 Most use cases only require a subset of `lean-action`'s features
@@ -38,6 +43,7 @@ To support these use cases,
 `lean-action` provides inputs to specify the subset of desired features of `lean-action`.
 
 ### Directly specifying a desired feature with specific feature inputs
+
 Each feature of `lean-action` has a corresponding input which users can set to `true` or `false`.
 Specific feature inputs have the highest precedence
 when `lean-action` determines which features to run.
@@ -45,6 +51,7 @@ When a feature input is set `lean-action` will always try to run the correspondi
 If `lean-action` is unable to successfully run the step, `lean-action` will fail.
 
 `lean-action` provides the following feature inputs:
+
 - `build`
 - `test`
 - `lint`
@@ -52,6 +59,7 @@ If `lean-action` is unable to successfully run the step, `lean-action` will fail
 - `lean4checker`
 
 ### Automatic configuration
+
 After feature inputs, `lean-action` uses the `auto-config` input
 to determine if it should use the Lake workspace to decide which steps to run automatically.
 When `auto-config: true`, `lean-action` will use the Lake workspace to detect targets
@@ -60,11 +68,13 @@ When `auto-config: false`, `lean-action` will only run features specified direct
 Users can combine `auto-config` with specific feature inputs to override the automatic configuration of `lean-action`.
 
 `lean-action` can automatically configure the following features:
+
 - `build`
 - `test`
 - `lint`
 
 ### Breaking up `lean-action` across workflows
+
 Sometimes it is useful to break up usage of `lean-action`
 across multiple workflows with different triggers,
 e.g., one workflow for PRs and another workflow scheduled by a cron job.
@@ -82,6 +92,7 @@ For example, run only `lean4checker` in a cron job workflow:
 ```
 
 ### Differences between using `auto-config` and feature inputs
+
 When you specify a feature with a feature input, `lean-action` will fail if it can't complete that step.
 However, if you use `auto-config`,
 `lean-action` will only fail if it detects a target in the Lake workspace and the detected target fails.
@@ -94,6 +105,7 @@ because `lean-action` may not detect the `test_driver` in the Lake workspace.
 To be certain `lean-action` runs a step, specify the desire feature with a feature input.
 
 ## Customization
+
 `lean-action` provides optional configuration inputs to customize the behavior for your specific workflow.
 
 ```yaml
@@ -161,12 +173,14 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 ```
 
 ## Output Parameters
+
 `lean-action` provides the following output parameters for downstream steps:
 
-- `build-status` 
+- `build-status`
   - Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
 - `test-status`
   - Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
+
 ### Example: Use `test-status` output parameter in downstream step
 
 ```yaml
@@ -228,13 +242,14 @@ steps:
       rm import_graph.dot
 ```
 
-
 ## Projects which use `lean-action`
+
 - [leanprover-community/aesop](https://github.com/leanprover-community/aesop/blob/master/.github/workflows/build.yml#L16)
 - [leanprover-community/import-graph](https://github.com/leanprover-community/import-graph/blob/main/.github/workflows/build.yml#L8)
 
 ## Keep the action updated with `dependabot`
-Because Lean is under heavy development, changes to Lean or Lake could break outdated versions of `lean-action`. You can configure [dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates) to automatically create a PR to update `lean-action` when a new stable version is released. 
+
+Because Lean is under heavy development, changes to Lean or Lake could break outdated versions of `lean-action`. You can configure [dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates) to automatically create a PR to update `lean-action` when a new stable version is released.
 
 Here is an example `.github/dependabot.yml` which configures `dependabot` to check daily for updates to all GitHub actions in your repository:
 

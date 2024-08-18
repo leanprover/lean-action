@@ -111,7 +111,7 @@ jobs:
           toolchain: ${{ env.toolchain }}
   
   macos-runner:
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/functional_tests/lake_init_success

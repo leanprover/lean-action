@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- switch elan installation method from download platform tar to `elan-init.sh`
+to support addition runners, e.g., macos.
+
 ## v1.0.0 - 2024-07-20
+
 ### Added
 
 - new `auto-config` input
