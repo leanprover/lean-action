@@ -18,6 +18,7 @@ runs:
     - name: create lake package with `lake init mathlibdep math`
       run: |
         lake init mathlibdep math
+        lake update
       shell: bash
 
     - name: "run `lean-action`"
