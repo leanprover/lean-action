@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.0.1 - 2024-8-24
+
+### Changed
+
+- use lake-manifest.json to detect mathlib dependency instead of lakefile.{lean, toml}
+to make lean-action more robust to changes in the configuration file formatting.
+
 ### Fixed
 
 - switch elan installation method from download platform tar to `elan-init.sh`
