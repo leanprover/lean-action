@@ -18,6 +18,7 @@ runs:
     - name: create lake package
       run: |
         lake init dummytest
+        lake update
       shell: bash 
 
     - name: create failing dummy test

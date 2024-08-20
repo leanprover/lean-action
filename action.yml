@@ -100,6 +100,11 @@ outputs:
       The status of the `lake lint` step.
       Allowed values: "SUCCESS" | "FAILURE" | "NOT_RUN".
     value: ${{ steps.set-output-parameters.outputs.lint-status }}
+  detected-mathlib:
+    description: |
+      If lean-action detected a mathlib dependency equals "true"
+      otherwise equals "false".
+    value: ${{ steps.detect-mathlib.outputs.detected-mathlib }}
 
 runs:
   using: "composite"
@@ -122,6 +127,7 @@ runs:
         : Configure Lean Action
         ${{ github.action_path }}/scripts/config.sh
       shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
 
     - uses: actions/cache@v4
       if: ${{ inputs.use-github-cache == 'true' }}
@@ -143,7 +149,7 @@ runs:
 
     - name: get mathlib cache
       # only get the cache if Mathlib was detected by detect-mathlib step or if the user explicitly set mathlib-cache to true
-      if: ${{ steps.detect-mathlib.outputs.DETECTED_MATHLIB == 'true' || inputs.use-mathlib-cache == 'true' }}
+      if: ${{ steps.detect-mathlib.outputs.detected-mathlib == 'true' || inputs.use-mathlib-cache == 'true' }}
       run: |
         : Get Mathlib Cache
         echo "::group::Mathlib Cache"

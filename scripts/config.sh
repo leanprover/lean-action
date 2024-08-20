@@ -7,6 +7,13 @@ echo "::group::Configure lean-action"
 # Get the directory of the script to read the step summaries md files
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
+# Verify that a lake-manifest.json exist
+if [ ! -f lake-manifest.json ]; then
+  echo "::error::No lake-manifest.json found. Run lake update to generate manifest"
+  echo "::error::Exiting with status 1"
+  exit 1
+fi
+
 # If the user specifies `build: true`, then run `lake build`.
 if [ "$BUILD" = "true" ]; then
     echo "build: true -> will run lake build"

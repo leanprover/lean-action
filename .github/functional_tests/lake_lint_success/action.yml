@@ -18,6 +18,7 @@ runs:
     - name: create lake package
       run: |
         lake init dummylint
+        lake update
       shell: bash
 
     - name: create successful dummy lint
