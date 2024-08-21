@@ -13,7 +13,7 @@ handle_exit() {
     if [ $exit_status -ne 0 ]; then
         echo "lint-status=FAILURE" >>"$GITHUB_OUTPUT"
         echo "::error::lake lint failed: could not find a test runner"
-        cat "$SCRIPT_DIR"/step_summaries/lake_check_error.md >>"$GITHUB_STEP_SUMMARY"
+        cat "$SCRIPT_DIR"/step_summaries/lake_lint_error.md >>"$GITHUB_STEP_SUMMARY"
     else
         echo "lint-status=SUCCESS" >>"$GITHUB_OUTPUT"
     fi
