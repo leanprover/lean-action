@@ -94,12 +94,12 @@ outputs:
     description: |
       The status of the `lake test` step.
       Allowed values: "SUCCESS" | "FAILURE" | "".
-    value: ${{ steps.set-output-parameters.outputs.test-status }}
+    value: ${{ steps.test.outputs.test-status }}
   lint-status:
     description: |
       The status of the `lake lint` step.
       Allowed values: "SUCCESS" | "FAILURE" | "".
-    value: ${{ steps.set-output-parameters.outputs.lint-status }}
+    value: ${{ steps.lint.outputs.lint-status }}
   detected-mathlib:
     description: |
       If lean-action detected a mathlib dependency equals "true"
