@@ -53,7 +53,7 @@ runs:
     - name: verify `lake test` didn't run
       env:
         OUTPUT_NAME: "test-status"
-        EXPECTED_VALUE: "NOT_RUN"
+        EXPECTED_VALUE: ""
         ACTUAL_VALUE: ${{ steps.lean-action.outputs.test-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash

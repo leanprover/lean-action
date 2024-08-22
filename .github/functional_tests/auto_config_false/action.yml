@@ -43,7 +43,7 @@ runs:
     - name: verify `lake build` not run
       env:
         OUTPUT_NAME: "build-status"
-        EXPECTED_VALUE: "NOT_RUN"
+        EXPECTED_VALUE: ""
         ACTUAL_VALUE: ${{ steps.lean-action.outputs.build-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
@@ -51,7 +51,7 @@ runs:
     - name: verify `lake test` not run
       env:
         OUTPUT_NAME: "test-status"
-        EXPECTED_VALUE: "NOT_RUN"
+        EXPECTED_VALUE: ""
         ACTUAL_VALUE: ${{ steps.lean-action.outputs.test-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
@@ -59,7 +59,7 @@ runs:
     - name: verify `lake lint` not run
       env:
         OUTPUT_NAME: "lint-status"
-        EXPECTED_VALUE: "NOT_RUN"
+        EXPECTED_VALUE: ""
         ACTUAL_VALUE: ${{ steps.lean-action.outputs.test-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
@@ -83,7 +83,7 @@ runs:
     - name: verify `lake build` not run
       env:
         OUTPUT_NAME: "build-status"
-        EXPECTED_VALUE: "NOT_RUN"
+        EXPECTED_VALUE: ""
         ACTUAL_VALUE: ${{ steps.lean-action-lean4checker.outputs.build-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
@@ -91,7 +91,7 @@ runs:
     - name: verify `lake test` not run
       env:
         OUTPUT_NAME: "test-status"
-        EXPECTED_VALUE: "NOT_RUN"
+        EXPECTED_VALUE: ""
         ACTUAL_VALUE: ${{ steps.lean-action-lean4checker.outputs.test-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
@@ -99,7 +99,7 @@ runs:
     - name: verify `lake lint` not run
       env:
         OUTPUT_NAME: "lint-status"
-        EXPECTED_VALUE: "NOT_RUN"
+        EXPECTED_VALUE: ""
         ACTUAL_VALUE: ${{ steps.lean-action.outputs.test-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
