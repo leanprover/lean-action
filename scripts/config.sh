@@ -52,7 +52,7 @@ fi
 if [ "$AUTO_CONFIG" = "true" ]; then
     # always run `lake build` with `auto-config: true`
     echo "auto-config: true"
-    echo "-> will run lake build"
+    echo "    -> will run lake build"
     run_lake_build="true"
 
     # only run `lake test` with `auto-config: true` if `lake check-test` returns true
@@ -68,7 +68,7 @@ if [ "$AUTO_CONFIG" = "true" ]; then
         echo "lake check-lint succeeded -> will run lake lint"
         run_lake_lint="true"
     else
-        echo "lake check-test failed -> will not run lake lint"
+        echo "lake check-lint failed -> will not run lake lint"
     fi
 fi
 

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- correct typo of in configuration step: "lake check-test failed" -> "lake check-lint failed"
+
 ## v1.0.1 - 2024-8-24
 
 ### Changed
