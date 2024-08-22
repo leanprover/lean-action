@@ -88,8 +88,8 @@ outputs:
   build-status:
     description: |
       The status of the `lake build` step.
-      Allowed values: "SUCCESS" | "FAILURE" | "NOT_RUN".
-    value: ${{ steps.set-output-parameters.outputs.build-status }}
+      Allowed values: "SUCCESS" | "FAILURE" | "".
+    value: ${{ steps.build.outputs.build-status }}
   test-status:
     description: |
       The status of the `lake test` step.
