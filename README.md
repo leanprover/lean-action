@@ -177,9 +177,13 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 `lean-action` provides the following output parameters for downstream steps:
 
 - `build-status`
-  - Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
+  - Values: "SUCCESS" | "FAILURE" | ""
 - `test-status`
-  - Values: "SUCCESS" | "FAILURE" | "NOT_RUN"
+  - Values: "SUCCESS" | "FAILURE" | ""
+- `lint-status`
+  - Values: "SUCCESS" | "FAILURE" | ""
+
+Note, a value of empty string indicates `lean-action` did not run the corresponding feature.
 
 ### Example: Use `test-status` output parameter in downstream step
 
