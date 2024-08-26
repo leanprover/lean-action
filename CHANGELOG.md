@@ -16,6 +16,7 @@ to avoid `set-output-parameters` final step breaking log group expansion
 
 - correct typo of in configuration step: "lake check-test failed" -> "lake check-lint failed"
 - fix log group expansion in failing steps due to `set-output-parameters` step
+and removing the end log group command when a step fails
 
 ## v1.0.1 - 2024-8-24
 

@@ -9,11 +9,11 @@ handle_exit() {
     exit_status=$?
     if [ $exit_status -ne 0 ]; then
         echo "test-status=FAILURE" >>"$GITHUB_OUTPUT"
+        echo "::error:: lake test failed"
     else
         echo "test-status=SUCCESS" >>"$GITHUB_OUTPUT"
+        echo "::endgroup::"
     fi
-    echo "::endgroup::"
-    echo
 }
 
 trap handle_exit EXIT
