@@ -112,6 +112,7 @@ runs:
     - name: install elan
       run: |
         : Install Elan
+        ls
         ${{ github.action_path }}/scripts/install_elan.sh
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}

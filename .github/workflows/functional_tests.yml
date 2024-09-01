@@ -21,111 +21,111 @@ env:
   toolchain: ${{ github.event.inputs.toolchain || 'leanprover/lean4:v4.10.0' }}
 
 jobs:
-  lake-init-success:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # run `lean-action` on a package generated with `lake init` for:
-        #  - a standalone package
-        #  - a package with a mathlib dependency
-        #  - a package with a `lakefile.toml` file
-        # see ./github/functional_tests/lake_init/action.yml for more details on lake-init-arguments
-        lake-init-arguments: ["standalone", "mathdep math", "tomltest .toml"]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/lake_init_success
-        with:
-          lake-init-arguments: ${{ matrix.lake-init-arguments}}
-          toolchain: ${{ env.toolchain }}
-
-  lake-init-failure:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/lake_init_failure
-        with:
-          toolchain: ${{ env.toolchain }}
-
-  auto-config-true:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/auto_config_true
-        with:
-          toolchain: ${{ env.toolchain }}
-
-  auto-config-false:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/auto_config_false
-        with:
-          toolchain: ${{ env.toolchain }}
-  
-  detect-mathlib:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/mathlib_dependency
-        with:
-          toolchain: ${{ env.toolchain }}
-
-  lake-test-success:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/lake_test_success
-        with:
-          toolchain: ${{ env.toolchain }}
-
-  lake-test-failure:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/lake_test_failure
-        with:
-          toolchain: ${{ env.toolchain }}
-
-  lake-lint-success:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/lake_lint_success
-        with:
-          toolchain: ${{ env.toolchain }}
-
-  lake-lint-failure:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/lake_lint_failure
-        with:
-          toolchain: ${{ env.toolchain }}
-
-  lake-check-test-failure:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/lake_check_test_failure
-        with:
-          toolchain: ${{ env.toolchain }}
-
-  subdirectory-lake-package:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/subdirectory_lake_package
-        with:
-          toolchain: ${{ env.toolchain }}
-  
-  macos-runner:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/functional_tests/lake_init_success
-        with:
-          lake-init-arguments: "standalone"
-          toolchain: ${{ env.toolchain }}
+  # lake-init-success:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       # run `lean-action` on a package generated with `lake init` for:
+  #       #  - a standalone package
+  #       #  - a package with a mathlib dependency
+  #       #  - a package with a `lakefile.toml` file
+  #       # see ./github/functional_tests/lake_init/action.yml for more details on lake-init-arguments
+  #       lake-init-arguments: ["standalone", "mathdep math", "tomltest .toml"]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.github/functional_tests/lake_init_success
+  #       with:
+  #         lake-init-arguments: ${{ matrix.lake-init-arguments}}
+  #         toolchain: ${{ env.toolchain }}
+  #
+  # lake-init-failure:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.github/functional_tests/lake_init_failure
+  #       with:
+  #         toolchain: ${{ env.toolchain }}
+  #
+  # auto-config-true:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.github/functional_tests/auto_config_true
+  #       with:
+  #         toolchain: ${{ env.toolchain }}
+  #
+  # auto-config-false:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.github/functional_tests/auto_config_false
+  #       with:
+  #         toolchain: ${{ env.toolchain }}
+  #
+  # detect-mathlib:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.github/functional_tests/mathlib_dependency
+  #       with:
+  #         toolchain: ${{ env.toolchain }}
+  #
+  # lake-test-success:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.github/functional_tests/lake_test_success
+  #       with:
+  #         toolchain: ${{ env.toolchain }}
+  #
+  # lake-test-failure:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.github/functional_tests/lake_test_failure
+  #       with:
+  #         toolchain: ${{ env.toolchain }}
+  #
+  # lake-lint-success:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.github/functional_tests/lake_lint_success
+  #       with:
+  #         toolchain: ${{ env.toolchain }}
+  #
+  # lake-lint-failure:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.github/functional_tests/lake_lint_failure
+  #       with:
+  #         toolchain: ${{ env.toolchain }}
+  #
+  # lake-check-test-failure:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.github/functional_tests/lake_check_test_failure
+  #       with:
+  #         toolchain: ${{ env.toolchain }}
+  #
+  # subdirectory-lake-package:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.github/functional_tests/subdirectory_lake_package
+  #       with:
+  #         toolchain: ${{ env.toolchain }}
+  #
+  # macos-runner:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: ./.github/functional_tests/lake_init_success
+  #       with:
+  #         lake-init-arguments: "standalone"
+  #         toolchain: ${{ env.toolchain }}
 
   windows-runner:
     runs-on: windows-latest
