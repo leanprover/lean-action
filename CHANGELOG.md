@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Windows GitHub runner support
 
+### Fixed
+
+- replace `actions/cache` with `actions/cache/restore` to prevent redundant cache saving
+previously caused by the combination of `actions/cache` and `actions/cache/save`
+
 ## v1.0.2 - 2024-8-26
 
 ### Changed
