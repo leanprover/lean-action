@@ -7,7 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-## v1.0.1 - 2024-8-24
+## v1.0.2 - 2024-8-26
+
+### Changed
+
+- use empty string as default value for status outputs instead of "NOT_RUN"
+to avoid `set-output-parameters` final step breaking log group expansion
+
+### Fixed
+
+- correct typo of in configuration step: "lake check-test failed" -> "lake check-lint failed"
+- fix log group expansion in failing steps due to `set-output-parameters` step
+and removing the end log group command when a step fails
+
+## v1.0.1 - 2024-8-20
 
 ### Changed
 

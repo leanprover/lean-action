@@ -9,11 +9,12 @@ handle_exit() {
     exit_status=$?
     if [ $exit_status -ne 0 ]; then
         echo "lint-status=FAILURE" >>"$GITHUB_OUTPUT"
+        echo "::error:: lake lint failed"
     else
         echo "lint-status=SUCCESS" >>"$GITHUB_OUTPUT"
+        echo "::endgroup::"
+        echo
     fi
-    echo "::endgroup::"
-    echo
 }
 
 trap handle_exit EXIT

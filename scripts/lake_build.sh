@@ -10,13 +10,13 @@ handle_exit() {
     exit_status=$?
     if [ $exit_status -ne 0 ]; then
         echo "build-status=FAILURE" >>"$GITHUB_OUTPUT"
+        echo "::error:: lake build failed"
     else
         echo "build-status=SUCCESS" >>"$GITHUB_OUTPUT"
+        # end log group and add a new line to improve readabiltiy
+        echo "::endgroup::"
+        echo
     fi
-
-    # end log group and add a new line to improve readabiltiy
-    echo "::endgroup::"
-    echo
 }
 
 trap handle_exit EXIT

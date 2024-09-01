@@ -88,18 +88,18 @@ outputs:
   build-status:
     description: |
       The status of the `lake build` step.
-      Allowed values: "SUCCESS" | "FAILURE" | "NOT_RUN".
-    value: ${{ steps.set-output-parameters.outputs.build-status }}
+      Allowed values: "SUCCESS" | "FAILURE" | "".
+    value: ${{ steps.build.outputs.build-status }}
   test-status:
     description: |
       The status of the `lake test` step.
-      Allowed values: "SUCCESS" | "FAILURE" | "NOT_RUN".
-    value: ${{ steps.set-output-parameters.outputs.test-status }}
+      Allowed values: "SUCCESS" | "FAILURE" | "".
+    value: ${{ steps.test.outputs.test-status }}
   lint-status:
     description: |
       The status of the `lake lint` step.
-      Allowed values: "SUCCESS" | "FAILURE" | "NOT_RUN".
-    value: ${{ steps.set-output-parameters.outputs.lint-status }}
+      Allowed values: "SUCCESS" | "FAILURE" | "".
+    value: ${{ steps.lint.outputs.lint-status }}
   detected-mathlib:
     description: |
       If lean-action detected a mathlib dependency equals "true"
@@ -214,17 +214,3 @@ runs:
         ${{ github.action_path }}/scripts/run_lean4checker.sh
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}
-
-    # This step sets the output parameters for the entirety of `lean-action`
-    # based on the outputs of the previous steps
-    - name: set output parameters
-      id: set-output-parameters
-      if: always() # always run this step even if previous steps fail
-      env:
-        BUILD_STATUS: ${{ steps.build.outputs.build-status }}
-        TEST_STATUS: ${{ steps.test.outputs.test-status }}
-        LINT_STATUS: ${{ steps.lint.outputs.lint-status }}
-      run: |
-        : Set Output Parameters
-        ${{ github.action_path }}/scripts/set_output_parameters.sh
-      shell: bash
