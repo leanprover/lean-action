@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Windows GitHub runner support
+
 ### Fixed
 
 - replace `actions/cache` with `actions/cache/restore` to prevent redundant cache saving

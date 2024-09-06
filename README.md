@@ -27,9 +27,9 @@ jobs:
 ```
 
 > [!IMPORTANT]
-`lean-action` is tested on `ubuntu-latest` and `macos-latest` GitHub-hosted runners,
-and should support Unix-based runners in general.
-Currently, `lean-action` does not support Windows runners.
+`lean-action` is tested on `ubuntu-latest`, `macos-latest`, and `windows-latest` GitHub-hosted runners.
+We recommend using one of these runners for the best experience,
+however if you encounter an issue when using a different runner, please still open an issue.
 
 ## Configuring which features `lean-action` runs
 

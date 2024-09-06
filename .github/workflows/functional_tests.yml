@@ -61,7 +61,7 @@ jobs:
       - uses: ./.github/functional_tests/auto_config_false
         with:
           toolchain: ${{ env.toolchain }}
-  
+
   detect-mathlib:
     runs-on: ubuntu-latest
     steps:
@@ -117,9 +117,18 @@ jobs:
       - uses: ./.github/functional_tests/subdirectory_lake_package
         with:
           toolchain: ${{ env.toolchain }}
-  
+
   macos-runner:
     runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/functional_tests/lake_init_success
+        with:
+          lake-init-arguments: "standalone"
+          toolchain: ${{ env.toolchain }}
+
+  windows-runner:
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/functional_tests/lake_init_success
