@@ -1,6 +1,6 @@
 name: "Lean Action - CI for Lean Projects"
 description: |
-  Standard CI for Lean projects. 
+  Standard CI for Lean projects.
   Steps:
     - install elan
     - get Mathlib cache (optional, must be downstream of Mathlib)
@@ -84,6 +84,12 @@ inputs:
       If lake-package-directory is not provided, `lean-action` will use the root directory of the repository by default.
     required: false
     default: "."
+  run-auto-update:
+    description: |
+      This is for debugging only. Run auto update script to make dependencies up-to-date.
+      Allowed values: "true" | "false".
+    required: false
+    default: "false"
 outputs:
   build-status:
     description: |
@@ -108,7 +114,7 @@ outputs:
 
 runs:
   using: "composite"
-  steps: 
+  steps:
     - name: install elan
       run: |
         : Install Elan
@@ -127,6 +133,15 @@ runs:
         : Configure Lean Action
         ${GITHUB_ACTION_PATH}/scripts/config.sh
       shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
+
+    # TODO: test for `lake-package-directory`
+    - name: // 👻 auto update // get latest lean-toolchain
+      if: ${{ github.event_name == 'schedule' }} || ${{ inputs.run-auto-update == 'true' }}
+      run: ${{ github.action_path }}/scripts/getLatest.ps1
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: pwsh
       working-directory: ${{ inputs.lake-package-directory }}
 
     - uses: actions/cache/restore@v4
@@ -162,8 +177,8 @@ runs:
     - name: build ${{ github.repository }}
       id: build
       if: ${{ steps.config.outputs.run-lake-build == 'true'}}
-      env: 
-          BUILD_ARGS: ${{ inputs.build-args }}
+      env:
+        BUILD_ARGS: ${{ inputs.build-args }}
       run: |
         : Lake Build
         ${GITHUB_ACTION_PATH}/scripts/lake_build.sh
