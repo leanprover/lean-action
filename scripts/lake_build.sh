@@ -21,4 +21,7 @@ handle_exit() {
 
 trap handle_exit EXIT
 
+echo "Build args:"
+echo "$BUILD_ARGS"
+
 lake build "$BUILD_ARGS"
