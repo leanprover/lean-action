@@ -21,7 +21,7 @@ runs:
 
     - name: create lake package
       run: |
-        lake init autoconfigtest
+        lake init autoconfigtest .lean
         lake update
       shell: bash
 
