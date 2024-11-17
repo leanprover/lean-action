@@ -81,10 +81,10 @@ runs:
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
 
-    - name: verify `lake build` not run
+    - name: verify `lake build` ran
       env:
         OUTPUT_NAME: "build-status"
-        EXPECTED_VALUE: ""
+        EXPECTED_VALUE: "SUCCESS"
         ACTUAL_VALUE: ${{ steps.lean-action-lean4checker.outputs.build-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
