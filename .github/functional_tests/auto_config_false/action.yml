@@ -69,6 +69,7 @@ runs:
       uses: ./
       with:
         auto-config: false
+        build: true
         lean4checker: true
         use-github-cache: false
 
