@@ -17,7 +17,7 @@ runs:
 
     - name: create lake package
       run: |
-        lake init dummylint
+        lake init dummylint .lean
         lake update
       shell: bash
 

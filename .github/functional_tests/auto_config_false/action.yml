@@ -21,7 +21,7 @@ runs:
 
     - name: create lake package
       run: |
-        lake init autoconfigtest
+        lake init autoconfigtest .lean
         lake update
       shell: bash
 
@@ -69,6 +69,7 @@ runs:
       uses: ./
       with:
         auto-config: false
+        build: true
         lean4checker: true
         use-github-cache: false
 
@@ -80,10 +81,10 @@ runs:
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
 
-    - name: verify `lake build` not run
+    - name: verify `lake build` ran
       env:
         OUTPUT_NAME: "build-status"
-        EXPECTED_VALUE: ""
+        EXPECTED_VALUE: "SUCCESS"
         ACTUAL_VALUE: ${{ steps.lean-action-lean4checker.outputs.build-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
