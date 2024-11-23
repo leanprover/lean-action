@@ -70,7 +70,6 @@ jobs:
         with:
           toolchain: ${{ env.toolchain }}
 
-
   detect-mathlib:
     runs-on: ubuntu-latest
     steps:
