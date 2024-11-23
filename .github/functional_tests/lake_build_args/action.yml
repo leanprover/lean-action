@@ -17,7 +17,7 @@ runs:
 
     - name: create lake package with `lake init ${{ inputs.lake-init-arguments }}`
       run: |
-        lake init buildargs
+        lake init buildargs .lean
         lake update
       shell: bash
 
