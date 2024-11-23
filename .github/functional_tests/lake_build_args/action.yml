@@ -1,0 +1,68 @@
+name: 'Lake Build Args'
+description: 'Run `lean-action` on with `build-args` input'
+inputs:
+  toolchain:
+    description: 'Toolchain to use for the test'
+    required: true
+runs: 
+  using: 'composite'
+  steps:
+    # TODO: once `lean-action` supports just setup, use it here
+    - name: install elan
+      run: |
+        set -o pipefail
+        curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain ${{ inputs.toolchain }}
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: create lake package with `lake init ${{ inputs.lake-init-arguments }}`
+      run: |
+        lake init buildargs
+        lake update
+      shell: bash
+
+    - name: "run `lean-action`"
+      id: lean-action
+      uses: ./
+      with:
+        build-args: "--wfail"
+        use-github-cache: false
+
+    - name: verify `lean-action` outcome success
+      env:
+        OUTPUT_NAME: "lean-action.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify `lake build` success
+      env:
+        OUTPUT_NAME: "build-status"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.build-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: "run `lean-action` with multiple build args"
+      id: lean-action-multiple-build-args
+      uses: ./
+      with:
+        build-args: "--log-level=warning --fail-level=warning"
+        use-github-cache: false
+    
+    - name: verify `lean-action-multiple-build-args` outcome success
+      env:
+        OUTPUT_NAME: "lean-action-multiple-build-args.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action-multiple-build-args.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify `lake build` success
+      env:
+        OUTPUT_NAME: "build-status"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action-multiple-build-args.outputs.build-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
