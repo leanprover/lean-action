@@ -21,7 +21,7 @@ runs:
         lake update
       shell: bash
 
-    - name: "run `lean-action`"
+    - name: "run `lean-action` with build-args"
       id: lean-action
       uses: ./
       with:
@@ -42,6 +42,10 @@ runs:
         EXPECTED_VALUE: "SUCCESS"
         ACTUAL_VALUE: ${{ steps.lean-action.outputs.build-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: lake clean
+      run: lake clean
       shell: bash
 
     - name: "run `lean-action` with multiple build args"
