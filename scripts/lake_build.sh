@@ -21,4 +21,5 @@ handle_exit() {
 
 trap handle_exit EXIT
 
-lake build "$BUILD_ARGS"
+# use eval to ensure build arguments are expanded
+eval "lake build $BUILD_ARGS"
