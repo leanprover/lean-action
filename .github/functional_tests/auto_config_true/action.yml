@@ -3,6 +3,9 @@ description: |
   Run `lean-action` with `auto-config: true` and no feature inputs
   on a package generated with `lake init` and a dummy test runner added.
   Verify `lake build` and `lake test` run successfully.
+  
+  Run `lean-action` with `auto-config:true` and false feature inputs.
+  Verify `lake build` and `lake test` did not run.
 inputs:
   toolchain:
     description: 'Toolchain to use for the test'
@@ -46,7 +49,7 @@ runs:
         } >> lakefile.lean
       shell: bash
       
-    - name: "run `lean-action` with `lake test`" 
+    - name: "run `lean-action` with auto-config: true" 
       id: lean-action
       uses: ./
       with:
@@ -82,5 +85,39 @@ runs:
         OUTPUT_NAME: "lint-status"
         EXPECTED_VALUE: "SUCCESS"
         ACTUAL_VALUE: ${{ steps.lean-action.outputs.lint-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+    
+
+    - name: "run `lean-action` with auto-config: true and false feature inputs" 
+      id: lean-action-false-feature-inputs
+      uses: ./
+      with:
+        auto-config: true
+        build: false
+        test: false
+        lint: false
+        use-github-cache: false
+    - name: verify `lake build` did not run
+      env:
+        OUTPUT_NAME: "build-status"
+        EXPECTED_VALUE: ""
+        ACTUAL_VALUE: ${{ steps.lean-action-false-feature-inputs.outputs.build-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify `lake test` did not run
+      env:
+        OUTPUT_NAME: "test-status"
+        EXPECTED_VALUE: ""
+        ACTUAL_VALUE: ${{ steps.lean-action-false-feature-inputs.outputs.test-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+      
+    - name: verify `lake lint` did not run
+      env:
+        OUTPUT_NAME: "lint-status"
+        EXPECTED_VALUE: ""
+        ACTUAL_VALUE: ${{ steps.lean-action-false-feature-inputs.outputs.lint-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
