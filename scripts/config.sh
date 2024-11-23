@@ -50,21 +50,35 @@ if [ "$LINT" = "true" ]; then
 fi
 
 if [ "$AUTO_CONFIG" = "true" ]; then
-    # always run `lake build` with `auto-config: true`
-    echo "auto-config: true"
-    echo "    -> will run lake build"
-    run_lake_build="true"
+    if [ "$BUILD" = "false" ]; then
+        # If the user specifies `build: false`, then do not run `lake build`.
+        echo "build: false -> will not run lake build"
+        run_lake_build="false"
+    else
+        # `build` input is not `false` and `auto-config: true`
+        echo "auto-config: true"
+        echo "    -> will run lake build"
+        run_lake_build="true"
+    fi
 
-    # only run `lake test` with `auto-config: true` if `lake check-test` returns true
-    if lake check-test; then
+    if [ "$TEST" = "false" ]; then
+        # If the user specifies `test: false`, then do not run `lake test`.
+        echo "test: false -> will not run lake test"
+        run_lake_test="false"
+    elif lake check-test; then
+        # only run `lake test` with `auto-config: true` if `lake check-test` returns true
         echo "lake check-test succeeded -> will run lake test"
         run_lake_test="true"
     else
         echo "lake check-test failed -> will not run lake test"
     fi
 
-    # only run `lake lint` with `auto-config: true` if `lake check-lint` returns true
-    if lake check-lint; then
+    if [ "$LINT" = "false" ]; then
+        # If the user specifies `lint: false`, then do not run `lake lint`.
+        echo "lint: false -> will not run lake lint"
+        run_lake_lint="false"
+    elif lake check-lint; then
+        # only run `lake lint` with `auto-config: true` if `lake check-lint` returns true
         echo "lake check-lint succeeded -> will run lake lint"
         run_lake_lint="true"
     else
