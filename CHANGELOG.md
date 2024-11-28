@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.1.1 - 2024-11-23
+
+### Fixed
+
+- fix bug with passing multiple arguments to `lake build` via `build-args` input
+- fix false feature flag logic when using `auto-config: true`
+
 ## v1.1.0 - 2024-9-16
 
 ### Added
