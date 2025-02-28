@@ -31,6 +31,38 @@ jobs:
 We recommend using one of these runners for the best experience,
 however if you encounter an issue when using a different runner, please still open an issue.
 
+## Caching `.lake` directory with GitHub's `actions\cache`
+By default, `lean-action` uses [`actions\cache`](https://github.com/actions/cache) to cache the `.lake` directory and speed up builds.
+
+> [!NOTE]
+GitHub caching is distinct from Mathlib caching with `lake exe cache get`
+
+### Cache keys
+`lean-action` uses [cache keys](https://github.com/actions/cache?tab=readme-ov-file#creating-a-cache-key) to save and restore caches.
+
+First it uses a primary key,
+composed of the runner operating system, the runner architecture (X86, X64, ARM, ARM64), the Lake manifest, and the git commit hash,
+to save/restore caches from an exact git commit.
+
+If there is no primary key cache hit, `lean-action` uses a fallback key, 
+composed of the operating system, the architecture, and the Lake manifest but not the git commit hash,
+to restore a cache from a previous commit.
+
+### Troubleshooting problems with caching
+Because caches are shared across different jobs,
+caching build files can lead to unexpected behavior and errors.
+
+To determine if the GitHub cache is causing problems you can disable caching with the `use-github-cache` input.
+```yml
+- uses: leanprover/lean-action@v1
+  with:
+    use-github-cache: false
+```
+
+For more complex workflows, you may want more control over how the `actions\cache` caches the build in your workflow,
+(.e.g., modifying the cache key to respect a build matrix)
+you can wrap `lean/action` with `use-github-cache: false` in your own call to `actions\cache`.
+
 ## Configuring which features `lean-action` runs
 
 Most use cases only require a subset of `lean-action`'s features
