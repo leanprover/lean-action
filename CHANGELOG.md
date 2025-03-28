@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.1.2 - 2025-03-28
+
+### Fixed
+
+- include runner architecture in cache key to avoid reusing `.lake` across different runner architectures
+
 ## v1.1.1 - 2024-11-23
 
 ### Fixed
