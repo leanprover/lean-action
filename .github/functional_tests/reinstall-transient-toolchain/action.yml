@@ -1,0 +1,70 @@
+name: 'Reinstall Transient Toolchain Functional Test'
+description: |
+  Run `lean-action` with `reinstall-transient-toolchain: true`.
+  Verify that the toolchain will be redownloaded.
+inputs:
+  toolchain:
+    description: 'Toolchain to use for `lake init` (not the toolchain that will be tested for reinstallation).'
+    required: true
+runs: 
+  using: 'composite'
+  steps:
+    # TODO: once `lean-action` supports just setup, use it here
+    - name: install elan
+      run: |
+        set -o pipefail
+        curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain ${{ inputs.toolchain }}
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: create lake package
+      run: |
+        lake init transienttoolchain .lean
+        lake update
+      shell: bash
+
+    - name: set a toolchain
+      run: |
+        echo "leanprover/lean4-pr-releases:pr-release-6627" > lean-toolchain
+      shell: bash
+
+    - name: "run `lean-action` to install the toolchain"
+      id: lean-action-install
+      uses: ./
+      with:
+        auto-config: true
+        use-github-cache: false
+
+    - name: verify the toolchain is installed
+      run: |
+        elan toolchain list | grep -qFx "leanprover/lean4-pr-releases:pr-release-6627"
+      shell: bash
+
+    - name: verify `lean-action` outcome success
+      env:
+        OUTPUT_NAME: "lean-action-install.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action-install.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: "run `lean-action` to uninstall the toolchain"
+      id: lean-action-uninstall
+      uses: ./
+      with:
+        reinstall-transient-toolchain: true
+        auto-config: false
+        use-github-cache: false
+
+    - name: verify the toolchain is no longer installed
+      run: |
+        ! elan toolchain list | grep -qFx "leanprover/lean4-pr-releases:pr-release-6627"
+      shell: bash
+
+    - name: verify `lean-action` outcome success
+      env:
+        OUTPUT_NAME: "lean-action.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action-uninstall.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
