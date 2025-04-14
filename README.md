@@ -202,6 +202,15 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Allowed values: a valid directory containing a Lake package.
     # If lake-package-directory is not provided, `lean-action` will use the root directory of the repository by default.
     lake-package-directory: ""
+
+    # Always reinstall the Lean toolchain if it is a transient one, hosted on the lean4-pr-releases repository.
+    # This ensures that CI always uses the latest build of that toolchain.
+    # This setting only applies to `lean4-pr-releases/pr-release-XXXX` toolchains:
+    # regular Lean toolchain releases remain cached.
+    # The toolchain version is determined from the `lean-toolchain` file.
+    # Allowed values: "true" | "false".
+    # Default: "false"
+    reinstall-transient-toolchain: ""
 ```
 
 ## Output Parameters
