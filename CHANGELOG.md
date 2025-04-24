@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- add option to reinstall `lean4-pr-releases` toolchains, ensuring CI runs with thev latest version
+- add option to always reinstall `lean4-pr-releases` toolchains, ensuring CI runs with the latest version
 
 ## v1.1.2 - 2025-03-28
 
