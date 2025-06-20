@@ -44,6 +44,14 @@ runs:
       continue-on-error: true # mk_all returns 1 if it made changes; this is not an error here.
       shell: bash
 
+    - name: "rerun `lean-action`"
+      id: lean-action
+      uses: ./
+      continue-on-error: true # required so that the action does not fail the workflow
+      with:
+        use-github-cache: false
+        mk_all-check: true
+
     - name: verify `lake exe mk_all --check` success
       env:
         OUTPUT_NAME: "mk_all-status"
