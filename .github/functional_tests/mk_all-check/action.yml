@@ -41,6 +41,7 @@ runs:
     - name: "run `lake exe mk_all` to fix the issue"
       run: |
         lake exe mk_all
+      continue-on-error: true # mk_all returns 1 if it made changes; this is not an error here.
       shell: bash
 
     - name: verify `lake exe mk_all --check` success
