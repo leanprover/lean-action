@@ -1,0 +1,51 @@
+name: '`mk_all` test'
+description: 'Run `lake exe mk_all --check` twice and verify that it fails before `lake exe mk_all`, and succeeds afterwards.'
+inputs:
+  toolchain:
+    description: 'Toolchain to use for the test'
+    required: true
+runs: 
+  using: 'composite'
+  steps:
+    # TODO: once `lean-action` supports just setup, use it here
+    - name: install elan
+      run: |
+        set -o pipefail
+        curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain ${{ inputs.toolchain }}
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: create lake package with an unimported file
+      run: |
+        lake init mkall math
+        lake update
+        echo "def foo := 1" > Mkall/Foo.lean
+      shell: bash
+
+    - name: "run `lean-action`"
+      id: lean-action
+      uses: ./
+      with:
+        use-github-cache: false
+        mk_all-check: true
+
+    - name: verify `lake exe mk_all --check` failure
+      env:
+        OUTPUT_NAME: "mk_all-status"
+        EXPECTED_VALUE: "FAILURE"
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.mk_all-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: "run `lake exe mk_all` to fix the issue"
+      run: |
+        lake exe mk_all
+      shell: bash
+
+    - name: verify `lake exe mk_all --check` success
+      env:
+        OUTPUT_NAME: "mk_all-status"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.mk_all-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
