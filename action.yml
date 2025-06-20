@@ -41,7 +41,7 @@ inputs:
       Allowed values: "true" | "false" | "default".
     required: false
     default: "default"
-  mk-all_check:
+  mk_all-check:
     description: |
       Check all files are imported with `lake exe mk_all --check`.
       Allowed values: "true" | "false"

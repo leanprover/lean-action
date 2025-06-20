@@ -25,6 +25,7 @@ runs:
     - name: "run `lean-action`"
       id: lean-action
       uses: ./
+      continue-on-error: true # required so that the action does not fail the workflow
       with:
         use-github-cache: false
         mk_all-check: true
