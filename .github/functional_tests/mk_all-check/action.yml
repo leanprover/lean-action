@@ -45,7 +45,7 @@ runs:
       shell: bash
 
     - name: "rerun `lean-action`"
-      id: lean-action
+      id: lean-action-rerun
       uses: ./
       continue-on-error: true # required so that the action does not fail the workflow
       with:
@@ -56,6 +56,6 @@ runs:
       env:
         OUTPUT_NAME: "mk_all-status"
         EXPECTED_VALUE: "SUCCESS"
-        ACTUAL_VALUE: ${{ steps.lean-action.outputs.mk_all-status }}
+        ACTUAL_VALUE: ${{ steps.lean-action-rerun.outputs.mk_all-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
