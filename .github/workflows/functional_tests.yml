@@ -134,6 +134,14 @@ jobs:
         with:
           toolchain: ${{ env.toolchain }}
 
+  mk_all-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/functional_tests/mk_all-check
+        with:
+          toolchain: ${{ env.toolchain }}
+
   macos-runner:
     runs-on: macos-latest
     steps:

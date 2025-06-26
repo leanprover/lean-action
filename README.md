@@ -168,6 +168,10 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Allowed values: "true" | "false" | "default".
     lint: ""
 
+    # Check all files are imported with `lake exe mk_all --check`.
+    # Allowed values: "true" | "false".
+    mk_all-check: ""
+
     # Build arguments to pass to `lake build {build-args}`.
     # For example, `build-args: "--quiet"` will run `lake build --quiet`.
     # By default, `lean-action` calls `lake build` with no arguments.
@@ -222,6 +226,8 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 - `test-status`
   - Values: "SUCCESS" | "FAILURE" | ""
 - `lint-status`
+  - Values: "SUCCESS" | "FAILURE" | ""
+- `mk_all-status`
   - Values: "SUCCESS" | "FAILURE" | ""
 
 Note, a value of empty string indicates `lean-action` did not run the corresponding feature.
