@@ -87,6 +87,7 @@ If `lean-action` is unable to successfully run the step, `lean-action` will fail
 - `build`
 - `test`
 - `lint`
+- `mk_all-check`
 - `check-reservoir-eligibility`
 - `lean4checker`
 
