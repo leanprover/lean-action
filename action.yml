@@ -41,6 +41,12 @@ inputs:
       Allowed values: "true" | "false" | "default".
     required: false
     default: "default"
+  mk_all-check:
+    description: |
+      Check all files are imported with `lake exe mk_all --check`.
+      Allowed values: "true" | "false"
+    required: false
+    default: "false"
   build-args:
     description: |
       Build arguments to pass to `lake build {build-args}`.
@@ -107,6 +113,11 @@ outputs:
       The status of the `lake lint` step.
       Allowed values: "SUCCESS" | "FAILURE" | "".
     value: ${{ steps.lint.outputs.lint-status }}
+  mk_all-status:
+    description: |
+      The status of the `lake exe mk_all --check` step.
+      Allowed values: "SUCCESS" | "FAILURE" | "".
+    value: ${{ steps.mk_all.outputs.mk_all-status }}
   detected-mathlib:
     description: |
       If lean-action detected a mathlib dependency equals "true"
@@ -144,6 +155,15 @@ runs:
           printf 'Uninstalling transient toolchain %s\n' "$(cat lean-toolchain)"
           elan toolchain uninstall "$(cat lean-toolchain)"
         fi
+      shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
+
+    - name: ensure all files are imported
+      id: mk_all
+      if: ${{ inputs.mk_all-check == 'true'}}
+      run: |
+        : Ensure all files are imported
+        ${GITHUB_ACTION_PATH}/scripts/mk_all_check.sh
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}
 
