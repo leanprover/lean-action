@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.3.0 - 2025-07-24
+
+### Added
+
+- Add a step to check all files in the default target's directory are imported in the main file by running `lake exe mk_all --check`. -   
+- Add `mk_all-check` input to enable the mk_all step and `mk_all-status` to use the result.
+
 ## v1.2.0 - 2025-05-16
 
 ### Added
