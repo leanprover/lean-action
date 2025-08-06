@@ -70,6 +70,14 @@ jobs:
         with:
           toolchain: ${{ env.toolchain }}
 
+  lake-test-args:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/functional_tests/lake_test_args
+        with:
+          toolchain: ${{ env.toolchain }}
+
   detect-mathlib:
     runs-on: ubuntu-latest
     steps:

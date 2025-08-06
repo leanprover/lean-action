@@ -18,4 +18,5 @@ handle_exit() {
 
 trap handle_exit EXIT
 
-lake test
+# use eval to ensure build arguments are expanded
+eval "lake test $TEST_ARGS"
