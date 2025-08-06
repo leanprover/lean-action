@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+# start log group
 echo "::group::Lake Test Output"
 
 # handle_exit function to handle the exit status of the script
@@ -12,7 +13,9 @@ handle_exit() {
         echo "::error:: lake test failed"
     else
         echo "test-status=SUCCESS" >>"$GITHUB_OUTPUT"
+        # end log group and add a new line to improve readabiltiy
         echo "::endgroup::"
+        echo
     fi
 }
 
