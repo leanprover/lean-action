@@ -21,6 +21,17 @@ runs:
         lake update
       shell: bash
 
+    - name: create successful dummy test
+      run: |
+        {
+          echo "@[test_runner]"
+          echo "script dummy_test do"
+          echo "  println! \"Running fake tests...\""
+          echo "  println! \"Fake tests passed!\""
+          echo "  return 0" 
+        } >> lakefile.lean
+      shell: bash
+     
     - name: "run `lean-action` with test-args"
       id: lean-action
       uses: ./
