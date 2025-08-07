@@ -178,6 +178,11 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # By default, `lean-action` calls `lake build` with no arguments.
     build-args: ""
 
+    # Test arguments to pass to `lake test {test-args}`.
+    # For example, `test-args: "--quiet"` will run `lake test --quiet`.
+    # By default, `lean-action` calls `lake test` with no arguments.
+    test-args: ""
+
     # By default, `lean-action` attempts to automatically detect a Mathlib dependency and run `lake exe cache get` accordingly.
     # Setting `use-mathlib-cache` will override automatic detection and run (or not run) `lake exe cache get`.
     # Project must be downstream of Mathlib to use the Mathlib cache.
