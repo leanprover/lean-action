@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Group logging using the ::group:: workflow command
 echo "::group::Elan Installation Output"
