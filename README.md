@@ -90,6 +90,7 @@ If `lean-action` is unable to successfully run the step, `lean-action` will fail
 - `mk_all-check`
 - `check-reservoir-eligibility`
 - `lean4checker`
+- `nanoda`
 
 ### Automatic configuration
 
@@ -230,7 +231,26 @@ All inputs from the standard action are supported. The workflow outputs the same
     # Allowed values: "true" | "false".
     # Default: "false"
     lean4checker: ""
-    
+
+    # Check environment with nanoda external type checker.
+    # nanoda is an independent Lean 4 type checker written in Rust.
+    # Requires Rust toolchain (will be installed automatically if not present).
+    # Allowed values: "true" | "false".
+    # Default: "false"
+    nanoda: ""
+
+    # When running nanoda, permit the sorryAx axiom.
+    # Set to "false" if your project should have no sorry placeholders.
+    # Allowed values: "true" | "false".
+    # Default: "true"
+    nanoda-allow-sorry: ""
+
+    # Only run nanoda on push events to the default branch, not on pull requests.
+    # Useful for reducing CI time on PRs since nanoda verification is slow.
+    # Allowed values: "true" | "false".
+    # Default: "true"
+    nanoda-on-main-only: ""
+
     # Enable GitHub caching.
     # Allowed values: "true" or "false".
     # If use-github-cache input is not provided, the action will use GitHub caching by default.
@@ -263,6 +283,8 @@ All inputs from the standard action are supported. The workflow outputs the same
 - `lint-status`
   - Values: "SUCCESS" | "FAILURE" | ""
 - `mk_all-status`
+  - Values: "SUCCESS" | "FAILURE" | ""
+- `nanoda-status`
   - Values: "SUCCESS" | "FAILURE" | ""
 
 Note, a value of empty string indicates `lean-action` did not run the corresponding feature.
@@ -326,6 +348,69 @@ steps:
     run: |
       lake exe graph
       rm import_graph.dot
+```
+
+## External Type Checking with nanoda
+
+[nanoda](https://github.com/ammkrn/nanoda_lib) is an independent Lean 4 type checker written in Rust. It provides additional assurance that your project's declarations are well-typed by verifying them with a completely separate implementation.
+
+### Enable nanoda verification
+
+```yaml
+- uses: leanprover/lean-action@v1
+  with:
+    nanoda: true
+```
+
+By default, nanoda only runs on push events to the main branch (not on PRs) because verification adds significant CI time. To run on all events:
+
+```yaml
+- uses: leanprover/lean-action@v1
+  with:
+    nanoda: true
+    nanoda-on-main-only: false
+```
+
+### Require no sorry placeholders
+
+By default, nanoda permits the `sorryAx` axiom for projects with incomplete proofs. To require all proofs be complete:
+
+```yaml
+- uses: leanprover/lean-action@v1
+  with:
+    nanoda: true
+    nanoda-allow-sorry: false
+```
+
+### Daily nanoda verification with notifications
+
+For daily verification runs with automatic failure notifications, use the reusable workflow:
+
+```yaml
+# .github/workflows/nanoda-daily.yml
+name: Daily nanoda verification
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    uses: leanprover/lean-action/.github/workflows/nanoda-daily.yml@v1
+    # Optional: configure notification method
+    # with:
+    #   notify: 'issue'  # default: creates GitHub issue on failure
+    # For webhook (Slack/Discord):
+    # with:
+    #   notify: 'webhook'
+    # secrets:
+    #   webhook-url: ${{ secrets.WEBHOOK_URL }}
+    # For Zulip:
+    # with:
+    #   notify: 'zulip'
+    #   zulip-org-url: 'leanprover.zulipchat.com'
+    # secrets:
+    #   zulip-api-key: ${{ secrets.ZULIP_API_KEY }}
 ```
 
 ## Projects which use `lean-action`
