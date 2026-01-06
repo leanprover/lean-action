@@ -137,6 +137,35 @@ because `lean-action` may not detect the `test_driver` in the Lake workspace.
 
 To be certain `lean-action` runs a step, specify the desire feature with a feature input.
 
+## Parallel Workflow
+
+For faster CI, `lean-action` provides a reusable workflow that runs test, lint, lean4checker, and reservoir checks in parallel on separate runners:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  ci:
+    uses: leanprover/lean-action/.github/workflows/ci.yml@v1
+    with:
+      test: "true"
+      lint: "true"
+      lean4checker: "true"
+```
+
+The parallel workflow:
+- Runs a **build** job first (elan setup, config, mathlib cache, lake build)
+- Then runs **test**, **lint**, **lean4checker**, and **reservoir** jobs in parallel
+- Each parallel job restores the build cache from the build job
+
+All inputs from the standard action are supported. The workflow outputs the same status parameters (`build-status`, `test-status`, `lint-status`, `mk_all-status`).
+
 ## Customization
 
 `lean-action` provides optional configuration inputs to customize the behavior for your specific workflow.
