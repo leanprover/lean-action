@@ -140,7 +140,7 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 
 ## Parallel Workflow
 
-For faster CI, `lean-action` provides a reusable workflow that runs test, lint, lean4checker, and reservoir checks in parallel on separate runners:
+For faster CI, `lean-action` provides a reusable workflow that runs test, lint, lean4checker, nanoda, and reservoir checks in parallel on separate runners:
 
 ```yaml
 name: CI
@@ -158,14 +158,15 @@ jobs:
       test: "true"
       lint: "true"
       lean4checker: "true"
+      nanoda: "true"
 ```
 
 The parallel workflow:
 - Runs a **build** job first (elan setup, config, mathlib cache, lake build)
-- Then runs **test**, **lint**, **lean4checker**, and **reservoir** jobs in parallel
+- Then runs **test**, **lint**, **lean4checker**, **nanoda**, and **reservoir** jobs in parallel
 - Each parallel job restores the build cache from the build job
 
-All inputs from the standard action are supported. The workflow outputs the same status parameters (`build-status`, `test-status`, `lint-status`, `mk_all-status`).
+All inputs from the standard action are supported. The workflow outputs the same status parameters (`build-status`, `test-status`, `lint-status`, `mk_all-status`, `nanoda-status`).
 
 ## Customization
 
