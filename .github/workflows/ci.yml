@@ -1,0 +1,314 @@
+name: "Lean CI (Parallel)"
+
+on:
+  workflow_call:
+    inputs:
+      auto-config:
+        description: |
+          Automatically configure based on Lake workspace.
+          Allowed values: "true" or "false".
+        type: string
+        required: false
+        default: "true"
+      build:
+        description: |
+          Run `lake build`.
+          Allowed values: "true" | "false" | "default".
+        type: string
+        required: false
+        default: "default"
+      test:
+        description: |
+          Run `lake test`.
+          Allowed values: "true" | "false" | "default".
+        type: string
+        required: false
+        default: "default"
+      lint:
+        description: |
+          Run `lake lint`.
+          Allowed values: "true" | "false" | "default".
+        type: string
+        required: false
+        default: "default"
+      mk_all-check:
+        description: |
+          Check all files are imported with `lake exe mk_all --check`.
+          Allowed values: "true" | "false".
+        type: string
+        required: false
+        default: "false"
+      build-args:
+        description: |
+          Build arguments to pass to `lake build {build-args}`.
+        type: string
+        required: false
+        default: ""
+      test-args:
+        description: |
+          Test arguments to pass to `lake test {test-args}`.
+        type: string
+        required: false
+        default: ""
+      use-mathlib-cache:
+        description: |
+          Override automatic Mathlib detection.
+          Allowed values: "true" | "false" | "auto".
+        type: string
+        required: false
+        default: "auto"
+      use-github-cache:
+        description: |
+          Enable GitHub caching.
+          Allowed values: "true" or "false".
+        type: string
+        required: false
+        default: "true"
+      lake-package-directory:
+        description: |
+          Directory containing the Lake package.
+        type: string
+        required: false
+        default: "."
+      reinstall-transient-toolchain:
+        description: |
+          Uninstall lean-pr-release toolchains before running.
+          Allowed values: "true" | "false".
+        type: string
+        required: false
+        default: "false"
+      check-reservoir-eligibility:
+        description: |
+          Check if repository is eligible for Reservoir.
+          Allowed values: "true" | "false".
+        type: string
+        required: false
+        default: "false"
+      lean4checker:
+        description: |
+          Check environment with lean4checker.
+          Allowed values: "true" | "false".
+        type: string
+        required: false
+        default: "false"
+    outputs:
+      build-status:
+        description: "Status of lake build: SUCCESS | FAILURE | ''"
+        value: ${{ jobs.build.outputs.build-status }}
+      test-status:
+        description: "Status of lake test: SUCCESS | FAILURE | ''"
+        value: ${{ jobs.test.outputs.test-status }}
+      lint-status:
+        description: "Status of lake lint: SUCCESS | FAILURE | ''"
+        value: ${{ jobs.lint.outputs.lint-status }}
+      mk_all-status:
+        description: "Status of mk_all --check: SUCCESS | FAILURE | ''"
+        value: ${{ jobs.build.outputs.mk_all-status }}
+      detected-mathlib:
+        description: "Whether Mathlib dependency was detected"
+        value: ${{ jobs.build.outputs.detected-mathlib }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      run-lake-test: ${{ steps.config.outputs.run-lake-test }}
+      run-lake-lint: ${{ steps.config.outputs.run-lake-lint }}
+      build-status: ${{ steps.build.outputs.build-status }}
+      mk_all-status: ${{ steps.mk_all.outputs.mk_all-status }}
+      detected-mathlib: ${{ steps.detect-mathlib.outputs.detected-mathlib }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: install elan
+        run: |
+          : Install Elan
+          "${GITHUB_WORKSPACE}/scripts/install_elan.sh"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+      - name: configure
+        id: config
+        env:
+          AUTO_CONFIG: ${{ inputs.auto-config }}
+          BUILD: ${{ inputs.build }}
+          TEST: ${{ inputs.test }}
+          LINT: ${{ inputs.lint }}
+        run: |
+          : Configure Lean Action
+          "${GITHUB_WORKSPACE}/scripts/config.sh"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+      - name: reinstall transient toolchain
+        if: inputs.reinstall-transient-toolchain == 'true'
+        run: |
+          : Reinstall Transient Toolchains
+          if [[ "$(cat lean-toolchain)" =~ ^leanprover/lean4-pr-releases:pr-release-[0-9]+$ ]]; then
+            printf 'Uninstalling transient toolchain %s\n' "$(cat lean-toolchain)"
+            elan toolchain uninstall "$(cat lean-toolchain)"
+          fi
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+      - name: ensure all files are imported
+        id: mk_all
+        if: inputs.mk_all-check == 'true'
+        run: |
+          : Ensure all files are imported
+          "${GITHUB_WORKSPACE}/scripts/mk_all_check.sh"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+      - uses: actions/cache/restore@v4
+        if: inputs.use-github-cache == 'true'
+        with:
+          path: ${{ inputs.lake-package-directory }}/.lake
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}-${{ github.sha }}
+          restore-keys: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}
+
+      - name: detect mathlib
+        if: inputs.use-mathlib-cache == 'auto'
+        id: detect-mathlib
+        run: |
+          : Detect Mathlib
+          "${GITHUB_WORKSPACE}/scripts/detect_mathlib.sh"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+      - name: get mathlib cache
+        if: steps.detect-mathlib.outputs.detected-mathlib == 'true' || inputs.use-mathlib-cache == 'true'
+        run: |
+          : Get Mathlib Cache
+          echo "::group::Mathlib Cache"
+          lake exe cache get
+          echo "::endgroup::"
+          echo
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+      - name: build
+        id: build
+        if: steps.config.outputs.run-lake-build == 'true'
+        env:
+          BUILD_ARGS: ${{ inputs.build-args }}
+        run: |
+          : Lake Build
+          "${GITHUB_WORKSPACE}/scripts/lake_build.sh"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+      - uses: actions/cache/save@v4
+        if: inputs.use-github-cache == 'true'
+        with:
+          path: ${{ inputs.lake-package-directory }}/.lake
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}-${{ github.sha }}
+
+  test:
+    needs: build
+    if: needs.build.outputs.run-lake-test == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      test-status: ${{ steps.test.outputs.test-status }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: install elan
+        run: |
+          : Install Elan
+          "${GITHUB_WORKSPACE}/scripts/install_elan.sh"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+      - uses: actions/cache/restore@v4
+        if: inputs.use-github-cache == 'true'
+        with:
+          path: ${{ inputs.lake-package-directory }}/.lake
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}-${{ github.sha }}
+          restore-keys: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}
+
+      - name: test
+        id: test
+        env:
+          TEST_ARGS: ${{ inputs.test-args }}
+        run: |
+          : Lake Test
+          "${GITHUB_WORKSPACE}/scripts/lake_test.sh"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+  lint:
+    needs: build
+    if: needs.build.outputs.run-lake-lint == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      lint-status: ${{ steps.lint.outputs.lint-status }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: install elan
+        run: |
+          : Install Elan
+          "${GITHUB_WORKSPACE}/scripts/install_elan.sh"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+      - uses: actions/cache/restore@v4
+        if: inputs.use-github-cache == 'true'
+        with:
+          path: ${{ inputs.lake-package-directory }}/.lake
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}-${{ github.sha }}
+          restore-keys: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}
+
+      - name: lint
+        id: lint
+        run: |
+          : Lake Lint
+          "${GITHUB_WORKSPACE}/scripts/lake_lint.sh"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+  lean4checker:
+    needs: build
+    if: inputs.lean4checker == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: install elan
+        run: |
+          : Install Elan
+          "${GITHUB_WORKSPACE}/scripts/install_elan.sh"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+      - uses: actions/cache/restore@v4
+        if: inputs.use-github-cache == 'true'
+        with:
+          path: ${{ inputs.lake-package-directory }}/.lake
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}-${{ github.sha }}
+          restore-keys: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}
+
+      - name: lean4checker
+        run: |
+          : Check Environment with lean4checker
+          "${GITHUB_WORKSPACE}/scripts/run_lean4checker.sh"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+  reservoir:
+    needs: build
+    if: inputs.check-reservoir-eligibility == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: check reservoir eligibility
+        run: |
+          : Check Reservoir Eligibility
+          "${GITHUB_WORKSPACE}/scripts/check_reservoir_eligibility.sh" \
+            "${{ github.event.repository.private }}" \
+            "${{ github.event.repository.stargazers_count }}" \
+            "${{ github.event.repository.license.spdx_id }}"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
