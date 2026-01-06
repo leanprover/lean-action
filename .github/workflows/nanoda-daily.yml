@@ -76,13 +76,19 @@ jobs:
             });
 
       - name: Send webhook notification
-        if: always() && inputs.notify == 'webhook' && secrets.webhook-url != ''
+        if: always() && inputs.notify == 'webhook'
+        env:
+          WEBHOOK_URL: ${{ secrets.webhook-url }}
         run: |
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "::error::webhook-url secret is required when notify is set to 'webhook'"
+            exit 1
+          fi
           STATUS="${{ job.status }}"
           EMOJI=$([[ "$STATUS" == "success" ]] && echo "✅" || echo "❌")
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          curl -X POST "${{ secrets.webhook-url }}" \
+          curl -X POST "$WEBHOOK_URL" \
             -H "Content-Type: application/json" \
             -d "{
               \"text\": \"$EMOJI nanoda daily verification: $STATUS\",
@@ -99,7 +105,7 @@ jobs:
         shell: bash
 
       - name: Send Zulip notification on success
-        if: success() && inputs.notify == 'zulip' && secrets.zulip-api-key != ''
+        if: success() && inputs.notify == 'zulip'
         uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5
         with:
           api-key: ${{ secrets.zulip-api-key }}
@@ -112,7 +118,7 @@ jobs:
             ✅ nanoda daily verification [succeeded](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) on `${{ github.sha }}`
 
       - name: Send Zulip notification on failure
-        if: failure() && inputs.notify == 'zulip' && secrets.zulip-api-key != ''
+        if: failure() && inputs.notify == 'zulip'
         uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5
         with:
           api-key: ${{ secrets.zulip-api-key }}
