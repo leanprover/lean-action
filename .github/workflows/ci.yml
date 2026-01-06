@@ -91,6 +91,23 @@ on:
         type: string
         required: false
         default: "false"
+      nanoda:
+        description: |
+          Check environment with nanoda external type checker.
+          nanoda is an independent Lean 4 type checker written in Rust.
+          Requires Rust toolchain (will be installed automatically if not present).
+          Allowed values: "true" | "false".
+        type: string
+        required: false
+        default: "false"
+      nanoda-allow-sorry:
+        description: |
+          When running nanoda, permit the sorryAx axiom.
+          Set to "false" if your project should have no sorry placeholders.
+          Allowed values: "true" | "false".
+        type: string
+        required: false
+        default: "true"
     outputs:
       build-status:
         description: "Status of lake build: SUCCESS | FAILURE | ''"
@@ -107,6 +124,9 @@ on:
       detected-mathlib:
         description: "Whether Mathlib dependency was detected"
         value: ${{ jobs.build.outputs.detected-mathlib }}
+      nanoda-status:
+        description: "Status of nanoda check: SUCCESS | FAILURE | ''"
+        value: ${{ jobs.nanoda.outputs.nanoda-status }}
 
 jobs:
   build:
@@ -310,5 +330,38 @@ jobs:
             "${{ github.event.repository.private }}" \
             "${{ github.event.repository.stargazers_count }}" \
             "${{ github.event.repository.license.spdx_id }}"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+  nanoda:
+    needs: build
+    if: inputs.nanoda == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      nanoda-status: ${{ steps.nanoda.outputs.nanoda-status }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: install elan
+        run: |
+          : Install Elan
+          "${GITHUB_WORKSPACE}/scripts/install_elan.sh"
+        shell: bash
+        working-directory: ${{ inputs.lake-package-directory }}
+
+      - uses: actions/cache/restore@v4
+        if: inputs.use-github-cache == 'true'
+        with:
+          path: ${{ inputs.lake-package-directory }}/.lake
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}-${{ github.sha }}
+          restore-keys: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}
+
+      - name: nanoda
+        id: nanoda
+        env:
+          NANODA_ALLOW_SORRY: ${{ inputs.nanoda-allow-sorry }}
+        run: |
+          : Check Environment with nanoda
+          "${GITHUB_WORKSPACE}/scripts/run_nanoda.sh"
         shell: bash
         working-directory: ${{ inputs.lake-package-directory }}
