@@ -7,10 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.4.0 - 2026-01-15
 
 ### Added
 
 - new `test-args` input to specify arguments to pass to `lake test`
+- fixed bug where elan installation failed but lean-action continued (#143)
 
 ## v1.3.0 - 2025-07-24
 
