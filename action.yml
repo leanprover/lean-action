@@ -61,6 +61,13 @@ inputs:
       By default, `lean-action` calls `lake test` with no arguments.
     required: false
     default: ""
+  lint-args:
+    description: |
+      Lint arguments to pass to `lake lint {lint-args}`.
+      For example, `lint-args: "--quiet"` will run `lake lint --quiet`.
+      By default, `lean-action` calls `lake lint` with no arguments.
+    required: false
+    default: ""
   use-mathlib-cache:
     description: |
       By default, `lean-action` attempts to automatically detect a Mathlib dependency and run `lake exe cache get` accordingly.
@@ -225,6 +232,8 @@ runs:
     - name: test ${{ github.repository }}
       id: test
       if: ${{ steps.config.outputs.run-lake-test == 'true'}}
+      env:
+          TEST_ARGS: ${{ inputs.test-args }}
       run: |
         : Lake Test
         ${GITHUB_ACTION_PATH}/scripts/lake_test.sh
@@ -235,6 +244,8 @@ runs:
       id: lint
       # only run linter if the user provided a module to lint
       if: ${{ steps.config.outputs.run-lake-lint == 'true'}}
+      env:
+          LINT_ARGS: ${{ inputs.lint-args }}
       run: |
         : Lake Lint
         ${GITHUB_ACTION_PATH}/scripts/lake_lint.sh

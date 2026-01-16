@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- new `lint-args` input to specify arguments to pass to `lake lint`
+
 ## v1.4.0 - 2026-01-15
 
 ### Added

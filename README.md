@@ -183,6 +183,11 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # By default, `lean-action` calls `lake test` with no arguments.
     test-args: ""
 
+    # Lint arguments to pass to `lake lint {lint-args}`.
+    # For example, `lint-args: "--quiet"` will run `lake lint --quiet`.
+    # By default, `lean-action` calls `lake lint` with no arguments.
+    lint-args: ""
+
     # By default, `lean-action` attempts to automatically detect a Mathlib dependency and run `lake exe cache get` accordingly.
     # Setting `use-mathlib-cache` will override automatic detection and run (or not run) `lake exe cache get`.
     # Project must be downstream of Mathlib to use the Mathlib cache.
