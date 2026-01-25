@@ -59,7 +59,6 @@ jobs:
         with:
           nanoda: true
           nanoda-allow-sorry: ${{ inputs.allow-sorry }}
-          nanoda-on-main-only: false  # This workflow is already scheduled, so run always
 
       - name: Create GitHub issue on failure
         if: failure() && inputs.notify == 'issue'

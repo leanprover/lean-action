@@ -106,13 +106,6 @@ inputs:
       Allowed values: "true" | "false".
     required: false
     default: "true"
-  nanoda-on-main-only:
-    description: |
-      Only run nanoda on push events to the default branch, not on pull requests.
-      Useful for reducing CI time on PRs since nanoda verification is slow.
-      Allowed values: "true" | "false".
-    required: false
-    default: "true"
   use-github-cache:
     description: |
       Enable GitHub caching.
@@ -301,7 +294,7 @@ runs:
 
     - name: check environment with nanoda
       id: nanoda
-      if: ${{ inputs.nanoda == 'true' && (inputs.nanoda-on-main-only != 'true' || github.event_name == 'push') }}
+      if: ${{ inputs.nanoda == 'true' }}
       env:
         NANODA_ALLOW_SORRY: ${{ inputs.nanoda-allow-sorry }}
       run: |
