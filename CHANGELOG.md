@@ -9,12 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- new `test-args` input to specify arguments to pass to `lake test`
 - new `nanoda` input to check environment with [nanoda](https://github.com/ammkrn/nanoda_lib) external type checker
 - new `nanoda-allow-sorry` input to permit sorryAx axiom when running nanoda (default: true)
 - new `nanoda-on-main-only` input to run nanoda only on push to main branch (default: true)
 - new `nanoda-status` output parameter
 - new reusable workflow `nanoda-daily.yml` for scheduled daily verification with notifications
+
+## v1.4.0 - 2026-01-15
+
+### Added
+
+- new `test-args` input to specify arguments to pass to `lake test`
+
+### Fixed
+
+- fixed bug where elan installation failed but lean-action continued (#143)
 
 ## v1.3.0 - 2025-07-24
 

@@ -133,6 +133,14 @@ jobs:
       - uses: ./.github/functional_tests/subdirectory_lake_package
         with:
           toolchain: ${{ env.toolchain }}
+  
+  subdirectory-lake-package-lean-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/functional_tests/subdirectory_lake_package_lean_checker
+        with:
+          toolchain: ${{ env.toolchain }}
 
   reinstall-transient-toolchain:
     runs-on: ubuntu-latest
