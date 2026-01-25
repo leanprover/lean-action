@@ -5,9 +5,14 @@ set -e
 echo "::group::nanoda Output"
 echo "Checking environment with nanoda external type checker"
 
-# handle_exit function to capture exit status
+# handle_exit function to capture exit status and cleanup
 handle_exit() {
     exit_status=$?
+
+    # Always cleanup temporary files/directories
+    echo "Cleaning up temporary files..."
+    rm -rf _lean4export _nanoda_lib _nanoda_export.txt _nanoda_config.json
+
     if [ $exit_status -ne 0 ]; then
         echo "nanoda-status=FAILURE" >> "$GITHUB_OUTPUT"
         echo "::error::nanoda check failed"
@@ -114,10 +119,5 @@ cat "$CONFIG_FILE"
 echo ""
 echo "Running nanoda type checker..."
 _nanoda_lib/target/release/nanoda_bin "$CONFIG_FILE"
-
-# Cleanup temporary files
-echo ""
-echo "Cleaning up temporary files..."
-rm -rf _lean4export _nanoda_lib "$EXPORT_FILE" "$CONFIG_FILE"
 
 echo "nanoda check completed successfully"
