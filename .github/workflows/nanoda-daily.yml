@@ -87,7 +87,7 @@ jobs:
           EMOJI=$([[ "$STATUS" == "success" ]] && echo "✅" || echo "❌")
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          curl -X POST "$WEBHOOK_URL" \
+          curl --fail -X POST "$WEBHOOK_URL" \
             -H "Content-Type: application/json" \
             -d "{
               \"text\": \"$EMOJI nanoda daily verification: $STATUS\",
@@ -104,7 +104,7 @@ jobs:
         shell: bash
 
       - name: Validate Zulip configuration
-        if: inputs.notify == 'zulip'
+        if: always() && inputs.notify == 'zulip'
         env:
           ZULIP_ORG_URL: ${{ inputs.zulip-org-url }}
           ZULIP_API_KEY: ${{ secrets.zulip-api-key }}
