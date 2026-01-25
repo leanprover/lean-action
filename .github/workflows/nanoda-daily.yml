@@ -103,6 +103,21 @@ jobs:
             }"
         shell: bash
 
+      - name: Validate Zulip configuration
+        if: inputs.notify == 'zulip'
+        env:
+          ZULIP_ORG_URL: ${{ inputs.zulip-org-url }}
+          ZULIP_API_KEY: ${{ secrets.zulip-api-key }}
+        run: |
+          if [ -z "$ZULIP_ORG_URL" ]; then
+            echo "::error::zulip-org-url input is required when notify is set to 'zulip'"
+            exit 1
+          fi
+          if [ -z "$ZULIP_API_KEY" ]; then
+            echo "::error::zulip-api-key secret is required when notify is set to 'zulip'"
+            exit 1
+          fi
+
       - name: Send Zulip notification on success
         if: success() && inputs.notify == 'zulip'
         uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5
