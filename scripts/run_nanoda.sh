@@ -69,8 +69,8 @@ fi
 
 # Fallback to lakefile.lean
 if [ -z "$MODULE_NAME" ] && [ -f "lakefile.lean" ]; then
-    # Try to extract from 'package' declaration
-    MODULE_NAME=$(grep -E "^package\s+" lakefile.lean | head -1 | awk '{print $2}' || true)
+    # Try to extract from 'package' declaration (allowing leading whitespace)
+    MODULE_NAME=$(grep -E "^\s*package\s+" lakefile.lean | head -1 | awk '{print $2}' || true)
 fi
 
 if [ -z "$MODULE_NAME" ]; then
