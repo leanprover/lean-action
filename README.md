@@ -216,12 +216,6 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Default: "true"
     nanoda-allow-sorry: ""
 
-    # Only run nanoda on push events to the default branch, not on pull requests.
-    # Useful for reducing CI time on PRs since nanoda verification is slow.
-    # Allowed values: "true" | "false".
-    # Default: "true"
-    nanoda-on-main-only: ""
-
     # Enable GitHub caching.
     # Allowed values: "true" or "false".
     # If use-github-cache input is not provided, the action will use GitHub caching by default.
@@ -331,15 +325,6 @@ steps:
 - uses: leanprover/lean-action@v1
   with:
     nanoda: true
-```
-
-By default, nanoda only runs on push events to the main branch (not on PRs) because verification adds significant CI time. To run on all events:
-
-```yaml
-- uses: leanprover/lean-action@v1
-  with:
-    nanoda: true
-    nanoda-on-main-only: false
 ```
 
 ### Require no sorry placeholders
