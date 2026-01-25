@@ -32,9 +32,7 @@ fi
 
 # Step 2: Clone and build lean4export
 echo "Cloning and building lean4export..."
-# TODO: Once https://github.com/leanprover/lean4export/pull/11 is merged,
-# switch to leanprover/lean4export and remove the branch checkout.
-git clone --depth 1 --branch fix-nondep-normalization https://github.com/kim-em/lean4export.git _lean4export
+git clone --depth 1 https://github.com/leanprover/lean4export.git _lean4export
 
 # Copy lean-toolchain to lean4export so it uses matching Lean version
 cp lean-toolchain _lean4export/
