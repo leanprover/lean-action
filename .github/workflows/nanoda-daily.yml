@@ -104,7 +104,9 @@ jobs:
         shell: bash
 
       - name: Validate Zulip configuration
-        if: always() && inputs.notify == 'zulip'
+        id: validate-zulip
+        if: (success() || failure()) && inputs.notify == 'zulip'
+        continue-on-error: true
         env:
           ZULIP_ORG_URL: ${{ inputs.zulip-org-url }}
           ZULIP_API_KEY: ${{ secrets.zulip-api-key }}
@@ -119,7 +121,7 @@ jobs:
           fi
 
       - name: Send Zulip notification on success
-        if: success() && inputs.notify == 'zulip'
+        if: success() && inputs.notify == 'zulip' && steps.validate-zulip.outcome == 'success'
         uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5
         with:
           api-key: ${{ secrets.zulip-api-key }}
@@ -132,7 +134,7 @@ jobs:
             ✅ nanoda daily verification [succeeded](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) on `${{ github.sha }}`
 
       - name: Send Zulip notification on failure
-        if: failure() && inputs.notify == 'zulip'
+        if: steps.lean-action.outcome == 'failure' && inputs.notify == 'zulip' && steps.validate-zulip.outcome == 'success'
         uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5
         with:
           api-key: ${{ secrets.zulip-api-key }}
