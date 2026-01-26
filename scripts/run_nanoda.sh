@@ -9,6 +9,9 @@ echo "Checking environment with nanoda external type checker"
 handle_exit() {
     exit_status=$?
 
+    # Close the log group before cleanup
+    echo "::endgroup::"
+
     # Always cleanup temporary files/directories
     echo "Cleaning up temporary files..."
     rm -rf _lean4export _nanoda_lib _nanoda_export.txt _nanoda_config.json
@@ -18,11 +21,16 @@ handle_exit() {
         echo "::error::nanoda check failed"
     else
         echo "nanoda-status=SUCCESS" >> "$GITHUB_OUTPUT"
-        echo "::endgroup::"
         echo
     fi
 }
 trap handle_exit EXIT
+
+# Check for conflicting directories before we start
+if [ -d "_lean4export" ] || [ -d "_nanoda_lib" ]; then
+    echo "::error::Directories _lean4export or _nanoda_lib already exist. Please remove them before running nanoda."
+    exit 1
+fi
 
 # Step 1: Install Rust if not present
 echo "Checking for Rust installation..."
