@@ -233,7 +233,7 @@ runs:
       if: ${{ inputs.use-github-cache == 'true' }}
       with:
         path: ${{ inputs.lake-package-directory }}/.lake/${{ steps.get-gh-tarball-cache-path.outputs.tarball-file }}
-        key: ${{ steps.get-gh-tarball-cache-path.outputs.cache-key }}
+        key: ${{ steps.github-cache-restore.cache-key }}
 
     - name: test ${{ github.repository }}
       id: test
