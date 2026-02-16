@@ -229,6 +229,10 @@ runs:
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}
 
+    - name: save tarball to github cache
+      if: ${{ inputs.use-github-cache == 'true' }}
+      shell: bash
+      run: lake pack
     - uses: actions/cache/save@v4
       if: ${{ inputs.use-github-cache == 'true' }}
       with:
