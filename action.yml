@@ -198,7 +198,7 @@ runs:
 
     - name: get tarball path for github cache
       if: ${{ inputs.use-github-cache == 'true' }}
-      id: get_gh_tarball_cache_path
+      id: get-gh-tarball-cache-path
       run: |
         : Get GitHub Cache Tarball Path
         ${GITHUB_ACTION_PATH}/scripts/get_gh_tarball_cache_path.sh
@@ -209,7 +209,7 @@ runs:
       uses: actions/cache/restore@v4
       if: ${{ inputs.use-github-cache == 'true' }}
       with:
-        path: ${{ inputs.lake-package-directory }}/.lake/${{ steps.get_gh_tarball_cache_path.outputs.tarball-file }}
+        path: ${{ inputs.lake-package-directory }}/.lake/${{ steps.get-gh-tarball-cache-path.outputs.tarball-file }}
         key: lake-${{ runner.os }}-${{ runner.arch}}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
         restore-keys: |
           lake-${{ runner.os }}-${{ runner.arch}}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
@@ -232,8 +232,8 @@ runs:
     - uses: actions/cache/save@v4
       if: ${{ inputs.use-github-cache == 'true' }}
       with:
-        path: ${{ inputs.lake-package-directory }}/.lake/${{ steps.get_gh_tarball_cache_path.outputs.tarball-file }}
-        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+        path: ${{ inputs.lake-package-directory }}/.lake/${{ steps.get-gh-tarball-cache-path.outputs.tarball-file }}
+        key: ${{ steps.get-gh-tarball-cache-path.outputs.cache-key }}
 
     - name: test ${{ github.repository }}
       id: test
