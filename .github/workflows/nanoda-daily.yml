@@ -38,6 +38,10 @@ on:
         description: 'Zulip organization URL (required if using zulip notify)'
         type: string
         default: ''
+      zulip-bot-email:
+        description: 'Zulip bot email username (before the @ sign, default: github-bot)'
+        type: string
+        default: 'github-bot'
     secrets:
       webhook-url:
         description: 'Slack/Discord webhook URL (optional)'
@@ -125,7 +129,7 @@ jobs:
         uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5
         with:
           api-key: ${{ secrets.zulip-api-key }}
-          email: 'github-bot@${{ inputs.zulip-org-url }}'
+          email: '${{ inputs.zulip-bot-email }}@${{ inputs.zulip-org-url }}'
           organization-url: 'https://${{ inputs.zulip-org-url }}'
           to: ${{ inputs.zulip-stream }}
           type: 'stream'
@@ -138,7 +142,7 @@ jobs:
         uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5
         with:
           api-key: ${{ secrets.zulip-api-key }}
-          email: 'github-bot@${{ inputs.zulip-org-url }}'
+          email: '${{ inputs.zulip-bot-email }}@${{ inputs.zulip-org-url }}'
           organization-url: 'https://${{ inputs.zulip-org-url }}'
           to: ${{ inputs.zulip-stream }}
           type: 'stream'
