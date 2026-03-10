@@ -1,8 +1,10 @@
 name: Functional Tests
 
 on:
+  push:
+    branches: test-args
   pull_request:
-    branches: [main]
+    branches: main
     paths:
       - "scripts/**"
       - "action.yml"

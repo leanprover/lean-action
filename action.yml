@@ -225,6 +225,8 @@ runs:
     - name: test ${{ github.repository }}
       id: test
       if: ${{ steps.config.outputs.run-lake-test == 'true'}}
+      env:
+          TEST_ARGS: ${{ inputs.test-args }}
       run: |
         : Lake Test
         ${GITHUB_ACTION_PATH}/scripts/lake_test.sh
