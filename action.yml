@@ -174,7 +174,7 @@ runs:
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}
 
-    - uses: actions/cache/restore@v4
+    - uses: actions/cache/restore@v5
       if: ${{ inputs.use-github-cache == 'true' }}
       with:
         path: ${{ inputs.lake-package-directory }}/.lake
@@ -216,7 +216,7 @@ runs:
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}
 
-    - uses: actions/cache/save@v4
+    - uses: actions/cache/save@v5
       if: ${{ inputs.use-github-cache == 'true' }}
       with:
         path: ${{ inputs.lake-package-directory }}/.lake
