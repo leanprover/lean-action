@@ -8,7 +8,7 @@ description: |
     - lake test (optional)
     - lake exe runLinter (optional, must be downstream of Batteries)
     - check reservoir eligibility (optional)
-    - check environment with lean4checker (optional)
+    - check environment with leanchecker (optional)
 inputs:
   auto-config:
     description: |
@@ -75,11 +75,19 @@ inputs:
       Allowed values: "true" | "false".
     required: false
     default: "false"
+  leanchecker:
+    description: |
+      Check environment with leanchecker.
+      Uses the bundled `leanchecker` binary on Lean `nightly-2026-01-09` / `v4.28.0-rc1` and newer.
+      Falls back to building the external `lean4checker` repository on older Lean versions.
+      Allowed values: "true" | "false".
+    required: false
+    default: "false"
   lean4checker:
     description: |
-      Check environment with lean4checker.
-      Lean version must be 4.8 or higher.
-      The version of lean4checker is automatically detected using `lean-toolchain`.
+      Deprecated alias for `leanchecker`.
+      Uses the bundled `leanchecker` binary on Lean `nightly-2026-01-09` / `v4.28.0-rc1` and newer.
+      Falls back to building the external `lean4checker` repository on older Lean versions.
       Allowed values: "true" | "false".
     required: false
     default: "false"
@@ -253,10 +261,13 @@ runs:
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}
 
-    - name: check environment with lean4checker
-      if: ${{ inputs.lean4checker == 'true' }}
+    - name: check environment with leanchecker
+      if: ${{ inputs.leanchecker == 'true' || inputs.lean4checker == 'true' }}
+      env:
+        LEANCHECKER_INPUT: ${{ inputs.leanchecker }}
+        LEAN4CHECKER_INPUT: ${{ inputs.lean4checker }}
       run: |
-        : Check Environment with lean4checker
-        ${GITHUB_ACTION_PATH}/scripts/run_lean4checker.sh
+        : Check Environment with leanchecker
+        ${GITHUB_ACTION_PATH}/scripts/run_leanchecker.sh
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}
