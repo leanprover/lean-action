@@ -19,6 +19,7 @@ on:
 # because the workflow_dispatch input is not available when the workflow is triggered by a pull request
 env:
   toolchain: ${{ github.event.inputs.toolchain || 'leanprover/lean4:v4.26.0' }}
+  modern_toolchain: leanprover/lean4:v4.28.0
 
 jobs:
   lake-init-success:
@@ -61,6 +62,14 @@ jobs:
       - uses: ./.github/functional_tests/auto_config_false
         with:
           toolchain: ${{ env.toolchain }}
+
+  auto-config-false-modern-leanchecker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/functional_tests/auto_config_false
+        with:
+          toolchain: ${{ env.modern_toolchain }}
 
   lake-build-args:
     runs-on: ubuntu-latest
@@ -140,7 +149,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ./.github/functional_tests/subdirectory_lake_package_lean_checker
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ env.modern_toolchain }}
 
   reinstall-transient-toolchain:
     runs-on: ubuntu-latest
@@ -175,4 +184,3 @@ jobs:
         with:
           lake-init-arguments: "standalone"
           toolchain: ${{ env.toolchain }}
-

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- rename the `lean4checker` input to `leanchecker`, while keeping `lean4checker` as a deprecated alias
+- use the bundled `leanchecker` binary on Lean `nightly-2026-01-09` / `v4.28.0-rc1` and newer, with fallback to the external `lean4checker` repository on older toolchains
+
 ## v1.4.0 - 2026-01-15
 
 ### Added

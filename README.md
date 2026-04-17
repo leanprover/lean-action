@@ -89,7 +89,7 @@ If `lean-action` is unable to successfully run the step, `lean-action` will fail
 - `lint`
 - `mk_all-check`
 - `check-reservoir-eligibility`
-- `lean4checker`
+- `leanchecker`
 
 ### Automatic configuration
 
@@ -113,15 +113,15 @@ across multiple workflows with different triggers,
 e.g., one workflow for PRs and another workflow scheduled by a cron job.
 `auto-config: false` allows users to run only a specific subset of features of `lean-action`.
 
-For example, run only `lean4checker` in a cron job workflow:
+For example, run only `leanchecker` in a cron job workflow:
 
 ```yaml
-- name: "run `lean-action` with only `lean4checker: true`"
+- name: "run `lean-action` with only `leanchecker: true`"
   id: lean-action
   uses: leanprover/lean-action@v1
   with:
     auto-config: false
-    lean4checker: true
+    leanchecker: true
 ```
 
 ### Differences between using `auto-config` and feature inputs
@@ -195,11 +195,14 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Default: "false"
     check-reservoir-eligibility: ""
     
-    # Check environment with lean4checker.
-    # Lean version must be 4.8 or higher.
-    # The version of lean4checker is automatically detected using `lean-toolchain`.
+    # Check environment with leanchecker.
+    # Uses the bundled `leanchecker` binary on Lean `nightly-2026-01-09` / `v4.28.0-rc1`
+    # and newer, and falls back to the external `lean4checker` repository on older versions.
     # Allowed values: "true" | "false".
     # Default: "false"
+    leanchecker: ""
+
+    # Deprecated alias for `leanchecker`.
     lean4checker: ""
     
     # Enable GitHub caching.
