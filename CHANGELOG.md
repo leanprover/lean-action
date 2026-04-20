@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add a step to check all files in the default target's directory are imported in the main file by running `lake exe mk_all --check`. -   
+- Add a step to check all files in the default target's directory are imported in the main file by running `lake exe mk_all --check`. -
 - Add `mk_all-check` input to enable the mk_all step and `mk_all-status` to use the result.
 
 ## v1.2.0 - 2025-05-16
@@ -148,6 +148,6 @@ This input will enable users to use `lean-action` when Lake packages are contain
 
 - build packages with `lake build`
 - run tests with `lake test`
-- automatically detect `mathlib` dependency and run `lake exe get cache`
+- automatically detect `mathlib` dependency and run `lake exe cache get`
 - detect [Reservoir eligibility](https://reservoir.lean-lang.org/inclusion-criteria)
 - check for environment hacking with lean4checker
