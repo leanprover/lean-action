@@ -84,9 +84,11 @@ on:
         type: string
         required: false
         default: "false"
-      lean4checker:
+      leanchecker:
         description: |
-          Check environment with lean4checker.
+          Check environment with leanchecker.
+          Uses the bundled `leanchecker` binary on Lean `nightly-2026-01-09` / `v4.28.0-rc1` and newer.
+          Falls back to building the external `lean4checker` repository on older Lean versions.
           Allowed values: "true" | "false".
         type: string
         required: false
@@ -288,9 +290,9 @@ jobs:
         shell: bash
         working-directory: ${{ inputs.lake-package-directory }}
 
-  lean4checker:
+  leanchecker:
     needs: build
-    if: inputs.lean4checker == 'true'
+    if: inputs.leanchecker == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -309,10 +311,10 @@ jobs:
           key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}-${{ github.sha }}
           restore-keys: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/lean-toolchain', inputs.lake-package-directory)) }}-${{ hashFiles(format('{0}/lake-manifest.json', inputs.lake-package-directory)) }}
 
-      - name: lean4checker
+      - name: leanchecker
         run: |
-          : Check Environment with lean4checker
-          "${GITHUB_WORKSPACE}/scripts/run_lean4checker.sh"
+          : Check Environment with leanchecker
+          "${GITHUB_WORKSPACE}/scripts/run_leanchecker.sh"
         shell: bash
         working-directory: ${{ inputs.lake-package-directory }}
 
