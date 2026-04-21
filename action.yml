@@ -91,6 +91,21 @@ inputs:
       Allowed values: "true" | "false".
     required: false
     default: "false"
+  nanoda:
+    description: |
+      Check environment with nanoda external type checker.
+      nanoda is an independent Lean 4 type checker written in Rust.
+      Requires Rust toolchain (will be installed automatically if not present).
+      Allowed values: "true" | "false".
+    required: false
+    default: "false"
+  nanoda-allow-sorry:
+    description: |
+      When running nanoda, permit the sorryAx axiom.
+      Set to "false" if your project should have no sorry placeholders.
+      Allowed values: "true" | "false".
+    required: false
+    default: "true"
   use-github-cache:
     description: |
       Enable GitHub caching.
@@ -138,6 +153,11 @@ outputs:
       If lean-action detected a mathlib dependency equals "true"
       otherwise equals "false".
     value: ${{ steps.detect-mathlib.outputs.detected-mathlib }}
+  nanoda-status:
+    description: |
+      The status of the nanoda check step.
+      Allowed values: "SUCCESS" | "FAILURE" | "".
+    value: ${{ steps.nanoda.outputs.nanoda-status }}
 
 runs:
   using: "composite"
@@ -269,5 +289,16 @@ runs:
       run: |
         : Check Environment with leanchecker
         ${GITHUB_ACTION_PATH}/scripts/run_leanchecker.sh
+      shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
+
+    - name: check environment with nanoda
+      id: nanoda
+      if: ${{ inputs.nanoda == 'true' }}
+      env:
+        NANODA_ALLOW_SORRY: ${{ inputs.nanoda-allow-sorry }}
+      run: |
+        : Check Environment with nanoda
+        ${GITHUB_ACTION_PATH}/scripts/run_nanoda.sh
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}

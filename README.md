@@ -90,6 +90,7 @@ If `lean-action` is unable to successfully run the step, `lean-action` will fail
 - `mk_all-check`
 - `check-reservoir-eligibility`
 - `leanchecker`
+- `nanoda`
 
 ### Automatic configuration
 
@@ -136,6 +137,36 @@ However the same improperly configured `test_driver` may not cause a `lean-actio
 because `lean-action` may not detect the `test_driver` in the Lake workspace.
 
 To be certain `lean-action` runs a step, specify the desire feature with a feature input.
+
+## Parallel Workflow
+
+For faster CI, `lean-action` provides a reusable workflow that runs test, lint, leanchecker, nanoda, and reservoir checks in parallel on separate runners:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  ci:
+    uses: leanprover/lean-action/.github/workflows/ci.yml@v1
+    with:
+      test: "true"
+      lint: "true"
+      leanchecker: "true"
+      nanoda: "true"
+```
+
+The parallel workflow:
+- Runs a **build** job first (elan setup, config, mathlib cache, lake build)
+- Then runs **test**, **lint**, **leanchecker**, **nanoda**, and **reservoir** jobs in parallel
+- Each parallel job restores the build cache from the build job
+
+All inputs from the standard action are supported. The workflow outputs the same status parameters (`build-status`, `test-status`, `lint-status`, `mk_all-status`, `nanoda-status`).
 
 ## Customization
 
@@ -204,7 +235,20 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 
     # Deprecated alias for `leanchecker`.
     lean4checker: ""
-    
+
+    # Check environment with nanoda external type checker.
+    # nanoda is an independent Lean 4 type checker written in Rust.
+    # Requires Rust toolchain (will be installed automatically if not present).
+    # Allowed values: "true" | "false".
+    # Default: "false"
+    nanoda: ""
+
+    # When running nanoda, permit the sorryAx axiom.
+    # Set to "false" if your project should have no sorry placeholders.
+    # Allowed values: "true" | "false".
+    # Default: "true"
+    nanoda-allow-sorry: ""
+
     # Enable GitHub caching.
     # Allowed values: "true" or "false".
     # If use-github-cache input is not provided, the action will use GitHub caching by default.
@@ -237,6 +281,8 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 - `lint-status`
   - Values: "SUCCESS" | "FAILURE" | ""
 - `mk_all-status`
+  - Values: "SUCCESS" | "FAILURE" | ""
+- `nanoda-status`
   - Values: "SUCCESS" | "FAILURE" | ""
 
 Note, a value of empty string indicates `lean-action` did not run the corresponding feature.
@@ -300,6 +346,60 @@ steps:
     run: |
       lake exe graph
       rm import_graph.dot
+```
+
+## External Type Checking with nanoda
+
+[nanoda](https://github.com/ammkrn/nanoda_lib) is an independent Lean 4 type checker written in Rust. It provides additional assurance that your project's declarations are well-typed by verifying them with a completely separate implementation.
+
+### Enable nanoda verification
+
+```yaml
+- uses: leanprover/lean-action@v1
+  with:
+    nanoda: true
+```
+
+### Require no sorry placeholders
+
+By default, nanoda permits the `sorryAx` axiom for projects with incomplete proofs. To require all proofs be complete:
+
+```yaml
+- uses: leanprover/lean-action@v1
+  with:
+    nanoda: true
+    nanoda-allow-sorry: false
+```
+
+### Daily nanoda verification with notifications
+
+For daily verification runs with automatic failure notifications, use the reusable workflow:
+
+```yaml
+# .github/workflows/nanoda-daily.yml
+name: Daily nanoda verification
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    uses: leanprover/lean-action/.github/workflows/nanoda-daily.yml@v1
+    # Optional: configure notification method
+    # with:
+    #   notify: 'issue'  # default: creates GitHub issue on failure
+    # For webhook (Slack/Discord):
+    # with:
+    #   notify: 'webhook'
+    # secrets:
+    #   webhook-url: ${{ secrets.WEBHOOK_URL }}
+    # For Zulip:
+    # with:
+    #   notify: 'zulip'
+    #   zulip-org-url: 'leanprover.zulipchat.com'
+    # secrets:
+    #   zulip-api-key: ${{ secrets.ZULIP_API_KEY }}
 ```
 
 ## Projects which use `lean-action`

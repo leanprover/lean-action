@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- new parallel reusable workflow `.github/workflows/ci.yml` that runs test, lint, leanchecker, nanoda, and reservoir checks in parallel
+- new `nanoda` input to check environment with [nanoda](https://github.com/ammkrn/nanoda_lib) external type checker
+- new `nanoda-allow-sorry` input to permit sorryAx axiom when running nanoda (default: true)
+- new `nanoda-status` output parameter
+- new reusable workflow `nanoda-daily.yml` for scheduled daily verification with notifications
+
 ### Changed
 
 - rename the `lean4checker` input to `leanchecker`, while keeping `lean4checker` as a deprecated alias
