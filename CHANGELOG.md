@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- new `leanchecker-args` input to pass arguments to `lake env leanchecker`,
+  e.g. `leanchecker-args: "-v"` for verbose output or explicit module prefixes
+  such as `leanchecker-args: "MyPkg.Core"` to narrow the set of modules checked
+
 ## v1.5.0 - 2026-04-21
 
 ### Added

@@ -83,6 +83,16 @@ inputs:
       Allowed values: "true" | "false".
     required: false
     default: "false"
+  leanchecker-args:
+    description: |
+      Extra arguments to pass to `lake env leanchecker {leanchecker-args}`.
+      For example, `leanchecker-args: "-v"` enables verbose output, and
+      `leanchecker-args: "MyPkg.Core MyPkg.Extras"` restricts checking to the
+      listed module prefixes.
+      By default, `lean-action` calls `lake env leanchecker` with no arguments,
+      which checks every module in the root package.
+    required: false
+    default: ""
   lean4checker:
     description: |
       Deprecated alias for `leanchecker`.
@@ -286,6 +296,7 @@ runs:
       env:
         LEANCHECKER_INPUT: ${{ inputs.leanchecker }}
         LEAN4CHECKER_INPUT: ${{ inputs.lean4checker }}
+        LEANCHECKER_ARGS: ${{ inputs.leanchecker-args }}
       run: |
         : Check Environment with leanchecker
         ${GITHUB_ACTION_PATH}/scripts/run_leanchecker.sh

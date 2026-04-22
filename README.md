@@ -203,6 +203,13 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Default: "false"
     leanchecker: ""
 
+    # Extra arguments to pass to `lake env leanchecker {leanchecker-args}`.
+    # For example, `leanchecker-args: "-v"` enables verbose output, and
+    # `leanchecker-args: "MyPkg.Core MyPkg.Extras"` restricts checking to the
+    # listed module prefixes. Only takes effect when `leanchecker: true`.
+    # Default: ""
+    leanchecker-args: ""
+
     # Deprecated alias for `leanchecker`.
     lean4checker: ""
 
