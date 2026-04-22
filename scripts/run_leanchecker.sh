@@ -32,7 +32,11 @@ git checkout "$toolchain_version"
 cp ../lean-toolchain .
 
 lake build
-./test.sh
+if [ -f ./test.sh ]; then
+  ./test.sh
+else
+  lake test
+fi
 )
 
 echo "Running external lean4checker"
