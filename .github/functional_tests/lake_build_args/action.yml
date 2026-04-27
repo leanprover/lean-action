@@ -1,10 +1,10 @@
 name: 'Lake Build Args'
-description: 'Run `lean-action` on with `build-args` input'
+description: 'Run `lean-action` with `build-args` input and verify args are passed through'
 inputs:
   toolchain:
     description: 'Toolchain to use for the test'
     required: true
-runs: 
+runs:
   using: 'composite'
   steps:
     # TODO: once `lean-action` supports just setup, use it here
@@ -15,32 +15,69 @@ runs:
         echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       shell: bash
 
-    - name: create lake package with `lake init ${{ inputs.lake-init-arguments }}`
+    - name: create lake package with a warning-producing target
       run: |
         lake init buildargs .lean
         lake update
+        {
+          echo ""
+          echo "@[default_target]"
+          echo "lean_exe WarningExe"
+        } >> lakefile.lean
+        {
+          echo "#eval (do"
+          echo "  let buildArgs <- IO.getEnv \"BUILD_ARGS\""
+          echo "  let value := buildArgs.get!"
+          echo "  IO.FS.writeFile \"build_args_output.txt\" value : IO Unit)"
+          echo ""
+          echo "def incomplete : Nat := sorry"
+          echo "def main : IO Unit := pure ()"
+        } > WarningExe.lean
       shell: bash
 
-    - name: "run `lean-action` with build-args"
-      id: lean-action
+    - name: "run `lean-action` without build-args (should succeed despite warning)"
+      id: lean-action-no-args
       uses: ./
+      with:
+        use-github-cache: false
+
+    - name: verify `lean-action` outcome success without build-args
+      env:
+        OUTPUT_NAME: "lean-action-no-args.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action-no-args.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify `lake build` success without build-args
+      env:
+        OUTPUT_NAME: "build-status"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action-no-args.outputs.build-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: "run `lean-action` with build-args `--wfail` (should fail due to sorry warning)"
+      id: lean-action-wfail
+      uses: ./
+      continue-on-error: true
       with:
         build-args: "--wfail"
         use-github-cache: false
 
-    - name: verify `lean-action` outcome success
+    - name: verify `lean-action` outcome failure with --wfail
       env:
-        OUTPUT_NAME: "lean-action.outcome"
-        EXPECTED_VALUE: "success"
-        ACTUAL_VALUE: ${{ steps.lean-action.outcome }}
+        OUTPUT_NAME: "lean-action-wfail.outcome"
+        EXPECTED_VALUE: "failure"
+        ACTUAL_VALUE: ${{ steps.lean-action-wfail.outcome }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
 
-    - name: verify `lake build` success
+    - name: verify `lake build` failure with --wfail
       env:
         OUTPUT_NAME: "build-status"
-        EXPECTED_VALUE: "SUCCESS"
-        ACTUAL_VALUE: ${{ steps.lean-action.outputs.build-status }}
+        EXPECTED_VALUE: "FAILURE"
+        ACTUAL_VALUE: ${{ steps.lean-action-wfail.outputs.build-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
 
@@ -52,9 +89,9 @@ runs:
       id: lean-action-multiple-build-args
       uses: ./
       with:
-        build-args: "--log-level=warning --fail-level=warning"
+        build-args: "--log-level=warning --fail-level=error"
         use-github-cache: false
-    
+
     - name: verify `lean-action-multiple-build-args` outcome success
       env:
         OUTPUT_NAME: "lean-action-multiple-build-args.outcome"
@@ -63,10 +100,12 @@ runs:
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
 
-    - name: verify `lake build` success
+    - name: verify multiple build-args output
       env:
-        OUTPUT_NAME: "build-status"
-        EXPECTED_VALUE: "SUCCESS"
-        ACTUAL_VALUE: ${{ steps.lean-action-multiple-build-args.outputs.build-status }}
-      run: .github/functional_tests/test_helpers/verify_action_output.sh
+        OUTPUT_NAME: "build-args-output"
+        EXPECTED_VALUE: "--log-level=warning --fail-level=error"
+      run: |
+        ACTUAL_VALUE=$(cat build_args_output.txt)
+        export ACTUAL_VALUE
+        .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
