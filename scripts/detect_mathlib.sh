@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Group logging using the ::group:: workflow command
 echo "::group::Detect Mathlib Output"
