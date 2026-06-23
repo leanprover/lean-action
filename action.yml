@@ -125,8 +125,8 @@ inputs:
     default: "propext,Classical.choice,Quot.sound"
   axiom-audit-root:
     description: |
-      The root namespace `axiom-audit` should audit. If empty, the package name from the
-      lakefile is used.
+      The root namespace `axiom-audit` should audit. If empty, the tool auto-detects it from the
+      first `lean_lib` in the lakefile.
       Allowed values: a Lean namespace, or "" to auto-detect.
     required: false
     default: ""

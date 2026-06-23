@@ -173,7 +173,8 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ./.github/functional_tests/axiom_audit
         with:
-          toolchain: ${{ env.toolchain }}
+          # axiom-audit builds with the project's toolchain, so use a recent one.
+          toolchain: ${{ env.modern_toolchain }}
 
   macos-runner:
     runs-on: macos-latest
