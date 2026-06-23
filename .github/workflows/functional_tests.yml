@@ -167,6 +167,14 @@ jobs:
         with:
           toolchain: ${{ env.toolchain }}
 
+  axiom_audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/functional_tests/axiom_audit
+        with:
+          toolchain: ${{ env.toolchain }}
+
   macos-runner:
     runs-on: macos-latest
     steps:

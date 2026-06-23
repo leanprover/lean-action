@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- new `axiom-audit` input to audit the project's axioms with [axiom-audit](https://github.com/leanprover-community/axiom-audit): fail if any declaration depends on an axiom outside the allowlist (catches `sorry`, `native_decide`, and home-rolled axioms). Default: false
+- new `axiom-audit-allow` input for the allowlist (default: `propext,Classical.choice,Quot.sound`)
+- new `axiom-audit-root` input to set the audited root namespace (default: the lakefile's library name)
+- new `axiom-audit-status` output parameter
+
 ## v1.5.0 - 2026-04-21
 
 ### Added

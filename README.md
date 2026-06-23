@@ -219,6 +219,20 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Default: "true"
     nanoda-allow-sorry: ""
 
+    # Audit the project's axioms with leanprover-community/axiom-audit: fail if any declaration
+    # depends on an axiom outside the allowlist (catches sorry, native_decide, home-rolled axioms).
+    # Allowed values: "true" | "false".
+    # Default: "false"
+    axiom-audit: ""
+
+    # Comma-separated allowlist of axioms for axiom-audit (no spaces).
+    # Default: "propext,Classical.choice,Quot.sound"
+    axiom-audit-allow: ""
+
+    # The root namespace axiom-audit should audit. If empty, the lakefile's library name is used.
+    # Default: ""
+    axiom-audit-root: ""
+
     # Enable GitHub caching.
     # Allowed values: "true" or "false".
     # If use-github-cache input is not provided, the action will use GitHub caching by default.
@@ -253,6 +267,8 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 - `mk_all-status`
   - Values: "SUCCESS" | "FAILURE" | ""
 - `nanoda-status`
+  - Values: "SUCCESS" | "FAILURE" | ""
+- `axiom-audit-status`
   - Values: "SUCCESS" | "FAILURE" | ""
 
 Note, a value of empty string indicates `lean-action` did not run the corresponding feature.
@@ -316,6 +332,32 @@ steps:
     run: |
       lake exe graph
       rm import_graph.dot
+```
+
+## Axiom Allowlist Audit with axiom-audit
+
+[axiom-audit](https://github.com/leanprover-community/axiom-audit) checks that every declaration in your library depends only on an allowlist of axioms (by default `propext`, `Classical.choice`, `Quot.sound`). Because it inspects the compiled kernel environment, it catches what a `grep` cannot: `sorry`/`admit` (`sorryAx`), `native_decide` (`Lean.ofReduceBool`), and any home-rolled `axiom`, including ones reaching in through imports.
+
+The tool is cloned and built with your project's own toolchain, then run against your compiled environment, so it needs a recent enough Lean (see the axiom-audit README). It is opt-in (default off).
+
+### Enable the axiom audit
+
+```yaml
+- uses: leanprover/lean-action@v1
+  with:
+    axiom-audit: true
+```
+
+### Customize the allowlist or root namespace
+
+By default the audit runs over the lakefile's library namespace and allows `propext,Classical.choice,Quot.sound`. To change either:
+
+```yaml
+- uses: leanprover/lean-action@v1
+  with:
+    axiom-audit: true
+    axiom-audit-allow: "propext,Classical.choice,Quot.sound,sorryAx"  # e.g. tolerate sorry
+    axiom-audit-root: "MyLib"                                          # if it differs from the library name
 ```
 
 ## External Type Checking with nanoda

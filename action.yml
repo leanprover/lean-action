@@ -106,6 +106,30 @@ inputs:
       Allowed values: "true" | "false".
     required: false
     default: "true"
+  axiom-audit:
+    description: |
+      Audit the project's axioms with leanprover-community/axiom-audit: fail if any declaration
+      defined under the project's root namespace transitively depends on an axiom outside the
+      allowlist. Catches `sorry`/`admit` (`sorryAx`), `native_decide` (`Lean.ofReduceBool`), and
+      home-rolled axioms, including ones reaching in through imports. The tool is cloned and built
+      with the project's own toolchain (so it needs a recent enough Lean; see the axiom-audit
+      README), then run against the project's compiled environment.
+      Allowed values: "true" | "false".
+    required: false
+    default: "false"
+  axiom-audit-allow:
+    description: |
+      Comma-separated allowlist of axioms for `axiom-audit` (no spaces).
+      Allowed values: a comma-separated list of axiom names.
+    required: false
+    default: "propext,Classical.choice,Quot.sound"
+  axiom-audit-root:
+    description: |
+      The root namespace `axiom-audit` should audit. If empty, the package name from the
+      lakefile is used.
+      Allowed values: a Lean namespace, or "" to auto-detect.
+    required: false
+    default: ""
   use-github-cache:
     description: |
       Enable GitHub caching.
@@ -158,6 +182,11 @@ outputs:
       The status of the nanoda check step.
       Allowed values: "SUCCESS" | "FAILURE" | "".
     value: ${{ steps.nanoda.outputs.nanoda-status }}
+  axiom-audit-status:
+    description: |
+      The status of the axiom-audit check step.
+      Allowed values: "SUCCESS" | "FAILURE" | "".
+    value: ${{ steps.axiom-audit.outputs.axiom-audit-status }}
 
 runs:
   using: "composite"
@@ -300,5 +329,17 @@ runs:
       run: |
         : Check Environment with nanoda
         ${GITHUB_ACTION_PATH}/scripts/run_nanoda.sh
+      shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
+
+    - name: audit axioms with axiom-audit
+      id: axiom-audit
+      if: ${{ inputs.axiom-audit == 'true' }}
+      env:
+        AXIOM_AUDIT_ALLOW: ${{ inputs.axiom-audit-allow }}
+        AXIOM_AUDIT_ROOT: ${{ inputs.axiom-audit-root }}
+      run: |
+        : Audit axioms with axiom-audit
+        ${GITHUB_ACTION_PATH}/scripts/run_axiom_audit.sh
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}
