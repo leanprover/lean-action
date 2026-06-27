@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- include `lake-package-directory` when hashing `lean-toolchain` and `lake-manifest.json` for the GitHub cache key, so projects whose Lake package lives in a subdirectory get a version-specific key instead of an empty one (the empty key previously caused stale, cross-version cache restores)
+
 ## v1.5.0 - 2026-04-21
 
 ### Added
