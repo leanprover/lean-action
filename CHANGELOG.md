@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+- Fix nanoda module discovery for current Lake TOML packages by reading the
+  `lean_lib` name rather than assuming the package name is also a module.
+
 ## v1.5.0 - 2026-04-21
 
 ### Added

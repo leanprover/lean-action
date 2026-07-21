@@ -71,8 +71,16 @@ MODULE_NAME=""
 
 # Try lakefile.toml first
 if [ -f "lakefile.toml" ]; then
-    # Extract name from [package] section
-    MODULE_NAME=$(grep -A5 '^\[package\]' lakefile.toml | grep '^name' | head -1 | sed 's/.*= *"\([^"]*\)".*/\1/' || true)
+    # nanoda exports a Lean module, so prefer the first lean_lib name. This is
+    # distinct from the package name in current `lake init .toml` output.
+    MODULE_NAME=$(sed -n '/^[[:space:]]*\[\[lean_lib\]\][[:space:]]*$/,/^[[:space:]]*\[\[/p' lakefile.toml |
+        sed -n 's/^[[:space:]]*name[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' |
+        head -1 || true)
+    # Compatibility fallback for older files where package and module names
+    # coincide and no explicit lean_lib section is present.
+    if [ -z "$MODULE_NAME" ]; then
+        MODULE_NAME=$(sed -n 's/^[[:space:]]*name[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' lakefile.toml | head -1 || true)
+    fi
 fi
 
 # Fallback to lakefile.lean

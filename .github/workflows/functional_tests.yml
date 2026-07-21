@@ -167,6 +167,14 @@ jobs:
         with:
           toolchain: ${{ env.toolchain }}
 
+  nanoda-toml-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/functional_tests/nanoda_toml
+        with:
+          toolchain: ${{ env.modern_toolchain }}
+
   macos-runner:
     runs-on: macos-latest
     steps:
