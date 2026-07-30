@@ -13,13 +13,15 @@ on:
       toolchain:
         description: "The Lean toolchain to use when running the tests."
         required: false
-        default: "leanprover/lean4:v4.26.0"
+        default: "leanprover/lean4:v4.33.0-rc1"
 
 # This environment variable is necessary in addition to the workflow_dispatch input
 # because the workflow_dispatch input is not available when the workflow is triggered by a pull request
 env:
-  toolchain: ${{ github.event.inputs.toolchain || 'leanprover/lean4:v4.26.0' }}
-  modern_toolchain: leanprover/lean4:v4.28.0
+  toolchain: ${{ github.event.inputs.toolchain || 'leanprover/lean4:v4.33.0-rc1' }}
+  # Toolchain without the bundled `leanchecker` binary,
+  # used to cover the external `lean4checker` fallback path
+  legacy_toolchain: leanprover/lean4:v4.26.0
 
 jobs:
   lake-init-success:
@@ -63,13 +65,13 @@ jobs:
         with:
           toolchain: ${{ env.toolchain }}
 
-  auto-config-false-modern-leanchecker:
+  auto-config-false-legacy-leanchecker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/functional_tests/auto_config_false
         with:
-          toolchain: ${{ env.modern_toolchain }}
+          toolchain: ${{ env.legacy_toolchain }}
 
   lake-build-args:
     runs-on: ubuntu-latest
@@ -149,7 +151,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ./.github/functional_tests/subdirectory_lake_package_lean_checker
         with:
-          toolchain: ${{ env.modern_toolchain }}
+          toolchain: ${{ env.legacy_toolchain }}
 
   reinstall-transient-toolchain:
     runs-on: ubuntu-latest
