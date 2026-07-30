@@ -1,10 +1,10 @@
 name: 'Lake Test Args'
-description: 'Run `lean-action` on with `test-args` input'
+description: 'Run `lean-action` with `test-args` input and verify args are passed through'
 inputs:
   toolchain:
     description: 'Toolchain to use for the test'
     required: true
-runs: 
+runs:
   using: 'composite'
   steps:
     # TODO: once `lean-action` supports just setup, use it here
@@ -15,23 +15,24 @@ runs:
         echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       shell: bash
 
-    - name: create lake package with `lake init ${{ inputs.lake-init-arguments }}`
+    - name: create lake package
       run: |
         lake init buildargs .lean
         lake update
       shell: bash
 
-    - name: create successful dummy test
+    - name: create test that verifies TEST_ARGS is set
       run: |
         {
           echo "@[test_runner]"
           echo "script dummy_test do"
-          echo "  println! \"Running fake tests...\""
-          echo "  println! \"Fake tests passed!\""
-          echo "  return 0" 
+          echo "  let testArgs <- IO.getEnv \"TEST_ARGS\""
+          echo "  let value := testArgs.get!"
+          echo "  IO.FS.writeFile \"test_args_output.txt\" value"
+          echo "  return 0"
         } >> lakefile.lean
       shell: bash
-     
+
     - name: "run `lean-action` with test-args"
       id: lean-action
       uses: ./
@@ -48,12 +49,14 @@ runs:
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
 
-    - name: verify `lake test` success
+    - name: verify test-args output
       env:
-        OUTPUT_NAME: "test-status"
-        EXPECTED_VALUE: "SUCCESS"
-        ACTUAL_VALUE: ${{ steps.lean-action.outputs.test-status }}
-      run: .github/functional_tests/test_helpers/verify_action_output.sh
+        OUTPUT_NAME: "test-args-output"
+        EXPECTED_VALUE: "--wfail"
+      run: |
+        ACTUAL_VALUE=$(cat test_args_output.txt)
+        export ACTUAL_VALUE
+        .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
 
     - name: lake clean
@@ -67,7 +70,7 @@ runs:
         test: true
         test-args: "--log-level=warning --fail-level=warning"
         use-github-cache: false
-    
+
     - name: verify `lean-action-multiple-test-args` outcome success
       env:
         OUTPUT_NAME: "lean-action-multiple-test-args.outcome"
@@ -76,10 +79,12 @@ runs:
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
 
-    - name: verify `lake test` success
+    - name: verify multiple test-args output
       env:
-        OUTPUT_NAME: "test-status"
-        EXPECTED_VALUE: "SUCCESS"
-        ACTUAL_VALUE: ${{ steps.lean-action-multiple-test-args.outputs.build-status }}
-      run: .github/functional_tests/test_helpers/verify_action_output.sh
+        OUTPUT_NAME: "test-args-output"
+        EXPECTED_VALUE: "--log-level=warning --fail-level=warning"
+      run: |
+        ACTUAL_VALUE=$(cat test_args_output.txt)
+        export ACTUAL_VALUE
+        .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
