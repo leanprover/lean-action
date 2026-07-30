@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.5.0 - 2026-04-21
+
+### Added
+
+- new `nanoda` input to check environment with [nanoda](https://github.com/ammkrn/nanoda_lib) external type checker
+- new `nanoda-allow-sorry` input to permit sorryAx axiom when running nanoda (default: true)
+- new `nanoda-status` output parameter
+- new reusable workflow `nanoda-daily.yml` for scheduled daily verification with notifications
+
+### Changed
+
+- rename the `lean4checker` input to `leanchecker`, while keeping `lean4checker` as a deprecated alias
+- use the bundled `leanchecker` binary on Lean `nightly-2026-01-09` / `v4.28.0-rc1` and newer, with fallback to the external `lean4checker` repository on older toolchains
+
+### Fixed
+- fixed bug where callling `.test.sh` instead of `lake test` on lean4checker on Lean `v4.27.x` would cause a failure
+
 ## v1.4.0 - 2026-01-15
 
 ### Added
@@ -18,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add a step to check all files in the default target's directory are imported in the main file by running `lake exe mk_all --check`. -   
+- Add a step to check all files in the default target's directory are imported in the main file by running `lake exe mk_all --check`. -
 - Add `mk_all-check` input to enable the mk_all step and `mk_all-status` to use the result.
 
 ## v1.2.0 - 2025-05-16
@@ -143,6 +160,6 @@ This input will enable users to use `lean-action` when Lake packages are contain
 
 - build packages with `lake build`
 - run tests with `lake test`
-- automatically detect `mathlib` dependency and run `lake exe get cache`
+- automatically detect `mathlib` dependency and run `lake exe cache get`
 - detect [Reservoir eligibility](https://reservoir.lean-lang.org/inclusion-criteria)
 - check for environment hacking with lean4checker
