@@ -1,0 +1,82 @@
+# Nightly job which checks the latest Lean release (including release
+# candidates) and, if it is newer than the toolchain used by the functional
+# tests, opens a PR updating .github/workflows/functional_tests.yml.
+#
+# Note: PRs created with the default GITHUB_TOKEN do not trigger
+# `pull_request` workflows (so the functional tests will not run on the
+# generated PR automatically). Configure a `TOOLCHAIN_UPDATE_TOKEN`
+# repository secret (a PAT with `contents` and `pull-requests` write access)
+# to have CI run on the generated PR, or close and reopen the PR manually.
+
+name: Update Functional Test Toolchain
+
+on:
+  schedule:
+    # 02:00 UTC nightly
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-toolchain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check for a newer Lean release
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # List releases (prereleases included, drafts excluded) and pick the
+          # newest by version. Mapping `-` to `~` before `sort -V` makes
+          # release candidates order below the corresponding stable release
+          # (v4.33.0-rc1 < v4.33.0), so the rc -> stable transition is
+          # detected as an update.
+          latest=$(gh api repos/leanprover/lean4/releases \
+            --jq '.[] | select(.draft | not) | .tag_name' \
+            | tr -- '-' '~' | sort -V | tail -n 1 | tr -- '~' '-')
+          current=$(sed -n "s#.*|| 'leanprover/lean4:\(v[^']*\)'.*#\1#p" .github/workflows/functional_tests.yml)
+
+          if [ -z "$latest" ] || [ -z "$current" ]; then
+            echo "::error::failed to determine versions (latest='$latest', current='$current')"
+            exit 1
+          fi
+
+          echo "Latest stable release: $latest"
+          echo "Current functional test toolchain: $current"
+
+          newest=$(printf '%s\n%s\n' "$current" "$latest" | tr -- '-' '~' | sort -V | tail -n 1 | tr -- '~' '-')
+          if [ "$latest" != "$current" ] && [ "$newest" = "$latest" ]; then
+            echo "update=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Functional test toolchain is up to date."
+            echo "update=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+
+      - name: Update functional_tests.yml
+        if: steps.check.outputs.update == 'true'
+        env:
+          CURRENT: ${{ steps.check.outputs.current }}
+          LATEST: ${{ steps.check.outputs.latest }}
+        run: |
+          sed -i "s#leanprover/lean4:${CURRENT}#leanprover/lean4:${LATEST}#g" .github/workflows/functional_tests.yml
+
+      - name: Create pull request
+        if: steps.check.outputs.update == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.TOOLCHAIN_UPDATE_TOKEN || github.token }}
+          commit-message: "chore: update functional test toolchain to ${{ steps.check.outputs.latest }}"
+          title: "chore: update functional test toolchain to ${{ steps.check.outputs.latest }}"
+          body: |
+            Updates the functional test toolchain from `${{ steps.check.outputs.current }}` to [`${{ steps.check.outputs.latest }}`](https://github.com/leanprover/lean4/releases/tag/${{ steps.check.outputs.latest }}), the latest Lean release.
+
+            This PR was created automatically by the [Update Functional Test Toolchain](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) workflow.
+          branch: auto-update/functional-test-toolchain
+          delete-branch: true
