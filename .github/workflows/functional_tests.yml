@@ -13,12 +13,12 @@ on:
       toolchain:
         description: "The Lean toolchain to use when running the tests."
         required: false
-        default: "leanprover/lean4:v4.33.0-rc1"
+        default: "leanprover/lean4:v4.32.2"
 
 # This environment variable is necessary in addition to the workflow_dispatch input
 # because the workflow_dispatch input is not available when the workflow is triggered by a pull request
 env:
-  toolchain: ${{ github.event.inputs.toolchain || 'leanprover/lean4:v4.33.0-rc1' }}
+  toolchain: ${{ github.event.inputs.toolchain || 'leanprover/lean4:v4.32.2' }}
   # Toolchain without the bundled `leanchecker` binary,
   # used to cover the external `lean4checker` fallback path
   legacy_toolchain: leanprover/lean4:v4.26.0
