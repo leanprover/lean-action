@@ -60,10 +60,10 @@ runs:
       env:
         OUTPUT_NAME: "lint-status"
         EXPECTED_VALUE: ""
-        ACTUAL_VALUE: ${{ steps.lean-action.outputs.test-status }}
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.lint-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
-      
+
     - name: "run `lean-action` with `auto-config: false` and `leanchecker: true`"
       id: lean-action-leanchecker
       uses: ./
@@ -101,6 +101,6 @@ runs:
       env:
         OUTPUT_NAME: "lint-status"
         EXPECTED_VALUE: ""
-        ACTUAL_VALUE: ${{ steps.lean-action-leanchecker.outputs.test-status }}
+        ACTUAL_VALUE: ${{ steps.lean-action-leanchecker.outputs.lint-status }}
       run: .github/functional_tests/test_helpers/verify_action_output.sh
       shell: bash
