@@ -69,7 +69,7 @@ jobs:
 
       - name: Create pull request
         if: steps.check.outputs.update == 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.TOOLCHAIN_UPDATE_TOKEN || github.token }}
           commit-message: "chore: update functional test toolchain to ${{ steps.check.outputs.latest }}"
