@@ -122,7 +122,7 @@ jobs:
 
       - name: Send Zulip notification on success
         if: success() && inputs.notify == 'zulip' && steps.validate-zulip.outcome == 'success'
-        uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5
+        uses: zulip/github-actions-zulip/send-message@f675f2b4eb2a95fae974215476dcb7ad8dfeff6b
         with:
           api-key: ${{ secrets.zulip-api-key }}
           email: 'github-bot@${{ inputs.zulip-org-url }}'
@@ -135,7 +135,7 @@ jobs:
 
       - name: Send Zulip notification on failure
         if: steps.lean-action.outcome == 'failure' && inputs.notify == 'zulip' && steps.validate-zulip.outcome == 'success'
-        uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5
+        uses: zulip/github-actions-zulip/send-message@f675f2b4eb2a95fae974215476dcb7ad8dfeff6b
         with:
           api-key: ${{ secrets.zulip-api-key }}
           email: 'github-bot@${{ inputs.zulip-org-url }}'
