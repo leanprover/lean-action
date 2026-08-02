@@ -1,6 +1,11 @@
 # Nightly job which checks the latest Lean release (including release
 # candidates) and, if it is newer than the toolchain used by the functional
-# tests, opens a PR updating .github/workflows/functional_tests.yml.
+# tests, opens a PR updating .github/functional_test_toolchain.
+#
+# The toolchain is pinned in its own file rather than in
+# .github/workflows/functional_tests.yml because pushing a change to any file
+# under .github/workflows/ requires a token with the `workflows` permission,
+# which the default GITHUB_TOKEN cannot be granted.
 #
 # Note: PRs created with the default GITHUB_TOKEN do not trigger
 # `pull_request` workflows (so the functional tests will not run on the
@@ -39,7 +44,7 @@ jobs:
           latest=$(gh api repos/leanprover/lean4/releases \
             --jq '.[] | select(.draft | not) | .tag_name' \
             | tr -- '-' '~' | sort -V | tail -n 1 | tr -- '~' '-')
-          current=$(sed -n "s#.*|| 'leanprover/lean4:\(v[^']*\)'.*#\1#p" .github/workflows/functional_tests.yml)
+          current=$(sed -n 's#^leanprover/lean4:\(v.*\)$#\1#p' .github/functional_test_toolchain)
 
           if [ -z "$latest" ] || [ -z "$current" ]; then
             echo "::error::failed to determine versions (latest='$latest', current='$current')"
@@ -59,13 +64,12 @@ jobs:
           echo "latest=$latest" >> "$GITHUB_OUTPUT"
           echo "current=$current" >> "$GITHUB_OUTPUT"
 
-      - name: Update functional_tests.yml
+      - name: Update the pinned functional test toolchain
         if: steps.check.outputs.update == 'true'
         env:
-          CURRENT: ${{ steps.check.outputs.current }}
           LATEST: ${{ steps.check.outputs.latest }}
         run: |
-          sed -i "s#leanprover/lean4:${CURRENT}#leanprover/lean4:${LATEST}#g" .github/workflows/functional_tests.yml
+          echo "leanprover/lean4:${LATEST}" > .github/functional_test_toolchain
 
       - name: Create pull request
         if: steps.check.outputs.update == 'true'

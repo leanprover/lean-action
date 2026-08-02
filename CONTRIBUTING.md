@@ -45,8 +45,12 @@ Here are the steps to create a new test:
 
 ### Running functional tests with a specific Lean toolchain
 When triggered by a pull request,
-the `functional_tests.yml` workflow uses the Lean toolchain defined in the `toolchain` environment variable
-at the top of the `functional_tests.yml`  workflow file.
+the `functional_tests.yml` workflow uses the Lean toolchain pinned in the
+`.github/functional_test_toolchain` file.
+The toolchain lives in its own file rather than in the workflow
+so that the `update_functional_test_toolchain.yml` workflow can bump it automatically;
+pushing changes to files under `.github/workflows/` requires a token with the `workflows` permission,
+which the default `GITHUB_TOKEN` cannot be granted.
 
 When `functional_tests.yml` is triggered by a manual workflow dispatch,
 users can specify the Lean toolchain as seen in the below screenshot.
