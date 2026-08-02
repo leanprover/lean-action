@@ -207,6 +207,15 @@ jobs:
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
+  axiom_audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/functional_tests/axiom_audit
+        with:
+          # axiom-audit builds with the project's toolchain, so use a recent one.
+          toolchain: ${{ env.toolchain }}
+
   macos-runner:
     needs: resolve-toolchain
     runs-on: macos-latest
