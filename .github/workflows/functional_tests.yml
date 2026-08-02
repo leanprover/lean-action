@@ -31,7 +31,7 @@ jobs:
     outputs:
       toolchain: ${{ steps.resolve.outputs.toolchain }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Resolve the functional test toolchain
         id: resolve
         env:
@@ -59,7 +59,7 @@ jobs:
         # see ./github/functional_tests/lake_init/action.yml for more details on lake-init-arguments
         lake-init-arguments: ["standalone", "mathdep math", "tomltest .toml"]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_init_success
         with:
           lake-init-arguments: ${{ matrix.lake-init-arguments}}
@@ -69,7 +69,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_init_failure
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -78,7 +78,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/auto_config_true
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -87,7 +87,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/auto_config_false
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -95,7 +95,7 @@ jobs:
   auto-config-false-legacy-leanchecker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/auto_config_false
         with:
           toolchain: ${{ env.legacy_toolchain }}
@@ -104,7 +104,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_build_args
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -113,7 +113,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_test_args
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -122,7 +122,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/mathlib_dependency
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -131,7 +131,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_test_success
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -140,7 +140,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_test_failure
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -149,7 +149,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_lint_success
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -158,7 +158,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_lint_failure
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -167,7 +167,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_check_test_failure
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -176,7 +176,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/subdirectory_lake_package
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -184,7 +184,7 @@ jobs:
   subdirectory-lake-package-lean-checker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/subdirectory_lake_package_lean_checker
         with:
           toolchain: ${{ env.legacy_toolchain }}
@@ -193,7 +193,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/reinstall-transient-toolchain
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -202,7 +202,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/mk_all-check
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
@@ -211,7 +211,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_init_success
         with:
           lake-init-arguments: "standalone"
@@ -221,7 +221,7 @@ jobs:
     needs: resolve-toolchain
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_init_success
         with:
           lake-init-arguments: "standalone"
