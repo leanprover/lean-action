@@ -163,6 +163,14 @@ jobs:
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
+  lake-lint-args:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/functional_tests/lake_lint_args
+        with:
+          toolchain: ${{ env.toolchain }}
+
   lake-check-test-failure:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
