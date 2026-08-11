@@ -1,0 +1,98 @@
+name: 'Nanoda Modules Test'
+description: |
+  Run `lean-action` with `nanoda: true` and an explicit `nanoda-modules` input
+inputs:
+  toolchain:
+    description: 'Toolchain to use for the test'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    # TODO: once `lean-action` supports just setup, use it here
+    - name: install elan
+      run: |
+        set -o pipefail
+        curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain ${{ inputs.toolchain }}
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: create lake package
+      run: |
+        lake init NanodaModulesTest .lean
+        lake update
+      shell: bash
+
+    # Prepare two modules to be checked by nanoda
+    # Add to `lakefile.lean` to get build by `lake build`
+    - name: add extra modules for the nanoda-modules input
+      run: |
+        {
+          echo ""
+          echo "@[default_target]"
+          echo "lean_lib «ModuleA» where"
+          echo ""
+          echo "@[default_target]"
+          echo "lean_lib «ModuleB» where"
+        } >> lakefile.lean
+        echo "def moduleAHello := \"moduleA\"" > ModuleA.lean
+        echo "def moduleBHello := \"moduleB\"" > ModuleB.lean
+      shell: bash
+
+    # Positive test: Specify `nanoda-modules` with two modules
+    # whose names do not match the package name.
+    # Expected outcome: success
+    - name: "run `lean-action` with a valid nanoda-modules list"
+      id: lean-action
+      uses: ./
+      with:
+        nanoda: true
+        nanoda-modules: "ModuleA ModuleB"
+        nanoda-allow-sorry: false
+        use-github-cache: false
+
+    - name: verify `lean-action` outcome success
+      env:
+        OUTPUT_NAME: "lean-action.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify `nanoda` success
+      env:
+        OUTPUT_NAME: "nanoda-status"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action.outputs.nanoda-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    # Negative test: Add a non-existent module to `nanoda-modules` input
+    # Expected outcome: failure
+    # The success would mean a regression:
+    # - `nanoda-modules` was ingored and package name used instead, or
+    # - only first/last element of `nanoda-modules` was used
+    - name: "run `lean-action` with a nanoda-modules list containing an missing module"
+      id: lean-action-missing-module
+      uses: ./
+      continue-on-error: true # required so that the action does not fail the workflow
+      with:
+        nanoda: true
+        nanoda-modules: "ModuleA MissingModule ModuleB"
+        nanoda-allow-sorry: false
+        use-github-cache: false
+
+    - name: verify `lean-action` outcome failure
+      env:
+        OUTPUT_NAME: "lean-action-missing-module.outcome"
+        EXPECTED_VALUE: "failure"
+        ACTUAL_VALUE: ${{ steps.lean-action-missing-module.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify `nanoda` failure
+      env:
+        OUTPUT_NAME: "nanoda-status"
+        EXPECTED_VALUE: "FAILURE"
+        ACTUAL_VALUE: ${{ steps.lean-action-missing-module.outputs.nanoda-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash

@@ -106,6 +106,13 @@ inputs:
       Allowed values: "true" | "false".
     required: false
     default: "true"
+  nanoda-modules:
+    description: |
+      The module(s) nanoda will check, given as a whitespace-separated list of
+      Lean module names. If not provided, the package name declared in `lakefile.toml`
+      or `lakefile.lean` will be used as input.
+    required: false
+    default: ""
   use-github-cache:
     description: |
       Enable GitHub caching.
@@ -299,6 +306,7 @@ runs:
       if: ${{ inputs.nanoda == 'true' }}
       env:
         NANODA_ALLOW_SORRY: ${{ inputs.nanoda-allow-sorry }}
+        NANODA_MODULES: ${{ inputs.nanoda-modules }}
       run: |
         : Check Environment with nanoda
         ${GITHUB_ACTION_PATH}/scripts/run_nanoda.sh

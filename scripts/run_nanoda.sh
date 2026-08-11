@@ -65,33 +65,45 @@ git clone --depth 1 --branch debug https://github.com/ammkrn/nanoda_lib.git _nan
     cargo build --release
 )
 
-# Step 4: Detect module name from lakefile
-echo "Detecting module name..."
-MODULE_NAME=""
+# Step 4: Determine which modules to check
+# Check for the `nanoda-modules` input first
+set -f # disable globbing (wildcard expansion) in `NANODA_MODULES`
+# shellcheck disable=SC2206 # word splitting on whitespace is intended here
+MODULES=( ${NANODA_MODULES:-} )
+set +f
 
-# Try lakefile.toml first
-if [ -f "lakefile.toml" ]; then
-    # Extract name from [package] section
-    MODULE_NAME=$(grep -A5 '^\[package\]' lakefile.toml | grep '^name' | head -1 | sed 's/.*= *"\([^"]*\)".*/\1/' || true)
+if [ ${#MODULES[@]} -gt 0 ]; then
+    echo "Using modules from the nanoda-modules input: ${MODULES[*]}"
+else
+    # Fall back to the package name declared in the lakefile
+    echo "Detecting module name..."
+    MODULE_NAME=""
+
+    # Try lakefile.toml first
+    if [ -f "lakefile.toml" ]; then
+        # Extract name from [package] section
+        MODULE_NAME=$(grep -A5 '^\[package\]' lakefile.toml | grep '^name' | head -1 | sed 's/.*= *"\([^"]*\)".*/\1/' || true)
+    fi
+
+    # Fallback to lakefile.lean
+    if [ -z "$MODULE_NAME" ] && [ -f "lakefile.lean" ]; then
+        # Try to extract from 'package' declaration (allowing leading whitespace)
+        MODULE_NAME=$(grep -E "^\s*package\s+" lakefile.lean | head -1 | awk '{print $2}' || true)
+    fi
+
+    if [ -z "$MODULE_NAME" ]; then
+        echo "::error::Could not detect module name from lakefile.toml or lakefile.lean"
+        exit 1
+    fi
+
+    echo "Detected module name: $MODULE_NAME"
+    MODULES=("$MODULE_NAME")
 fi
-
-# Fallback to lakefile.lean
-if [ -z "$MODULE_NAME" ] && [ -f "lakefile.lean" ]; then
-    # Try to extract from 'package' declaration (allowing leading whitespace)
-    MODULE_NAME=$(grep -E "^\s*package\s+" lakefile.lean | head -1 | awk '{print $2}' || true)
-fi
-
-if [ -z "$MODULE_NAME" ]; then
-    echo "::error::Could not detect module name from lakefile.toml or lakefile.lean"
-    exit 1
-fi
-
-echo "Detected module name: $MODULE_NAME"
 
 # Step 5: Export the project
-echo "Exporting $MODULE_NAME..."
+echo "Exporting ${MODULES[*]}..."
 EXPORT_FILE="_nanoda_export.txt"
-lake env _lean4export/.lake/build/bin/lean4export "$MODULE_NAME" > "$EXPORT_FILE"
+lake env _lean4export/.lake/build/bin/lean4export "${MODULES[@]}" > "$EXPORT_FILE"
 
 echo "Export file size: $(wc -c < "$EXPORT_FILE") bytes"
 echo "Export file lines: $(wc -l < "$EXPORT_FILE") lines"
