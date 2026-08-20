@@ -1,0 +1,146 @@
+# Automates the lean-action release process described in RELEASING.md.
+#
+# Dispatch this workflow with the new version number (e.g. v1.5.1) on the ref
+# to release, usually `main`. It validates the version, runs the functional
+# tests, creates the GitHub release and git tag, moves the major version tag,
+# and opens a PR stamping CHANGELOG.md (and README.md for a major release).
+#
+# Note: PRs created with the default GITHUB_TOKEN do not trigger
+# `pull_request` workflows. Configure a `TOOLCHAIN_UPDATE_TOKEN` repository
+# secret (a PAT with `contents` and `pull-requests` write access) to have CI
+# run on the generated PR, or close and reopen the PR manually.
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version to release, e.g. v1.5.1"
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Prevent two releases from running at the same time.
+concurrency: release
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      major: ${{ steps.validate.outputs.major }}
+      new-major: ${{ steps.validate.outputs.new-major }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Validate the release version
+        id: validate
+        env:
+          version: ${{ inputs.version }}
+        run: |
+          if ! echo "$version" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::version '$version' is not of the form vMAJOR.MINOR.PATCH"
+            exit 1
+          fi
+
+          if git ls-remote --exit-code origin "refs/tags/$version" > /dev/null; then
+            echo "::error::tag '$version' already exists"
+            exit 1
+          fi
+
+          major="${version%%.*}"
+          echo "major=$major" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code origin "refs/tags/$major" > /dev/null; then
+            echo "new-major=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new-major=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check the Unreleased section of CHANGELOG.md is not empty
+        run: |
+          awk '/^## Unreleased/{flag=1; next} /^## /{exit} flag' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          if ! grep -q '[^[:space:]]' "$RUNNER_TEMP/notes.md"; then
+            echo "::error::the Unreleased section of CHANGELOG.md is empty"
+            exit 1
+          fi
+
+  functional-tests:
+    needs: validate
+    uses: ./.github/workflows/functional_tests.yml
+
+  release:
+    needs: [validate, functional-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          version: ${{ inputs.version }}
+        run: |
+          awk '/^## Unreleased/{flag=1; next} /^## /{exit} flag' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          gh release create "$version" \
+            --target "$GITHUB_SHA" \
+            --title "$version" \
+            --notes-file "$RUNNER_TEMP/notes.md"
+
+      - name: Move the major version tag
+        env:
+          major: ${{ needs.validate.outputs.major }}
+        run: |
+          git tag --force "$major" "$GITHUB_SHA"
+          git push --force origin "refs/tags/$major"
+
+      - name: Write the release announcement to the workflow summary
+        env:
+          version: ${{ inputs.version }}
+        run: |
+          {
+            echo "## Release announcement"
+            echo ""
+            echo "Post the following in the \`general/lean-action\` Zulip topic:"
+            echo ""
+            echo '```'
+            echo "lean-action $version has been released: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/$version"
+            echo ""
+            cat "$RUNNER_TEMP/notes.md"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  changelog-pr:
+    needs: [validate, release]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Stamp CHANGELOG.md with the release version and date
+        env:
+          version: ${{ inputs.version }}
+        run: |
+          sed -i "s/^## Unreleased$/## Unreleased\n\n## $version - $(date +%Y-%m-%d)/" CHANGELOG.md
+
+      - name: Update the major version in README.md
+        # Only needed for a major release, where README examples still
+        # reference the previous major version tag.
+        if: needs.validate.outputs.new-major == 'true'
+        env:
+          major: ${{ needs.validate.outputs.major }}
+        run: |
+          previous_major="v$(( ${major#v} - 1 ))"
+          sed -i "s#leanprover/lean-action@$previous_major#leanprover/lean-action@$major#g" README.md
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.TOOLCHAIN_UPDATE_TOKEN || github.token }}
+          commit-message: "chore: finalize ${{ inputs.version }} release"
+          title: "chore: finalize ${{ inputs.version }} release"
+          body: |
+            Stamps `CHANGELOG.md` with the [`${{ inputs.version }}`](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ inputs.version }}) release.
+
+            This PR was created automatically by the [Release](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) workflow.
+          branch: auto-update/release-${{ inputs.version }}
+          delete-branch: true

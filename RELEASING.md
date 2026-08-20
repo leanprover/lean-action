@@ -11,23 +11,24 @@ A major version tag is maintained for each version which points to the latest ve
 For more information about releasing GitHub actions see the [Using tags for release management](https://docs.github.com/en/actions/creating-actions/about-custom-actions#using-tags-for-release-management) section of the GitHub custom actions documentation.
 
 ## Creating a release
-To create a release create an issue title `{RELEASE_VERSION} release`
-with the `.github/issue_templates/release_template.md` template
-and the `release` GitHub issue label.
-Follow the steps in the issue template.
+Releases are automated by the `Release` workflow (`.github/workflows/release.yml`).
 
-Here is an outline of the release process. There are more details in the release issue template.
-- Create a `release/v{RELEASE_VERSION}` branch (e.g. `release/v2.7.1`).
-    - Run the `functional_test.yml` workflow on `release/lean-action@v{RELEASE_VERSION}`.
-    - Make any minor commits related to the release on the release branch.
-- Once the release has been validated, create a new release with release notes copied from the `## Unreleased` section of `CHANGELOG.md` and a git tag `v{RELEASE_VERSION}` (e.g `v2.7.1`).
-- In the case of a minor or patch version, move the major version tag to the latest version
-- Update `CHANGELOG.md` with a new section with the release name and date directly below the `## Unreleased` header, e.g., `## v2.7.1 - 2024-12-21` .
-    - If you made updates to the release notes in the GitHub release, add them to `CHANGELOG.md`.
-- If there are additional commits on the release branch, merge the release branch back into `main`.
-- Make an announcement to the Lean community.
+To create a release, run the `Release` workflow on the ref to release (usually `main`)
+with the new version number (e.g. `v2.7.1`) as input.
+
+The workflow:
+- Validates the version number and checks the `## Unreleased` section of `CHANGELOG.md` is not empty.
+- Runs the functional tests on the release ref and blocks the release if they fail.
+- Creates a GitHub release and a `v{RELEASE_VERSION}` git tag with release notes taken from the `## Unreleased` section of `CHANGELOG.md`.
+- Moves the major version tag (e.g. `v2`) to the new release, creating it first for a major release.
+- Opens a PR which stamps `CHANGELOG.md` with the release version and date and, for a major release, updates the `leanprover/lean-action@v{MAJOR_VERSION}` references in `README.md`.
+- Writes a release announcement to the workflow run summary.
+
+After the workflow completes:
+- Merge the PR opened by the workflow.
+- Post the release announcement from the workflow run summary in the `general/lean-action` Zulip topic.
+
+In the rare case a release needs commits which are not on `main` (e.g. a patch release which cherry-picks a fix), create a `release/v{RELEASE_VERSION}` branch, push the commits there, run the `Release` workflow on that branch, and merge the branch back into `main` afterwards.
 
 ## Special notes for major releases
-- Replace all instances of `leanprover/leanaction@{PREVIOUS_MAJOR_RELEASE_VERSION}` in `README.md` with `leanprover/lean-action@{NEW_MAJOR_RELEASE_VERSION}`.
-    - Quickly do this with `sed -i 's/leanprover\/lean-action@v2/leanprover\/lean-action@v3/g' README.md` if releasing `v3`.
-- Clearly outline in the `README.md` and in communication to the Lean community what the migration strategy is to the new version if it is more involved than bumping the version number in `uses: leanprover/leanaction@v{VERSION}`.
+- Clearly outline in the `README.md` and in communication to the Lean community what the migration strategy is to the new version if it is more involved than bumping the version number in `uses: leanprover/lean-action@v{VERSION}`.
