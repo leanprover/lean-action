@@ -1,0 +1,135 @@
+name: 'Lake Lint Args'
+description: 'Run `lean-action` on with `lint-args` input'
+inputs:
+  toolchain:
+    description: 'Toolchain to use for the test'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    # TODO: once `lean-action` supports just setup, use it here
+    - name: install elan
+      run: |
+        set -o pipefail
+        curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain ${{ inputs.toolchain }}
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: create lake package with `lake init ${{ inputs.lake-init-arguments }}`
+      run: |
+        lake init lintargs .lean
+        lake update
+      shell: bash
+
+    - name: create lint script template
+      run: |
+        cp lakefile.lean lint_script.template
+        cat <<'TEMPLATE' >> lint_script.template
+        @[lint_driver]
+        script check_lint_args (args) do
+          let expected := @EXPECTED_ARGS@
+          if args == expected then
+            IO.println s!"✓ Arguments match expected: {expected}"
+            return 0
+          else
+            IO.eprintln s!"✗ Arguments mismatch!"
+            IO.eprintln s!"  Expected: {expected}"
+            IO.eprintln s!"  Got:      {args}"
+            return 1
+        TEMPLATE
+      shell: bash
+
+    - name: configure script for single driver argument test
+      run: |
+        sed 's/@EXPECTED_ARGS@/["test-arg"]/' lint_script.template > lakefile.lean
+      shell: bash
+
+    - name: "run `lean-action` with single lint-arg passed to driver"
+      id: lean-action-single
+      uses: ./
+      with:
+        lint: true
+        lint-args: "-- test-arg"
+        use-github-cache: false
+
+    - name: verify `lean-action` outcome success
+      env:
+        OUTPUT_NAME: "lean-action-single.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action-single.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify single argument was passed correctly
+      env:
+        OUTPUT_NAME: "lint-status (single arg)"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action-single.outputs.lint-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: lake clean
+      run: lake clean
+      shell: bash
+
+    - name: configure script for multiple driver arguments test
+      run: |
+        sed 's/@EXPECTED_ARGS@/["arg1", "arg2", "arg3"]/' lint_script.template > lakefile.lean
+      shell: bash
+
+    - name: "run `lean-action` with multiple lint args passed to driver"
+      id: lean-action-multiple
+      uses: ./
+      with:
+        lint: true
+        lint-args: "-- arg1 arg2 arg3"
+        use-github-cache: false
+
+    - name: verify `lean-action-multiple` outcome success
+      env:
+        OUTPUT_NAME: "lean-action-multiple.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action-multiple.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify multiple arguments were passed correctly
+      env:
+        OUTPUT_NAME: "lint-status (multiple args)"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action-multiple.outputs.lint-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: lake clean
+      run: lake clean
+      shell: bash
+
+    - name: configure script for empty args test (lake flags)
+      run: |
+        sed 's/@EXPECTED_ARGS@/([] : List String)/' lint_script.template > lakefile.lean
+      shell: bash
+
+    - name: "run `lean-action` with lake flags (not driver args)"
+      id: lean-action-flags
+      uses: ./
+      with:
+        lint: true
+        lint-args: "--quiet"
+        use-github-cache: false
+
+    - name: verify `lean-action-flags` outcome success
+      env:
+        OUTPUT_NAME: "lean-action-flags.outcome"
+        EXPECTED_VALUE: "success"
+        ACTUAL_VALUE: ${{ steps.lean-action-flags.outcome }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: verify lake flag was passed correctly
+      env:
+        OUTPUT_NAME: "lint-status (lake flags)"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action-flags.outputs.lint-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
