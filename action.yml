@@ -87,6 +87,8 @@ inputs:
       Check environment with leanchecker.
       Uses the bundled `leanchecker` binary on Lean `nightly-2026-01-09` / `v4.28.0-rc1` and newer.
       Falls back to building the external `lean4checker` repository on older Lean versions.
+      Note: Mathlib-dependent projects should set `LEAN_NUM_THREADS`, see the README
+      section "Run leanchecker on a project with a Mathlib dependency".
       Allowed values: "true" | "false".
     required: false
     default: "false"
