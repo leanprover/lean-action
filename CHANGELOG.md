@@ -18,8 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new `axiom-audit-status` output parameter
 - new `lint-args` input to specify arguments to pass to `lake lint`
 
+### Changed
+
+- document the `LEAN_NUM_THREADS` workaround for `leanchecker` memory exhaustion on projects with a Mathlib dependency
+
 ### Fixed
 
+- pass the `test-args` input through to `lake test`; the input was previously ignored
 - include `lake-package-directory` when hashing `lean-toolchain` and `lake-manifest.json` for the GitHub cache key, so projects whose Lake package lives in a subdirectory get a version-specific key instead of an empty one (the empty key previously caused stale, cross-version cache restores)
 - use a more portable shebang, useful for self-hosted runners
 
