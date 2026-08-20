@@ -57,8 +57,7 @@ cp lean-toolchain _lean4export/
 
 # Step 3: Clone and build nanoda_lib
 echo "Cloning and building nanoda_lib..."
-# Using debug branch which has fixes for recent Lean kernel changes
-git clone --depth 1 --branch debug https://github.com/ammkrn/nanoda_lib.git _nanoda_lib
+git clone --depth 1 --branch master https://github.com/ammkrn/nanoda_lib.git _nanoda_lib
 
 (
     cd _nanoda_lib
