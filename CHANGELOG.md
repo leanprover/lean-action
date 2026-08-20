@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - new `lint-args` input to specify arguments to pass to `lake lint`
+- new `release.yml` workflow which automates the release process (see `RELEASING.md`)
 
 ### Fixed
 
