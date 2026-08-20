@@ -11,7 +11,8 @@ fi
 leanchecker_path="$(elan which leanchecker 2>/dev/null || true)"
 if [ -n "$leanchecker_path" ] && [ -x "$leanchecker_path" ]; then
   echo "Using bundled leanchecker from the active Lean toolchain"
-  lake env leanchecker
+  # use eval to ensure leanchecker arguments are expanded
+  eval "lake env leanchecker ${LEANCHECKER_ARGS:-}"
   echo "::endgroup::"
   echo
   exit 0
@@ -40,7 +41,8 @@ fi
 )
 
 echo "Running external lean4checker"
-lake env lean4checker/.lake/build/bin/lean4checker
+# use eval to ensure leanchecker arguments are expanded
+eval "lake env lean4checker/.lake/build/bin/lean4checker ${LEANCHECKER_ARGS:-}"
 
 echo "::endgroup::"
 echo
