@@ -13,8 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new `axiom-audit-allow` input for the allowlist (default: `propext,Classical.choice,Quot.sound`)
 - new `axiom-audit-root` input to set the audited root namespace (default: the lakefile's library name)
 - new `axiom-audit-status` output parameter
+- new `lint-args` input to specify arguments to pass to `lake lint`
+
 ### Fixed
 
+- include `lake-package-directory` when hashing `lean-toolchain` and `lake-manifest.json` for the GitHub cache key, so projects whose Lake package lives in a subdirectory get a version-specific key instead of an empty one (the empty key previously caused stale, cross-version cache restores)
 - use a more portable shebang, useful for self-hosted runners
 
 ## v1.5.0 - 2026-04-21

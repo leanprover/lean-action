@@ -184,6 +184,11 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # By default, `lean-action` calls `lake test` with no arguments.
     test-args: ""
 
+    # Lint arguments to pass to `lake lint {lint-args}`.
+    # For example, `lint-args: "--quiet"` will run `lake lint --quiet`.
+    # By default, `lean-action` calls `lake lint` with no arguments.
+    lint-args: ""
+
     # By default, `lean-action` attempts to automatically detect a Mathlib dependency and run `lake exe cache get` accordingly.
     # Setting `use-mathlib-cache` will override automatic detection and run (or not run) `lake exe cache get`.
     # Project must be downstream of Mathlib to use the Mathlib cache.
@@ -199,6 +204,8 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Check environment with leanchecker.
     # Uses the bundled `leanchecker` binary on Lean `nightly-2026-01-09` / `v4.28.0-rc1`
     # and newer, and falls back to the external `lean4checker` repository on older versions.
+    # Note: Mathlib-dependent projects should set `LEAN_NUM_THREADS`,
+    # see "Run leanchecker on a project with a Mathlib dependency".
     # Allowed values: "true" | "false".
     # Default: "false"
     leanchecker: ""
@@ -333,6 +340,26 @@ steps:
       lake exe graph
       rm import_graph.dot
 ```
+
+### Run leanchecker on a project with a Mathlib dependency
+
+`leanchecker` checks modules in parallel, and each parallel check loads the
+module's full import environment.
+For Mathlib-dependent projects this can exhaust the memory of a GitHub-hosted
+runner, causing the job to hang and then fail with "The hosted runner lost
+communication with the server", with no logs.
+
+Cap the parallelism by setting `LEAN_NUM_THREADS` on the `lean-action` step:
+
+```yaml
+- uses: leanprover/lean-action@v1
+  env:
+    LEAN_NUM_THREADS: "1"
+  with:
+    leanchecker: "true"
+```
+
+Higher values trade memory for speed.
 
 ## Axiom Allowlist Audit with axiom-audit
 
