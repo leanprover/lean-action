@@ -19,4 +19,5 @@ handle_exit() {
 
 trap handle_exit EXIT
 
-lake lint
+# use eval to ensure lint arguments are expanded
+eval "lake lint $LINT_ARGS"
