@@ -16,12 +16,21 @@ handle_exit() {
     echo "Cleaning up temporary files..."
     rm -rf _lean4export _nanoda_lib _nanoda_export.txt _nanoda_config.json
 
-    if [ $exit_status -ne 0 ]; then
-        echo "nanoda-status=FAILURE" >> "$GITHUB_OUTPUT"
+    # Detection-only mode is used by the TOML fixture and does not run nanoda.
+    if [ "${NANODA_DETECT_ONLY:-}" = "true" ]; then
+        return
+    fi
+
+    if [ -n "${GITHUB_OUTPUT:-}" ]; then
+        if [ $exit_status -ne 0 ]; then
+            echo "nanoda-status=FAILURE" >> "$GITHUB_OUTPUT"
+            echo "::error::nanoda check failed"
+        else
+            echo "nanoda-status=SUCCESS" >> "$GITHUB_OUTPUT"
+            echo
+        fi
+    elif [ $exit_status -ne 0 ]; then
         echo "::error::nanoda check failed"
-    else
-        echo "nanoda-status=SUCCESS" >> "$GITHUB_OUTPUT"
-        echo
     fi
 }
 trap handle_exit EXIT
@@ -30,6 +39,46 @@ trap handle_exit EXIT
 if [ -d "_lean4export" ] || [ -d "_nanoda_lib" ]; then
     echo "::error::Directories _lean4export or _nanoda_lib already exist. Please remove them before running nanoda."
     exit 1
+fi
+
+# Detect module name from lakefile before installing nanoda. Current
+# `lake init name .toml` emits a package name distinct from the Lean module
+# root, so nanoda must export the first lean_lib name rather than the package.
+echo "Detecting module name..."
+MODULE_NAME=""
+
+# Try lakefile.toml first
+if [ -f "lakefile.toml" ]; then
+    # nanoda exports a Lean module, so prefer the first lean_lib name. This is
+    # distinct from the package name in current `lake init .toml` output.
+    MODULE_NAME=$(sed -n '/^[[:space:]]*\[\[lean_lib\]\][[:space:]]*$/,/^[[:space:]]*\[\[/p' lakefile.toml |
+        sed -n 's/^[[:space:]]*name[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' |
+        head -1 || true)
+    # Compatibility fallback for older files where package and module names
+    # coincide and no explicit lean_lib section is present.
+    if [ -z "$MODULE_NAME" ]; then
+        MODULE_NAME=$(sed -n 's/^[[:space:]]*name[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' lakefile.toml | head -1 || true)
+    fi
+fi
+
+# Fallback to lakefile.lean
+if [ -z "$MODULE_NAME" ] && [ -f "lakefile.lean" ]; then
+    # Try to extract from 'package' declaration (allowing leading whitespace)
+    MODULE_NAME=$(grep -E "^\s*package\s+" lakefile.lean | head -1 | awk '{print $2}' || true)
+fi
+
+if [ -z "$MODULE_NAME" ]; then
+    echo "::error::Could not detect module name from lakefile.toml or lakefile.lean"
+    exit 1
+fi
+
+echo "Detected module name: $MODULE_NAME"
+
+# The TOML fixture uses this to assert discovery without running nanoda, whose
+# debug-branch parser currently rejects lean4export NDJSON (#169 / #177).
+if [ "${NANODA_DETECT_ONLY:-}" = "true" ]; then
+    echo "Skipping nanoda export (NANODA_DETECT_ONLY=true)"
+    exit 0
 fi
 
 # Step 1: Install Rust if not present
@@ -65,38 +114,7 @@ git clone --depth 1 --branch debug https://github.com/ammkrn/nanoda_lib.git _nan
     cargo build --release
 )
 
-# Step 4: Detect module name from lakefile
-echo "Detecting module name..."
-MODULE_NAME=""
-
-# Try lakefile.toml first
-if [ -f "lakefile.toml" ]; then
-    # nanoda exports a Lean module, so prefer the first lean_lib name. This is
-    # distinct from the package name in current `lake init .toml` output.
-    MODULE_NAME=$(sed -n '/^[[:space:]]*\[\[lean_lib\]\][[:space:]]*$/,/^[[:space:]]*\[\[/p' lakefile.toml |
-        sed -n 's/^[[:space:]]*name[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' |
-        head -1 || true)
-    # Compatibility fallback for older files where package and module names
-    # coincide and no explicit lean_lib section is present.
-    if [ -z "$MODULE_NAME" ]; then
-        MODULE_NAME=$(sed -n 's/^[[:space:]]*name[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' lakefile.toml | head -1 || true)
-    fi
-fi
-
-# Fallback to lakefile.lean
-if [ -z "$MODULE_NAME" ] && [ -f "lakefile.lean" ]; then
-    # Try to extract from 'package' declaration (allowing leading whitespace)
-    MODULE_NAME=$(grep -E "^\s*package\s+" lakefile.lean | head -1 | awk '{print $2}' || true)
-fi
-
-if [ -z "$MODULE_NAME" ]; then
-    echo "::error::Could not detect module name from lakefile.toml or lakefile.lean"
-    exit 1
-fi
-
-echo "Detected module name: $MODULE_NAME"
-
-# Step 5: Export the project
+# Step 4: Export the project
 echo "Exporting $MODULE_NAME..."
 EXPORT_FILE="_nanoda_export.txt"
 lake env _lean4export/.lake/build/bin/lean4export "$MODULE_NAME" > "$EXPORT_FILE"
@@ -104,7 +122,7 @@ lake env _lean4export/.lake/build/bin/lean4export "$MODULE_NAME" > "$EXPORT_FILE
 echo "Export file size: $(wc -c < "$EXPORT_FILE") bytes"
 echo "Export file lines: $(wc -l < "$EXPORT_FILE") lines"
 
-# Step 6: Create nanoda config
+# Step 5: Create nanoda config
 echo "Creating nanoda configuration..."
 CONFIG_FILE="_nanoda_config.json"
 
