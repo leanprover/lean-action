@@ -18,4 +18,5 @@ handle_exit() {
 
 trap handle_exit EXIT
 
-lake exe mk_all --check
+# use eval to ensure mk_all arguments are expanded
+eval "lake exe mk_all --check $MK_ALL_ARGS"

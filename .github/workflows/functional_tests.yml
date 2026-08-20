@@ -216,6 +216,15 @@ jobs:
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
+  mk_all-args:
+    needs: resolve-toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/functional_tests/mk_all_args
+        with:
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
+
   axiom_audit:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
