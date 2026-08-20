@@ -1,0 +1,58 @@
+name: 'axiom-audit test'
+description: 'Verify the axiom-audit check succeeds on a clean package and fails once a home-rolled axiom is introduced.'
+inputs:
+  toolchain:
+    description: 'Toolchain to use for the test'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    # TODO: once `lean-action` supports just setup, use it here
+    - name: install elan
+      run: |
+        set -o pipefail
+        curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain ${{ inputs.toolchain }}
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: create a clean lake library
+      run: |
+        lake init foo lib
+        lake update
+      shell: bash
+
+    - name: "run `lean-action` (clean package)"
+      id: lean-action-clean
+      uses: ./
+      with:
+        use-github-cache: false
+        axiom-audit: true
+
+    - name: verify axiom-audit success on the clean package
+      env:
+        OUTPUT_NAME: "axiom-audit-status"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action-clean.outputs.axiom-audit-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: introduce a home-rolled axiom
+      run: |
+        printf '\naxiom fooBad : True\ntheorem fooUsesBad : True := fooBad\n' >> Foo/Basic.lean
+      shell: bash
+
+    - name: "rerun `lean-action` (axiom introduced)"
+      id: lean-action-dirty
+      uses: ./
+      continue-on-error: true # required so that the failing audit does not fail the workflow
+      with:
+        use-github-cache: false
+        axiom-audit: true
+
+    - name: verify axiom-audit failure once an axiom is introduced
+      env:
+        OUTPUT_NAME: "axiom-audit-status"
+        EXPECTED_VALUE: "FAILURE"
+        ACTUAL_VALUE: ${{ steps.lean-action-dirty.outputs.axiom-audit-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
