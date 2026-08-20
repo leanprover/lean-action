@@ -234,6 +234,15 @@ jobs:
           # axiom-audit builds with the project's toolchain, so use a recent one.
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
+  nanoda-toml-package:
+    needs: resolve-toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/functional_tests/nanoda_toml
+        with:
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
+
   macos-runner:
     needs: resolve-toolchain
     runs-on: macos-latest
