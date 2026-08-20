@@ -7,24 +7,48 @@ on:
       - "scripts/**"
       - "action.yml"
       - ".github/workflows/functional_tests.yml"
+      - ".github/functional_test_toolchain"
       - ".github/functional_tests/**"
   workflow_dispatch:
     inputs:
       toolchain:
-        description: "The Lean toolchain to use when running the tests."
+        description: "The Lean toolchain to use when running the tests. Defaults to the toolchain pinned in .github/functional_test_toolchain."
         required: false
-        default: "leanprover/lean4:v4.32.2"
+        default: ""
 
-# This environment variable is necessary in addition to the workflow_dispatch input
-# because the workflow_dispatch input is not available when the workflow is triggered by a pull request
 env:
-  toolchain: ${{ github.event.inputs.toolchain || 'leanprover/lean4:v4.32.2' }}
   # Toolchain without the bundled `leanchecker` binary,
   # used to cover the external `lean4checker` fallback path
   legacy_toolchain: leanprover/lean4:v4.26.0
 
 jobs:
+  # The default toolchain is pinned in `.github/functional_test_toolchain`
+  # rather than in this file so that the `Update Functional Test Toolchain`
+  # workflow can bump it without a token holding the `workflows` permission,
+  # which the default `GITHUB_TOKEN` cannot be granted.
+  resolve-toolchain:
+    runs-on: ubuntu-latest
+    outputs:
+      toolchain: ${{ steps.resolve.outputs.toolchain }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Resolve the functional test toolchain
+        id: resolve
+        env:
+          # The workflow_dispatch input is unset when the workflow is triggered
+          # by a pull request, in which case the pinned toolchain is used.
+          input_toolchain: ${{ github.event.inputs.toolchain }}
+        run: |
+          toolchain="${input_toolchain:-$(tr -d '[:space:]' < .github/functional_test_toolchain)}"
+          if [ -z "$toolchain" ]; then
+            echo "::error::failed to resolve the functional test toolchain"
+            exit 1
+          fi
+          echo "Using toolchain: $toolchain"
+          echo "toolchain=$toolchain" >> "$GITHUB_OUTPUT"
+
   lake-init-success:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -35,139 +59,161 @@ jobs:
         # see ./github/functional_tests/lake_init/action.yml for more details on lake-init-arguments
         lake-init-arguments: ["standalone", "mathdep math", "tomltest .toml"]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_init_success
         with:
           lake-init-arguments: ${{ matrix.lake-init-arguments}}
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   lake-init-failure:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_init_failure
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   auto-config-true:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/auto_config_true
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   auto-config-false:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/auto_config_false
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   auto-config-false-legacy-leanchecker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/auto_config_false
         with:
           toolchain: ${{ env.legacy_toolchain }}
 
   lake-build-args:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_build_args
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   lake-test-args:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_test_args
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   detect-mathlib:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/mathlib_dependency
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   lake-test-success:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_test_success
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   lake-test-failure:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_test_failure
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   lake-lint-success:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_lint_success
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   lake-lint-failure:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_lint_failure
+        with:
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
+
+  lake-lint-args:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/functional_tests/lake_lint_args
         with:
           toolchain: ${{ env.toolchain }}
 
   lake-check-test-failure:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_check_test_failure
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   subdirectory-lake-package:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/subdirectory_lake_package
         with:
-          toolchain: ${{ env.toolchain }}
-  
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
+
   subdirectory-lake-package-lean-checker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/subdirectory_lake_package_lean_checker
         with:
           toolchain: ${{ env.legacy_toolchain }}
 
   reinstall-transient-toolchain:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/reinstall-transient-toolchain
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   mk_all-check:
+    needs: resolve-toolchain
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/mk_all-check
         with:
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   axiom_audit:
     runs-on: ubuntu-latest
@@ -179,19 +225,21 @@ jobs:
           toolchain: ${{ env.toolchain }}
 
   macos-runner:
+    needs: resolve-toolchain
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_init_success
         with:
           lake-init-arguments: "standalone"
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   windows-runner:
+    needs: resolve-toolchain
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/functional_tests/lake_init_success
         with:
           lake-init-arguments: "standalone"
-          toolchain: ${{ env.toolchain }}
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
