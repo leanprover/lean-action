@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new `axiom-audit-status` output parameter
 - new `lint-args` input to specify arguments to pass to `lake lint`
 - new `mk_all-args` input to pass arguments to `lake exe mk_all --check`, e.g. `mk_all-args: "--lib Carleson"` to restrict the check to a specific library
+- new `release.yml` workflow which automates the release process (see `RELEASING.md`)
 
 ### Fixed
 
