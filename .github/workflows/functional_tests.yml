@@ -118,6 +118,15 @@ jobs:
         with:
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
+  nanoda-modules:
+    needs: resolve-toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/functional_tests/nanoda_modules
+        with:
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
+
   detect-mathlib:
     needs: resolve-toolchain
     runs-on: ubuntu-latest
