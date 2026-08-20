@@ -27,7 +27,9 @@ runs:
         else
           printf '\nlean_lib Other\n' >> lakefile.lean
         fi
-        echo "def other := 0" > Other.lean
+        mkdir Other
+        echo "def otherBasic := 0" > Other/Basic.lean
+        echo "import Other.Basic" > Other.lean
         echo "def foo := 1" > Mkall/Foo.lean
       shell: bash
 
