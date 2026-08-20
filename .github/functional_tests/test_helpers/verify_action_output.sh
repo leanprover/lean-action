@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Expects the following environment variables to be set in the calling job step:
 # - OUTPUT_NAME: the name of the output to verify
