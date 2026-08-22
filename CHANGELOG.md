@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.6.0 - 2026-08-22
+
 ### Added
 
 - new `leanchecker-args` input to pass arguments to `lake env leanchecker`,
