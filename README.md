@@ -174,6 +174,12 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Allowed values: "true" | "false".
     mk_all-check: ""
 
+    # Arguments to pass to `lake exe mk_all --check {mk_all-args}`.
+    # For example, `mk_all-args: "--lib Carleson"` will run `lake exe mk_all --check --lib Carleson`,
+    # restricting the check to the `Carleson` library.
+    # By default, `lean-action` calls `lake exe mk_all --check` with no additional arguments.
+    mk_all-args: ""
+
     # Build arguments to pass to `lake build {build-args}`.
     # For example, `build-args: "--quiet"` will run `lake build --quiet`.
     # By default, `lean-action` calls `lake build` with no arguments.

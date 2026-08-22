@@ -1,0 +1,67 @@
+name: '`mk_all-args` test'
+description: |
+  Run `lean-action` with the `mk_all-args` input on a package with two libraries,
+  one of which contains an unimported file. Verify that `mk_all-args: "--lib <lib>"`
+  restricts the check to the given library.
+inputs:
+  toolchain:
+    description: 'Toolchain to use for the test'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    # TODO: once `lean-action` supports just setup, use it here
+    - name: install elan
+      run: |
+        set -o pipefail
+        curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain ${{ inputs.toolchain }}
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: create lake package with two libraries and an unimported file
+      run: |
+        lake init mkall math
+        lake update
+        if [ -f lakefile.toml ]; then
+          printf '\n[[lean_lib]]\nname = "Other"\n' >> lakefile.toml
+        else
+          printf '\nlean_lib Other\n' >> lakefile.lean
+        fi
+        mkdir Other
+        echo "def otherBasic := 0" > Other/Basic.lean
+        echo "import Other.Basic" > Other.lean
+        echo "def foo := 1" > Mkall/Foo.lean
+      shell: bash
+
+    - name: "run `lean-action` restricted to the library with the unimported file"
+      id: lean-action-failure
+      uses: ./
+      continue-on-error: true # required so that the action does not fail the workflow
+      with:
+        use-github-cache: false
+        mk_all-check: true
+        mk_all-args: "--lib Mkall"
+
+    - name: verify `lake exe mk_all --check --lib Mkall` failure
+      env:
+        OUTPUT_NAME: "mk_all-status (--lib Mkall)"
+        EXPECTED_VALUE: "FAILURE"
+        ACTUAL_VALUE: ${{ steps.lean-action-failure.outputs.mk_all-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash
+
+    - name: "run `lean-action` restricted to the complete library"
+      id: lean-action-success
+      uses: ./
+      with:
+        use-github-cache: false
+        mk_all-check: true
+        mk_all-args: "--lib Other"
+
+    - name: verify `lake exe mk_all --check --lib Other` success
+      env:
+        OUTPUT_NAME: "mk_all-status (--lib Other)"
+        EXPECTED_VALUE: "SUCCESS"
+        ACTUAL_VALUE: ${{ steps.lean-action-success.outputs.mk_all-status }}
+      run: .github/functional_tests/test_helpers/verify_action_output.sh
+      shell: bash

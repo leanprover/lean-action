@@ -47,6 +47,14 @@ inputs:
       Allowed values: "true" | "false"
     required: false
     default: "false"
+  mk_all-args:
+    description: |
+      Arguments to pass to `lake exe mk_all --check {mk_all-args}`.
+      For example, `mk_all-args: "--lib Carleson"` will run `lake exe mk_all --check --lib Carleson`,
+      restricting the check to the `Carleson` library.
+      By default, `lean-action` calls `lake exe mk_all --check` with no additional arguments.
+    required: false
+    default: ""
   build-args:
     description: |
       Build arguments to pass to `lake build {build-args}`.
@@ -244,6 +252,8 @@ runs:
     - name: ensure all files are imported
       id: mk_all
       if: ${{ inputs.mk_all-check == 'true'}}
+      env:
+        MK_ALL_ARGS: ${{ inputs.mk_all-args }}
       run: |
         : Ensure all files are imported
         ${GITHUB_ACTION_PATH}/scripts/mk_all_check.sh
