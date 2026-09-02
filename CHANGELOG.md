@@ -22,8 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new `mk_all-args` input to pass arguments to `lake exe mk_all --check`, e.g. `mk_all-args: "--lib Carleson"` to restrict the check to a specific library
 - new `release.yml` workflow which automates the release process (see `RELEASING.md`)
 
+### Changed
+
+- document the `LEAN_NUM_THREADS` workaround for `leanchecker` memory exhaustion on projects with a Mathlib dependency
+
 ### Fixed
 
+- pass the `test-args` input through to `lake test`; the input was previously ignored
 - include `lake-package-directory` when hashing `lean-toolchain` and `lake-manifest.json` for the GitHub cache key, so projects whose Lake package lives in a subdirectory get a version-specific key instead of an empty one (the empty key previously caused stale, cross-version cache restores)
 - use a more portable shebang, useful for self-hosted runners
 
