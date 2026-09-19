@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- pass `--no-modify-path` to `elan-init` so installing elan no longer edits the
+  runner's persistent environment (`HKCU\Environment\PATH` on Windows,
+  `~/.profile` and friends elsewhere). `lean-action` already puts
+  `$HOME/.elan/bin` on `$GITHUB_PATH`, so this is a no-op on GitHub-hosted
+  runners; on self-hosted runners it stops every job from accumulating PATH
+  entries that outlive it
+
 ## v1.6.0 - 2026-08-22
 
 ### Added
