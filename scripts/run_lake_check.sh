@@ -72,9 +72,9 @@ fi
 
 sandbox_setup="${LAKE_CHECK_SANDBOX_INPUT:-none}"
 case "$sandbox_setup" in
-    none | sysctl | setuid) ;;
+    none | apparmor | sysctl | setuid) ;;
     *)
-        failure_message="\`lake-check-sandbox\` must be \"none\", \"sysctl\" or \"setuid\", got \"${sandbox_setup}\""
+        failure_message="\`lake-check-sandbox\` must be \"none\", \"apparmor\", \"sysctl\" or \"setuid\", got \"${sandbox_setup}\""
         exit 1
         ;;
 esac
@@ -107,8 +107,35 @@ sandbox_works() {
 
 if ! sandbox_works; then
     case "$sandbox_setup" in
+        apparmor)
+            # Ubuntu's own mechanism: the restriction denies unprivileged user namespaces to
+            # programs whose AppArmor profile does not grant `userns`, so granting it to this one
+            # binary leaves the restriction in force for everything else on the runner.
+            echo "::warning::\`lake-check-sandbox: apparmor\` is installing an AppArmor profile granting ${sandbox_exe} permission to create user namespaces. The runner's restriction stays in force for every other program."
+            if ! command -v apparmor_parser > /dev/null 2>&1; then
+                failure_message="\`lake-check-sandbox: apparmor\` needs \`apparmor_parser\`, which is not on this runner. Use \"sysctl\" or \"setuid\" instead."
+                exit 2
+            fi
+            if ! sudo tee /etc/apparmor.d/lean-action-bwrap > /dev/null <<PROFILE
+abi <abi/4.0>,
+include <tunables/global>
+
+profile bwrap ${sandbox_exe} flags=(unconfined) {
+  userns,
+  include if exists <local/bwrap>
+}
+PROFILE
+            then
+                failure_message="\`lake-check-sandbox: apparmor\` could not write /etc/apparmor.d/lean-action-bwrap. This runner probably does not offer passwordless sudo."
+                exit 2
+            fi
+            if ! sudo apparmor_parser -r /etc/apparmor.d/lean-action-bwrap; then
+                failure_message="\`lake-check-sandbox: apparmor\` could not load the AppArmor profile for ${sandbox_exe}. Use \"sysctl\" or \"setuid\" instead."
+                exit 2
+            fi
+            ;;
         sysctl)
-            echo "::warning::\`lake-check-sandbox: sysctl\` is relaxing kernel.apparmor_restrict_unprivileged_userns on this runner so bubblewrap can start. This affects the whole runner for the rest of the job."
+            echo "::warning::\`lake-check-sandbox: sysctl\` is relaxing kernel.apparmor_restrict_unprivileged_userns on this runner so bubblewrap can start. This affects the whole runner for the rest of the job, not just bubblewrap; \`lake-check-sandbox: apparmor\` is narrower."
             if ! sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0; then
                 failure_message="\`lake-check-sandbox: sysctl\` could not set \`kernel.apparmor_restrict_unprivileged_userns\`. This runner either does not have that knob, in which case its sandbox is blocked by something else, or does not offer passwordless sudo."
                 exit 2
@@ -134,7 +161,7 @@ if ! sandbox_works; then
             ;;
         *"uid map"* | *"user namespace"*)
             if [ "$sandbox_setup" = "none" ]; then
-                hint="This runner blocks the unprivileged user namespaces bubblewrap needs, which is the default on Ubuntu 24.04 and newer, including GitHub-hosted runners. Set \`lake-check-sandbox: sysctl\` to let lean-action relax \`kernel.apparmor_restrict_unprivileged_userns\` for this job, or \`lake-check-sandbox: setuid\` to install bubblewrap setuid root instead. Both need passwordless sudo."
+                hint="This runner restricts the unprivileged user namespaces bubblewrap needs, as GitHub-hosted runners do. Set \`lake-check-sandbox: apparmor\` to grant bubblewrap alone permission to create them, leaving the restriction in force for everything else; \`sysctl\` and \`setuid\` are the blunter alternatives. All three need passwordless sudo."
             else
                 hint="\`lake-check-sandbox: ${sandbox_setup}\` was applied and the sandbox still cannot start. Try the other value, or run on a runner that permits unprivileged user namespaces."
             fi

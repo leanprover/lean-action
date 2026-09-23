@@ -11,15 +11,20 @@ echo "Checking environment with nanoda external type checker"
 # particular, do not install bubblewrap or touch the runner's sandbox configuration on the strength
 # of a deprecated input the caller set for something else -- fall back instead, as before.
 if [ "$(uname -s)" = "Linux" ] && lake check --help 2>&1 | grep -q -- "--paranoid"; then
-    echo "::warning::\`nanoda\` is deprecated; use \`lake-check: paranoid\` instead. It runs nanoda together with every other checker bundled with the toolchain, and builds none of them."
-    if command -v bwrap > /dev/null 2>&1 && bwrap --ro-bind / / true > /dev/null 2>&1; then
+    echo "::warning::\`nanoda\` is deprecated; use \`lake-check: paranoid\` instead. It runs nanoda together with every other checker bundled with the toolchain, and builds none of them. It has no equivalent of \`nanoda-allow-sorry: true\`, because \`lake check\` permits only the standard axioms."
+    if [ "${NANODA_ALLOW_SORRY:-true}" != "false" ]; then
+        # `lake check` fails on any non-standard axiom and cannot be told otherwise, so delegating
+        # here would start rejecting projects that carry a `sorry` and currently pass.
+        echo "\`nanoda-allow-sorry\` permits sorryAx, which \`lake check\` cannot; building nanoda from source so the axiom policy is unchanged"
+    elif command -v bwrap > /dev/null 2>&1 && bwrap --ro-bind / / true > /dev/null 2>&1; then
         echo "Delegating to \`lake check --paranoid\`, which runs the bundled nanoda_bin"
         echo "::endgroup::"
         export LAKE_CHECK_INPUT="paranoid"
         export LAKE_CHECK_STATUS_NAME="nanoda-status"
         exec "$(dirname "$0")/run_lake_check.sh"
+    else
+        echo "No usable bubblewrap sandbox here, so \`lake check\` cannot run; building nanoda from source instead"
     fi
-    echo "No usable bubblewrap sandbox here, so \`lake check\` cannot run; building nanoda from source instead"
 fi
 
 # handle_exit function to capture exit status and cleanup

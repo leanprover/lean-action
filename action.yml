@@ -134,22 +134,27 @@ inputs:
   lake-check-sandbox:
     description: |
       How to make `lake check`'s bubblewrap sandbox able to start, when it cannot.
-      Ubuntu 24.04 and newer block the unprivileged user namespaces bubblewrap needs, which
-      includes GitHub-hosted runners, so `lake-check` fails there without one of these.
+      GitHub-hosted runners restrict the unprivileged user namespaces bubblewrap needs, so
+      `lake-check` fails there without one of these. A runner that already permits them, such as
+      a privileged Namespace container, needs nothing.
       "none" changes nothing, and `lake-check` fails with an error naming this input.
-      "sysctl" relaxes `kernel.apparmor_restrict_unprivileged_userns` for the rest of the job;
-      this is the usual choice on GitHub-hosted runners.
-      "setuid" installs `bwrap` setuid root instead, which is narrower but leaves a setuid
-      binary behind.
-      Both non-"none" values need passwordless sudo, and are only applied when the sandbox is
-      found not to work.
-      Allowed values: "none" | "sysctl" | "setuid".
+      "apparmor" installs an AppArmor profile granting `bwrap` alone permission to create user
+      namespaces, leaving the runner's restriction in force for every other program; this is the
+      narrowest option and the usual choice on GitHub-hosted runners.
+      "sysctl" relaxes `kernel.apparmor_restrict_unprivileged_userns` for the rest of the job,
+      which affects the whole runner rather than just bubblewrap.
+      "setuid" installs `bwrap` setuid root, which leaves a setuid binary behind.
+      All three need passwordless sudo, and are only applied when the sandbox is found not to
+      work.
+      Allowed values: "none" | "apparmor" | "sysctl" | "setuid".
     required: false
     default: "none"
   nanoda:
     description: |
       Deprecated: use `lake-check: paranoid`, which runs nanoda among every other checker
-      bundled with the toolchain and builds none of them.
+      bundled with the toolchain and builds none of them. There is no migration for
+      `nanoda-allow-sorry: true`, because `lake check` permits only the standard axioms; a
+      project that needs `sorry` tolerated has to stay on this input for now.
       Check environment with nanoda external type checker.
       nanoda is an independent Lean 4 type checker written in Rust.
       Requires Rust toolchain (will be installed automatically if not present).

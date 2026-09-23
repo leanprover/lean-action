@@ -239,16 +239,20 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 
     # How to make `lake check`'s sandbox able to start, when it cannot.
     # "none" changes nothing and `lake-check` fails with an error naming this input.
+    # "apparmor" grants `bwrap` alone permission to create user namespaces, leaving the
+    # runner's restriction in force for everything else; the narrowest option, and the
+    # usual choice on GitHub-hosted runners.
     # "sysctl" relaxes `kernel.apparmor_restrict_unprivileged_userns` for the rest of the
-    # job; this is the usual choice on GitHub-hosted runners.
-    # "setuid" installs `bwrap` setuid root instead.
-    # Both non-"none" values need passwordless sudo, and are applied only when the sandbox
-    # is found not to work.
-    # Allowed values: "none" | "sysctl" | "setuid".
+    # job, affecting the whole runner.
+    # "setuid" installs `bwrap` setuid root.
+    # All three need passwordless sudo, and are applied only when the sandbox is found not
+    # to work.
+    # Allowed values: "none" | "apparmor" | "sysctl" | "setuid".
     # Default: "none"
     lake-check-sandbox: ""
 
-    # Deprecated: use `lake-check: paranoid`.
+    # Deprecated: use `lake-check: paranoid`, except when `nanoda-allow-sorry: true` is
+    # needed: `lake check` permits only the standard axioms and cannot tolerate a `sorry`.
     # Check environment with nanoda external type checker.
     # nanoda is an independent Lean 4 type checker written in Rust.
     # Requires Rust toolchain (will be installed automatically if not present).
@@ -404,7 +408,13 @@ Higher values trade memory for speed.
 `lake check` builds the project, exports it, and replays the result through a kernel, erroring
 on any use of a non-standard axiom. It treats the project as untrusted input: the configuration
 is evaluated and the code built and exported inside a sandbox, and none of the project's `.olean`
-files is ever loaded into Lake's own address space.
+files is ever loaded into Lake's own address space. The reference manual explains where this sits
+among the ways to validate a proof, in
+[Validating a Lean Proof](https://lean-lang.org/doc/reference/latest/ValidatingProofs/#validating-comparator);
+`lake help check` documents the command itself.
+
+Because only the standard axioms are permitted, a project containing a `sorry` is rejected, and
+there is no option to allow one.
 
 ```yaml
 - uses: leanprover/lean-action@v1
@@ -423,23 +433,24 @@ than skipping the check.
 
 ### On GitHub-hosted runners, set `lake-check-sandbox`
 
-Ubuntu 24.04 and newer block the unprivileged user namespaces bubblewrap needs, so the sandbox
-cannot start on a GitHub-hosted runner until something changes that. `lean-action` will not make
-that change without being asked, so `lake-check` on its own fails there with an error saying so.
-Pick one:
+GitHub-hosted runners restrict the unprivileged user namespaces bubblewrap needs, so the sandbox
+cannot start there until the restriction is lifted. Lifting it means changing the runner, which
+`lean-action` will not do uninvited, so `lake-check` on its own fails there with an error saying
+so. Pick one:
 
 ```yaml
 - uses: leanprover/lean-action@v1
   with:
     lake-check: "paranoid"
-    lake-check-sandbox: "sysctl"
+    lake-check-sandbox: "apparmor"
 ```
 
 | value | effect |
 | --- | --- |
 | `"none"` (default) | Change nothing. `lake-check` fails if the sandbox cannot start. |
-| `"sysctl"` | Relax `kernel.apparmor_restrict_unprivileged_userns` for the rest of the job. The usual choice on GitHub-hosted runners. |
-| `"setuid"` | Install `bwrap` setuid root instead. Narrower, but leaves a setuid binary behind. |
+| `"apparmor"` | Install an AppArmor profile granting `bwrap` alone permission to create user namespaces. The restriction stays in force for every other program, so this is the narrowest option and the usual choice. |
+| `"sysctl"` | Relax `kernel.apparmor_restrict_unprivileged_userns` for the rest of the job. Affects the whole runner, not just bubblewrap. |
+| `"setuid"` | Install `bwrap` setuid root. Leaves a setuid binary behind. |
 
 Both non-`"none"` values need passwordless sudo and are applied only when the sandbox is found not
 to work, so a runner that already permits user namespaces is left untouched.

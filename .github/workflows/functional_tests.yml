@@ -254,8 +254,8 @@ jobs:
         with:
           # `lake check --paranoid` needs v4.35.0-rc2 or newer.
           toolchain: ${{ env.lake_check_toolchain }}
-          # GitHub-hosted runners block the user namespaces bubblewrap needs.
-          sandbox: sysctl
+          # GitHub-hosted runners restrict the user namespaces bubblewrap needs.
+          sandbox: apparmor
 
   # Namespace runs jobs in a container whose default seccomp profile denies `pivot_root`, so the
   # sandbox needs a privileged container rather than anything `lake-check-sandbox` can do. The
