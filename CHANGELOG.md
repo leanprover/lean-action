@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- new `lake-check` input to check the project with `lake check`: build it and replay the result through one or more kernels inside a sandbox, erroring on any use of a non-standard axiom. `"true"` uses Lean's own kernel; `"paranoid"` additionally runs every external checker the toolchain bundles (`leanchecker-paranoid`, `lean4lean`, `nanoda`, `con-leche` and `con-ron`), none of which has to be built. Requires a Linux runner and Lean `v4.35.0-rc1` or newer (`"paranoid"` needs `v4.35.0-rc2` or newer). Default: false
+- new `lake-check-status` output parameter
+
+### Deprecated
+
+- `nanoda` and `nanoda-allow-sorry`, in favour of `lake-check: paranoid`, which runs the `nanoda_bin` the toolchain already ships rather than installing Rust and building it from source. On a Linux runner with a toolchain that bundles the checkers, `nanoda: true` now delegates to `lake check --paranoid`; everywhere else it keeps building nanoda from source as before
+
 ## v1.6.0 - 2026-08-22
 
 ### Added

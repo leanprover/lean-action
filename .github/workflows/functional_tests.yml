@@ -28,6 +28,9 @@ env:
   # Toolchain without the bundled `leanchecker` binary,
   # used to cover the external `lean4checker` fallback path
   legacy_toolchain: leanprover/lean4:v4.26.0
+  # `lake check --paranoid` landed in v4.35.0-rc2, which is newer than the toolchain pinned in
+  # `.github/functional_test_toolchain`, so the `lake-check` tests pin their own.
+  lake_check_toolchain: leanprover/lean4:v4.35.0-rc2
 
 jobs:
   # The default toolchain is pinned in `.github/functional_test_toolchain`
@@ -241,6 +244,25 @@ jobs:
       - uses: ./.github/functional_tests/axiom_audit
         with:
           # axiom-audit builds with the project's toolchain, so use a recent one.
+          toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
+
+  lake-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/functional_tests/lake_check
+        with:
+          # `lake check --paranoid` needs v4.35.0-rc2 or newer.
+          toolchain: ${{ env.lake_check_toolchain }}
+
+  lake-check-unsupported-toolchain:
+    needs: resolve-toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/functional_tests/lake_check_unsupported
+        with:
+          # The pinned functional test toolchain predates `lake check`, which is what this covers.
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
 
   macos-runner:

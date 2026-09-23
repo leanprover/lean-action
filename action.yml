@@ -118,8 +118,23 @@ inputs:
       Allowed values: "true" | "false".
     required: false
     default: "false"
+  lake-check:
+    description: |
+      Check the project with `lake check`: build it and replay the result through one or more
+      kernels inside a sandbox, erroring on any use of a non-standard axiom.
+      "true" checks with Lean's own kernel. "paranoid" additionally runs every external checker
+      bundled with the toolchain: `leanchecker-paranoid`, `lean4lean`, `nanoda`, `con-leche` and
+      `con-ron`. None of them has to be built: release toolchains ship all of them.
+      Requires a Linux runner, because the sandbox needs Linux namespaces, and Lean
+      `v4.35.0-rc1` or newer ("paranoid" needs `v4.35.0-rc2` or newer). `bubblewrap` is
+      installed automatically if it is not already present.
+      Allowed values: "true" | "false" | "paranoid".
+    required: false
+    default: "false"
   nanoda:
     description: |
+      Deprecated: use `lake-check: paranoid`, which runs nanoda among every other checker
+      bundled with the toolchain and builds none of them.
       Check environment with nanoda external type checker.
       nanoda is an independent Lean 4 type checker written in Rust.
       Requires Rust toolchain (will be installed automatically if not present).
@@ -204,6 +219,11 @@ outputs:
       If lean-action detected a mathlib dependency equals "true"
       otherwise equals "false".
     value: ${{ steps.detect-mathlib.outputs.detected-mathlib }}
+  lake-check-status:
+    description: |
+      The status of the `lake check` step.
+      Allowed values: "SUCCESS" | "FAILURE" | "".
+    value: ${{ steps.lake-check.outputs.lake-check-status }}
   nanoda-status:
     description: |
       The status of the nanoda check step.
@@ -352,6 +372,17 @@ runs:
       run: |
         : Check Environment with leanchecker
         ${GITHUB_ACTION_PATH}/scripts/run_leanchecker.sh
+      shell: bash
+      working-directory: ${{ inputs.lake-package-directory }}
+
+    - name: check the project with lake check
+      id: lake-check
+      if: ${{ inputs.lake-check != 'false' }}
+      env:
+        LAKE_CHECK_INPUT: ${{ inputs.lake-check }}
+      run: |
+        : Check the project with lake check
+        ${GITHUB_ACTION_PATH}/scripts/run_lake_check.sh
       shell: bash
       working-directory: ${{ inputs.lake-package-directory }}
 

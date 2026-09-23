@@ -90,6 +90,7 @@ If `lean-action` is unable to successfully run the step, `lean-action` will fail
 - `mk_all-check`
 - `check-reservoir-eligibility`
 - `leanchecker`
+- `lake-check`
 - `nanoda`
 
 ### Automatic configuration
@@ -226,6 +227,17 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Deprecated alias for `leanchecker`.
     lean4checker: ""
 
+    # Check the project with `lake check`: build it and replay the result through one or more
+    # kernels inside a sandbox, erroring on any use of a non-standard axiom.
+    # "true" checks with Lean's own kernel. "paranoid" additionally runs every external checker
+    # bundled with the toolchain: `leanchecker-paranoid`, `lean4lean`, `nanoda`, `con-leche`
+    # and `con-ron`. None of them has to be built: release toolchains ship all of them.
+    # Requires a Linux runner and Lean `v4.35.0-rc1`+ ("paranoid" needs `v4.35.0-rc2`+).
+    # Allowed values: "true" | "false" | "paranoid".
+    # Default: "false"
+    lake-check: ""
+
+    # Deprecated: use `lake-check: paranoid`.
     # Check environment with nanoda external type checker.
     # nanoda is an independent Lean 4 type checker written in Rust.
     # Requires Rust toolchain (will be installed automatically if not present).
@@ -285,6 +297,8 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 - `lint-status`
   - Values: "SUCCESS" | "FAILURE" | ""
 - `mk_all-status`
+  - Values: "SUCCESS" | "FAILURE" | ""
+- `lake-check-status`
   - Values: "SUCCESS" | "FAILURE" | ""
 - `nanoda-status`
   - Values: "SUCCESS" | "FAILURE" | ""
@@ -373,6 +387,35 @@ Cap the parallelism by setting `LEAN_NUM_THREADS` on the `lean-action` step:
 ```
 
 Higher values trade memory for speed.
+
+## Independent kernel checks with `lake check`
+
+`lake check` builds the project, exports it, and replays the result through a kernel, erroring
+on any use of a non-standard axiom. It treats the project as untrusted input: the configuration
+is evaluated and the code built and exported inside a sandbox, and none of the project's `.olean`
+files is ever loaded into Lake's own address space.
+
+```yaml
+- uses: leanprover/lean-action@v1
+  with:
+    lake-check: "paranoid"
+```
+
+`lake-check: "true"` checks with Lean's own kernel. `lake-check: "paranoid"` additionally runs
+every external checker the toolchain bundles: `leanchecker-paranoid`, `lean4lean`, `nanoda`,
+`con-leche` and `con-ron`. Release toolchains ship all of them, so nothing is cloned or compiled,
+and a solution has to satisfy every one of them.
+
+Three requirements, all of which `lean-action` reports as an error rather than skipping past:
+
+- **A Linux runner.** The sandbox needs Linux namespaces, and Lake refuses to run anywhere else.
+- **Lean `v4.35.0-rc1` or newer**, and `v4.35.0-rc2` or newer for `"paranoid"`.
+- **`bubblewrap`.** `lean-action` installs it when it is missing. It is not on the GitHub-hosted
+  Ubuntu images.
+
+Because dependency resolution happens inside the sandbox, which cannot write to the project
+directory, the project needs a `lake-manifest.json`. `lean-action` builds the project first, which
+writes one.
 
 ## Axiom Allowlist Audit with axiom-audit
 
