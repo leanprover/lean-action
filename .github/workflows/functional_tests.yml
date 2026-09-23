@@ -28,6 +28,9 @@ env:
   # Toolchain without the bundled `leanchecker` binary,
   # used to cover the external `lean4checker` fallback path
   legacy_toolchain: leanprover/lean4:v4.26.0
+  # Bundles `leanexport` and `nanoda_bin`, which the `nanoda` step now prefers over building
+  # lean4export and nanoda_lib from source.
+  bundled_nanoda_toolchain: leanprover/lean4:v4.35.0-rc2
 
 jobs:
   # The default toolchain is pinned in `.github/functional_test_toolchain`
@@ -242,6 +245,14 @@ jobs:
         with:
           # axiom-audit builds with the project's toolchain, so use a recent one.
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
+
+  nanoda-bundled:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/functional_tests/nanoda_bundled
+        with:
+          toolchain: ${{ env.bundled_nanoda_toolchain }}
 
   macos-runner:
     needs: resolve-toolchain

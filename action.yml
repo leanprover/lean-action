@@ -120,9 +120,15 @@ inputs:
     default: "false"
   nanoda:
     description: |
+      Deprecated: use `lake-check: paranoid`, which runs nanoda among every other checker
+      bundled with the toolchain. There is no migration for `nanoda-allow-sorry: true`, because
+      `lake check` permits only the standard axioms, so a project that needs `sorry` tolerated
+      should stay on this input for now.
       Check environment with nanoda external type checker.
       nanoda is an independent Lean 4 type checker written in Rust.
-      Requires Rust toolchain (will be installed automatically if not present).
+      Uses the `leanexport` and `nanoda_bin` bundled with the toolchain when it ships them,
+      and otherwise builds lean4export and nanoda_lib from source, which needs a Rust toolchain
+      (installed automatically if not present).
       Allowed values: "true" | "false".
     required: false
     default: "false"
