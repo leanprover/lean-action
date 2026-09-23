@@ -91,14 +91,29 @@ fi
 echo "Building the project..."
 lake build
 
+# Keep a copy of the output: a sandbox that fails to start has to be told apart from a project
+# that was rejected, and `lake check` does not distinguish them by exit code.
+check_log="$(mktemp "${RUNNER_TEMP:-/tmp}/lake-check.XXXXXX")"
+
 status=0
 if [ "$mode" = "paranoid" ]; then
     echo "Running \`lake check --paranoid\`: Lean's own kernel plus every bundled external checker"
-    lake check --paranoid || status=$?
+    lake check --paranoid 2>&1 | tee "$check_log" || status=$?
 else
     echo "Running \`lake check\`"
-    lake check || status=$?
+    lake check 2>&1 | tee "$check_log" || status=$?
 fi
+
+# `bwrap` failing to start exits 1, the same code as a genuine rejection: the documented exit 2
+# only covers `bwrap` being missing outright. Reporting "your project was rejected" when nothing
+# was ever checked is the worst possible outcome, so key off the sandbox's own diagnostic.
+if [ "$status" -ne 0 ] && grep -q "^bwrap:" "$check_log"; then
+    bwrap_error="$(grep -m1 "^bwrap:" "$check_log")"
+    rm -f "$check_log"
+    failure_message="\`lake check\` could not start its sandbox (${bwrap_error}). Nothing was checked; this is a setup problem, not a finding about the project. GitHub-hosted Ubuntu runners block unprivileged user namespaces, which bubblewrap needs."
+    exit 2
+fi
+rm -f "$check_log"
 
 case "$status" in
     0)
