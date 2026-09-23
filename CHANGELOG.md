@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - new `lake-check` input to check the project with `lake check`: build it and replay the result through one or more kernels inside a sandbox, erroring on any use of a non-standard axiom. `"true"` uses Lean's own kernel; `"paranoid"` additionally runs every external checker the toolchain bundles (`leanchecker-paranoid`, `lean4lean`, `nanoda`, `con-leche` and `con-ron`), none of which has to be built. Requires a Linux runner, Lean `v4.35.0-rc1` or newer (`"paranoid"` needs `v4.35.0-rc2`), and a runner permitting the user namespaces bubblewrap needs; see the README. Default: false
 - new `lake-check-status` output parameter
+- new `lake-check-sandbox` input (`"none"` | `"apparmor"` | `"sysctl"` | `"setuid"`, default `"none"`) choosing how to make bubblewrap's sandbox able to start on a runner that restricts unprivileged user namespaces, as GitHub-hosted runners do. `"apparmor"` is narrowest: it grants the capability through an AppArmor profile and leaves the restriction in force for everything else. `lean-action` never changes a runner's configuration unless asked, and only when the sandbox is found not to work
 
 ## v1.6.0 - 2026-08-22
 
