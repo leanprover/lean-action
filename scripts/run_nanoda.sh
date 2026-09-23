@@ -90,10 +90,21 @@ fi
 echo "Detecting module name..."
 MODULE_NAME=""
 
-# Try lakefile.toml first
+# Try lakefile.toml first. Prefer `defaultTargets`, then the first `lean_lib`: those name the
+# module to export, where the package name need not be a module at all. `lake init foo lib` on a
+# current toolchain writes `name = "foo"` at the top level with no `[package]` section and a
+# library called `Foo`, so looking only for a package name finds nothing to export.
 if [ -f "lakefile.toml" ]; then
-    # Extract name from [package] section
-    MODULE_NAME=$(grep -A5 '^\[package\]' lakefile.toml | grep '^name' | head -1 | sed 's/.*= *"\([^"]*\)".*/\1/' || true)
+    MODULE_NAME=$(grep -m1 '^defaultTargets' lakefile.toml | sed -n 's/.*\[[^"]*"\([^"]*\)".*/\1/p' || true)
+
+    if [ -z "$MODULE_NAME" ]; then
+        MODULE_NAME=$(grep -A3 '^\[\[lean_lib\]\]' lakefile.toml | grep -m1 '^name' | sed 's/.*= *"\([^"]*\)".*/\1/' || true)
+    fi
+
+    # Older lakefiles put the package name in a `[package]` section.
+    if [ -z "$MODULE_NAME" ]; then
+        MODULE_NAME=$(grep -A5 '^\[package\]' lakefile.toml | grep '^name' | head -1 | sed 's/.*= *"\([^"]*\)".*/\1/' || true)
+    fi
 fi
 
 # Fallback to lakefile.lean
