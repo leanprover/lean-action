@@ -264,6 +264,16 @@ jobs:
         with:
           toolchain: ${{ env.lake_check_toolchain }}
 
+  lake-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/functional_tests/lake_check
+        with:
+          toolchain: ${{ env.lake_check_toolchain }}
+          # GitHub-hosted runners restrict the user namespaces bubblewrap needs.
+          sandbox: apparmor
+
   # Pinned to a toolchain that predates `lake check`, rather than to the moving default: once the
   # default supports it, this would otherwise quietly stop testing feature detection.
   lake-check-unsupported-toolchain:
