@@ -28,6 +28,9 @@ env:
   # Toolchain without the bundled `leanchecker` binary,
   # used to cover the external `lean4checker` fallback path
   legacy_toolchain: leanprover/lean4:v4.26.0
+  # `lake check --paranoid` landed in v4.35.0-rc2, which is newer than the toolchain pinned in
+  # `.github/functional_test_toolchain`, so the `lake-check` test pins its own.
+  lake_check_toolchain: leanprover/lean4:v4.35.0-rc2
 
 jobs:
   # The default toolchain is pinned in `.github/functional_test_toolchain`
@@ -242,6 +245,34 @@ jobs:
         with:
           # axiom-audit builds with the project's toolchain, so use a recent one.
           toolchain: ${{ needs.resolve-toolchain.outputs.toolchain }}
+
+  # `lake check` sandboxes with bubblewrap, which GitHub-hosted runners do not permit without a
+  # privileged change to the runner. Namespace serves a privileged container, which permits it
+  # outright, so that is where this runs. The `-with-features` suffix is what makes the feature
+  # label apply. These labels are per-organisation configuration, and a job whose labels an
+  # organisation does not serve sits queued rather than failing, so keep this to the repository
+  # known to be provisioned for them.
+  lake-check-namespace:
+    if: github.repository == 'leanprover/lean-action'
+    runs-on:
+      - nscloud-ubuntu-24.04-amd64-2x4-with-features
+      - namespace-features:container.privileged=true
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/functional_tests/lake_check
+        with:
+          toolchain: ${{ env.lake_check_toolchain }}
+
+  # Pinned to a toolchain that predates `lake check`, rather than to the moving default: once the
+  # default supports it, this would otherwise quietly stop testing feature detection.
+  lake-check-unsupported-toolchain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/functional_tests/lake_check_unsupported
+        with:
+          toolchain: ${{ env.legacy_toolchain }}
 
   macos-runner:
     needs: resolve-toolchain
