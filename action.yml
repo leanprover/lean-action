@@ -131,6 +131,21 @@ inputs:
       Allowed values: "true" | "false" | "paranoid".
     required: false
     default: "false"
+  lake-check-sandbox:
+    description: |
+      How to make `lake check`'s bubblewrap sandbox able to start, when it cannot.
+      Ubuntu 24.04 and newer block the unprivileged user namespaces bubblewrap needs, which
+      includes GitHub-hosted runners, so `lake-check` fails there without one of these.
+      "none" changes nothing, and `lake-check` fails with an error naming this input.
+      "sysctl" relaxes `kernel.apparmor_restrict_unprivileged_userns` for the rest of the job;
+      this is the usual choice on GitHub-hosted runners.
+      "setuid" installs `bwrap` setuid root instead, which is narrower but leaves a setuid
+      binary behind.
+      Both non-"none" values need passwordless sudo, and are only applied when the sandbox is
+      found not to work.
+      Allowed values: "none" | "sysctl" | "setuid".
+    required: false
+    default: "none"
   nanoda:
     description: |
       Deprecated: use `lake-check: paranoid`, which runs nanoda among every other checker
@@ -380,6 +395,7 @@ runs:
       if: ${{ inputs.lake-check != 'false' }}
       env:
         LAKE_CHECK_INPUT: ${{ inputs.lake-check }}
+        LAKE_CHECK_SANDBOX_INPUT: ${{ inputs.lake-check-sandbox }}
       run: |
         : Check the project with lake check
         ${GITHUB_ACTION_PATH}/scripts/run_lake_check.sh

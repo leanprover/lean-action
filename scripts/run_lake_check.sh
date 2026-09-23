@@ -70,19 +70,63 @@ if [ "$mode" = "paranoid" ]; then
     esac
 fi
 
+sandbox_setup="${LAKE_CHECK_SANDBOX_INPUT:-none}"
+case "$sandbox_setup" in
+    none | sysctl | setuid) ;;
+    *)
+        failure_message="\`lake-check-sandbox\` must be \"none\", \"sysctl\" or \"setuid\", got \"${sandbox_setup}\""
+        exit 1
+        ;;
+esac
+
 # `lake check` looks for `bwrap` on PATH unless COMPARATOR_BWRAP points at it. The GitHub-hosted
 # Ubuntu images do not ship bubblewrap, so install it the way the nanoda path installs Rust.
 if [ -n "${COMPARATOR_BWRAP:-}" ] && [ -x "${COMPARATOR_BWRAP}" ]; then
-    echo "Using the sandbox at COMPARATOR_BWRAP=${COMPARATOR_BWRAP}"
-elif ! command -v bwrap > /dev/null 2>&1; then
-    echo "bubblewrap not found; installing it"
-    if ! command -v apt-get > /dev/null 2>&1; then
-        failure_message="\`lake-check\` needs \`bwrap\` on PATH, and \`apt-get\` is not available to install it. Install bubblewrap before calling lean-action, or point COMPARATOR_BWRAP at it."
-        exit 1
+    sandbox_exe="${COMPARATOR_BWRAP}"
+    echo "Using the sandbox at COMPARATOR_BWRAP=${sandbox_exe}"
+else
+    if ! command -v bwrap > /dev/null 2>&1; then
+        echo "bubblewrap not found; installing it"
+        if ! command -v apt-get > /dev/null 2>&1; then
+            failure_message="\`lake-check\` needs \`bwrap\` on PATH, and \`apt-get\` is not available to install it. Install bubblewrap before calling lean-action, or point COMPARATOR_BWRAP at it."
+            exit 1
+        fi
+        sudo apt-get update
+        sudo apt-get install -y bubblewrap
     fi
-    sudo apt-get update
-    sudo apt-get install -y bubblewrap
+    sandbox_exe="$(command -v bwrap)"
 fi
+
+# Probe the sandbox before running the check. An environment that cannot sandbox has to be
+# reported as a setup problem naming the input that fixes it, not as a failed check: `lake check`
+# exits 1 either way, so by the time it has run the two are hard to tell apart.
+sandbox_probe_output=""
+sandbox_works() {
+    sandbox_probe_output="$("$sandbox_exe" --ro-bind / / true 2>&1)"
+}
+
+if ! sandbox_works; then
+    case "$sandbox_setup" in
+        sysctl)
+            echo "::warning::\`lake-check-sandbox: sysctl\` is relaxing kernel.apparmor_restrict_unprivileged_userns on this runner so bubblewrap can start. This affects the whole runner for the rest of the job."
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+            ;;
+        setuid)
+            echo "::warning::\`lake-check-sandbox: setuid\` is installing ${sandbox_exe} setuid root so bubblewrap can start."
+            sudo chmod u+s "$sandbox_exe"
+            ;;
+    esac
+fi
+
+if ! sandbox_works; then
+    if [ "$sandbox_setup" = "none" ]; then
+        failure_message="\`lake check\` cannot start its sandbox, so nothing was checked: \`${sandbox_exe} --ro-bind / / true\` fails with \"${sandbox_probe_output}\". Ubuntu 24.04 and newer block unprivileged user namespaces, which bubblewrap needs, and GitHub-hosted runners are affected. Set \`lake-check-sandbox: sysctl\` to let lean-action relax \`kernel.apparmor_restrict_unprivileged_userns\` for this job (the usual choice on GitHub-hosted runners), or \`lake-check-sandbox: setuid\` to install bubblewrap setuid root instead. Both need passwordless sudo."
+    else
+        failure_message="\`lake check\` cannot start its sandbox even after applying \`lake-check-sandbox: ${sandbox_setup}\`, so nothing was checked: \`${sandbox_exe} --ro-bind / / true\` fails with \"${sandbox_probe_output}\". Try the other value, or run on a runner that permits unprivileged user namespaces."
+    fi
+    exit 2
+fi
+echo "Sandbox check passed: bubblewrap can create a user namespace here"
 
 # `lake check` resolves dependencies inside the sandbox, which is not granted write access to the
 # project directory, so `lake-manifest.json` has to exist before it starts. `lake build` writes one

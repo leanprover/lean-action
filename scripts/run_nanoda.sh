@@ -6,18 +6,20 @@ echo "::group::nanoda Output"
 echo "Checking environment with nanoda external type checker"
 
 # `lake check --paranoid` runs the `nanoda_bin` the toolchain already ships, alongside every other
-# bundled checker, so none of the cloning and building below is needed. Delegate to it where it can
-# run: it needs a Linux runner for its sandbox, and older toolchains do not have it at all.
-if lake check --help 2>&1 | grep -q -- "--paranoid"; then
+# bundled checker, so none of the cloning and building below is needed. Only delegate to it when it
+# can run as-is: a Linux runner, a toolchain that has it, and a sandbox that already works. In
+# particular, do not install bubblewrap or touch the runner's sandbox configuration on the strength
+# of a deprecated input the caller set for something else -- fall back instead, as before.
+if [ "$(uname -s)" = "Linux" ] && lake check --help 2>&1 | grep -q -- "--paranoid"; then
     echo "::warning::\`nanoda\` is deprecated; use \`lake-check: paranoid\` instead. It runs nanoda together with every other checker bundled with the toolchain, and builds none of them."
-    if [ "$(uname -s)" = "Linux" ]; then
+    if command -v bwrap > /dev/null 2>&1 && bwrap --ro-bind / / true > /dev/null 2>&1; then
         echo "Delegating to \`lake check --paranoid\`, which runs the bundled nanoda_bin"
         echo "::endgroup::"
         export LAKE_CHECK_INPUT="paranoid"
         export LAKE_CHECK_STATUS_NAME="nanoda-status"
         exec "$(dirname "$0")/run_lake_check.sh"
     fi
-    echo "This is not a Linux runner, so \`lake check\` cannot sandbox here; building nanoda from source instead"
+    echo "No usable bubblewrap sandbox here, so \`lake check\` cannot run; building nanoda from source instead"
 fi
 
 # handle_exit function to capture exit status and cleanup
