@@ -1,0 +1,7 @@
+# Namespace runner labels used by the `lake-check-namespace` functional test. `lake check`
+# sandboxes with bubblewrap, which needs a privileged container on Namespace; the
+# `-with-features` suffix is what makes the feature label apply.
+self-hosted-runner:
+  labels:
+    - nscloud-ubuntu-24.04-amd64-2x4-with-features
+    - namespace-features:container.privileged=true

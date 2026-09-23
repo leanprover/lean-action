@@ -444,6 +444,30 @@ Pick one:
 Both non-`"none"` values need passwordless sudo and are applied only when the sandbox is found not
 to work, so a runner that already permits user namespaces is left untouched.
 
+### On Namespace runners, request a privileged container
+
+Namespace runs jobs in a container whose default seccomp profile denies `pivot_root`, which
+bubblewrap needs. That is a property of the container, not of the runner's kernel settings, so
+`lake-check-sandbox` cannot help: ask Namespace for a privileged container instead. The
+`-with-features` suffix on the machine label is what makes the feature label apply.
+
+```yaml
+jobs:
+  verify:
+    runs-on:
+      - nscloud-ubuntu-24.04-amd64-8x16-with-features
+      - namespace-features:container.privileged=true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-check: "paranoid"
+```
+
+A privileged container permits user namespaces too, so leave `lake-check-sandbox` at `"none"`
+there. Note that these labels are per-organisation configuration: a job whose labels your
+organisation does not serve sits queued rather than failing.
+
 Because dependency resolution happens inside the sandbox, which cannot write to the project
 directory, the project needs a `lake-manifest.json`. `lean-action` builds the project first, which
 writes one.

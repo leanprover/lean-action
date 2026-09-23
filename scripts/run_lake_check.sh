@@ -130,7 +130,7 @@ if ! sandbox_works; then
     # A denied `pivot_root` means the job is running inside a container, which it cannot.
     case "$sandbox_probe_output" in
         *"pivot_root"*)
-            hint="The user namespace was created but \`pivot_root\` was refused, which means this job is running inside a container. No value of \`lake-check-sandbox\` can fix that. Run \`lake-check\` on a runner that is not containerised."
+            hint="The user namespace was created but \`pivot_root\` was refused, which means this job is running in a container whose seccomp profile forbids it. \`lake-check-sandbox\` cannot fix that, because the restriction is on the container rather than on the runner's kernel settings. On Namespace runners, request a privileged container: add \`namespace-features:container.privileged=true\` to \`runs-on\` and the \`-with-features\` suffix to the machine label. Otherwise use a runner that is not containerised."
             ;;
         *"uid map"* | *"user namespace"*)
             if [ "$sandbox_setup" = "none" ]; then

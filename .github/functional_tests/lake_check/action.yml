@@ -4,6 +4,10 @@ inputs:
   toolchain:
     description: 'Toolchain to use for the test'
     required: true
+  sandbox:
+    description: 'Value for the `lake-check-sandbox` input. GitHub-hosted runners need "sysctl"; a privileged Namespace container needs nothing.'
+    required: false
+    default: 'none'
 runs:
   using: 'composite'
   steps:
@@ -27,7 +31,7 @@ runs:
       with:
         use-github-cache: false
         lake-check: paranoid
-        lake-check-sandbox: sysctl
+        lake-check-sandbox: ${{ inputs.sandbox }}
 
     - name: verify lake check success on the clean package
       env:
@@ -51,7 +55,7 @@ runs:
       with:
         use-github-cache: false
         lake-check: paranoid
-        lake-check-sandbox: sysctl
+        lake-check-sandbox: ${{ inputs.sandbox }}
 
     - name: verify lake check failure once a sorry is introduced
       env:
