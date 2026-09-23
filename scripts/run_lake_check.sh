@@ -109,21 +109,41 @@ if ! sandbox_works; then
     case "$sandbox_setup" in
         sysctl)
             echo "::warning::\`lake-check-sandbox: sysctl\` is relaxing kernel.apparmor_restrict_unprivileged_userns on this runner so bubblewrap can start. This affects the whole runner for the rest of the job."
-            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+            if ! sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0; then
+                failure_message="\`lake-check-sandbox: sysctl\` could not set \`kernel.apparmor_restrict_unprivileged_userns\`. This runner either does not have that knob, in which case its sandbox is blocked by something else, or does not offer passwordless sudo."
+                exit 2
+            fi
             ;;
         setuid)
             echo "::warning::\`lake-check-sandbox: setuid\` is installing ${sandbox_exe} setuid root so bubblewrap can start."
-            sudo chmod u+s "$sandbox_exe"
+            if ! sudo chmod u+s "$sandbox_exe"; then
+                failure_message="\`lake-check-sandbox: setuid\` could not make ${sandbox_exe} setuid root. This runner probably does not offer passwordless sudo."
+                exit 2
+            fi
             ;;
     esac
 fi
 
 if ! sandbox_works; then
-    if [ "$sandbox_setup" = "none" ]; then
-        failure_message="\`lake check\` cannot start its sandbox, so nothing was checked: \`${sandbox_exe} --ro-bind / / true\` fails with \"${sandbox_probe_output}\". Ubuntu 24.04 and newer block unprivileged user namespaces, which bubblewrap needs, and GitHub-hosted runners are affected. Set \`lake-check-sandbox: sysctl\` to let lean-action relax \`kernel.apparmor_restrict_unprivileged_userns\` for this job (the usual choice on GitHub-hosted runners), or \`lake-check-sandbox: setuid\` to install bubblewrap setuid root instead. Both need passwordless sudo."
-    else
-        failure_message="\`lake check\` cannot start its sandbox even after applying \`lake-check-sandbox: ${sandbox_setup}\`, so nothing was checked: \`${sandbox_exe} --ro-bind / / true\` fails with \"${sandbox_probe_output}\". Try the other value, or run on a runner that permits unprivileged user namespaces."
-    fi
+    # The remedy depends on which half of the sandbox was refused, so name the one that fits.
+    # A denied uid map means user namespaces are blocked, which `lake-check-sandbox` can fix.
+    # A denied `pivot_root` means the job is running inside a container, which it cannot.
+    case "$sandbox_probe_output" in
+        *"pivot_root"*)
+            hint="The user namespace was created but \`pivot_root\` was refused, which means this job is running inside a container. No value of \`lake-check-sandbox\` can fix that. Run \`lake-check\` on a runner that is not containerised."
+            ;;
+        *"uid map"* | *"user namespace"*)
+            if [ "$sandbox_setup" = "none" ]; then
+                hint="This runner blocks the unprivileged user namespaces bubblewrap needs, which is the default on Ubuntu 24.04 and newer, including GitHub-hosted runners. Set \`lake-check-sandbox: sysctl\` to let lean-action relax \`kernel.apparmor_restrict_unprivileged_userns\` for this job, or \`lake-check-sandbox: setuid\` to install bubblewrap setuid root instead. Both need passwordless sudo."
+            else
+                hint="\`lake-check-sandbox: ${sandbox_setup}\` was applied and the sandbox still cannot start. Try the other value, or run on a runner that permits unprivileged user namespaces."
+            fi
+            ;;
+        *)
+            hint="Set \`lake-check-sandbox\` to \"sysctl\" or \"setuid\" if this runner needs a privileged change before bubblewrap can sandbox."
+            ;;
+    esac
+    failure_message="\`lake check\` cannot start its sandbox, so nothing was checked: \`${sandbox_exe} --ro-bind / / true\` fails with \"${sandbox_probe_output}\". ${hint}"
     exit 2
 fi
 echo "Sandbox check passed: bubblewrap can create a user namespace here"

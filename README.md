@@ -237,6 +237,17 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Default: "false"
     lake-check: ""
 
+    # How to make `lake check`'s sandbox able to start, when it cannot.
+    # "none" changes nothing and `lake-check` fails with an error naming this input.
+    # "sysctl" relaxes `kernel.apparmor_restrict_unprivileged_userns` for the rest of the
+    # job; this is the usual choice on GitHub-hosted runners.
+    # "setuid" installs `bwrap` setuid root instead.
+    # Both non-"none" values need passwordless sudo, and are applied only when the sandbox
+    # is found not to work.
+    # Allowed values: "none" | "sysctl" | "setuid".
+    # Default: "none"
+    lake-check-sandbox: ""
+
     # Deprecated: use `lake-check: paranoid`.
     # Check environment with nanoda external type checker.
     # nanoda is an independent Lean 4 type checker written in Rust.
@@ -406,12 +417,32 @@ every external checker the toolchain bundles: `leanchecker-paranoid`, `lean4lean
 `con-leche` and `con-ron`. Release toolchains ship all of them, so nothing is cloned or compiled,
 and a solution has to satisfy every one of them.
 
-Three requirements, all of which `lean-action` reports as an error rather than skipping past:
+It needs a Linux runner and Lean `v4.35.0-rc1` or newer (`v4.35.0-rc2` for `"paranoid"`).
+`lean-action` installs `bubblewrap` itself, and reports any unmet requirement as an error rather
+than skipping the check.
 
-- **A Linux runner.** The sandbox needs Linux namespaces, and Lake refuses to run anywhere else.
-- **Lean `v4.35.0-rc1` or newer**, and `v4.35.0-rc2` or newer for `"paranoid"`.
-- **`bubblewrap`.** `lean-action` installs it when it is missing. It is not on the GitHub-hosted
-  Ubuntu images.
+### On GitHub-hosted runners, set `lake-check-sandbox`
+
+Ubuntu 24.04 and newer block the unprivileged user namespaces bubblewrap needs, so the sandbox
+cannot start on a GitHub-hosted runner until something changes that. `lean-action` will not make
+that change without being asked, so `lake-check` on its own fails there with an error saying so.
+Pick one:
+
+```yaml
+- uses: leanprover/lean-action@v1
+  with:
+    lake-check: "paranoid"
+    lake-check-sandbox: "sysctl"
+```
+
+| value | effect |
+| --- | --- |
+| `"none"` (default) | Change nothing. `lake-check` fails if the sandbox cannot start. |
+| `"sysctl"` | Relax `kernel.apparmor_restrict_unprivileged_userns` for the rest of the job. The usual choice on GitHub-hosted runners. |
+| `"setuid"` | Install `bwrap` setuid root instead. Narrower, but leaves a setuid binary behind. |
+
+Both non-`"none"` values need passwordless sudo and are applied only when the sandbox is found not
+to work, so a runner that already permits user namespaces is left untouched.
 
 Because dependency resolution happens inside the sandbox, which cannot write to the project
 directory, the project needs a `lake-manifest.json`. `lean-action` builds the project first, which
