@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- pin the `actions/cache` steps, and all actions used by this repository's workflows, to full commit SHAs, so that `lean-action` works in organizations that require SHA-pinned actions
+
 ## v1.6.0 - 2026-08-22
 
 ### Added
