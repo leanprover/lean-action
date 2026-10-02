@@ -131,6 +131,26 @@ inputs:
       Allowed values: "true" | "false" | "paranoid".
     required: false
     default: "false"
+  lake-check-sandbox:
+    description: |
+      How to make `lake check`'s bubblewrap sandbox able to start, when it cannot.
+      GitHub-hosted runners restrict the unprivileged user namespaces bubblewrap needs, so
+      `lake-check` fails there without one of these. A runner that already permits them, such as
+      a privileged Namespace container, needs nothing.
+      "none" changes nothing, and `lake-check` fails with an error naming this input.
+      "apparmor" installs an AppArmor profile granting bubblewrap, and the processes it starts,
+      permission to create user namespaces, leaving the runner's restriction in force for
+      everything else. The narrowest option, and the usual choice on GitHub-hosted runners.
+      "sysctl" relaxes `kernel.apparmor_restrict_unprivileged_userns`, which affects every
+      program on the runner.
+      "setuid" installs `bwrap` setuid root.
+      All three need passwordless sudo, are applied only when the sandbox is found not to work,
+      and are not restored afterwards: on a persistent self-hosted runner they outlive the job.
+      "apparmor" and "setuid" are applied only to a root-owned distribution bubblewrap, never to
+      one named by COMPARATOR_BWRAP.
+      Allowed values: "none" | "apparmor" | "sysctl" | "setuid".
+    required: false
+    default: "none"
   nanoda:
     description: |
       Check environment with nanoda external type checker.
@@ -378,6 +398,7 @@ runs:
       if: ${{ inputs.lake-check != 'false' }}
       env:
         LAKE_CHECK_INPUT: ${{ inputs.lake-check }}
+        LAKE_CHECK_SANDBOX_INPUT: ${{ inputs.lake-check-sandbox }}
       run: |
         : Check the project with lake check
         ${GITHUB_ACTION_PATH}/scripts/run_lake_check.sh

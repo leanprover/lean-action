@@ -35,6 +35,15 @@ case "$mode" in
         ;;
 esac
 
+sandbox_setup="${LAKE_CHECK_SANDBOX_INPUT:-none}"
+case "$sandbox_setup" in
+    none | apparmor | sysctl | setuid) ;;
+    *)
+        failure_message="\`lake-check-sandbox\` must be \"none\", \"apparmor\", \"sysctl\" or \"setuid\", got \"${sandbox_setup}\""
+        exit 1
+        ;;
+esac
+
 # `lake check` sandboxes the code it checks with bubblewrap, which needs Linux namespaces; Lake
 # refuses to run anywhere else, so say so here rather than letting it fail further in.
 runner_os="$(uname -s)"
@@ -94,10 +103,93 @@ fi
 # reported as a setup problem naming the remedy, not as a failed check: `lake check` exits 1 both
 # when it rejects a project and when bubblewrap fails to start, so by the time it has run the two
 # are hard to tell apart.
+#
+# Exercise the namespace and mount operations Lake itself uses, not just a bind: a runner can
+# permit `--ro-bind` and still refuse the sandbox Lake actually builds.
 sandbox_probe_output=""
 sandbox_works() {
-    sandbox_probe_output="$("$sandbox_exe" --ro-bind / / true 2>&1)"
+    sandbox_probe_output="$("$sandbox_exe" --unshare-all --ro-bind / / --proc /proc --dev /dev true 2>&1)"
 }
+
+# Privileged setup is only ever applied to a distribution bubblewrap at a root-owned path. The
+# executable to modify would otherwise be decided by PATH or by COMPARATOR_BWRAP, and neither
+# establishes that the target is bubblewrap or that modifying it is safe.
+assert_trusted_sandbox_exe() {
+    if [ -n "${COMPARATOR_BWRAP:-}" ]; then
+        failure_message="\`lake-check-sandbox: ${sandbox_setup}\` will not modify the executable named by COMPARATOR_BWRAP. Provision that sandbox yourself, or unset COMPARATOR_BWRAP to use the distribution's bubblewrap."
+        exit 2
+    fi
+    if [ -L "$sandbox_exe" ]; then
+        failure_message="\`lake-check-sandbox: ${sandbox_setup}\` will not modify ${sandbox_exe}, which is a symbolic link; the target it resolves to today need not be the one modified."
+        exit 2
+    fi
+    case "$sandbox_exe" in
+        /usr/bin/bwrap | /bin/bwrap) ;;
+        *)
+            failure_message="\`lake-check-sandbox: ${sandbox_setup}\` only modifies a distribution bubblewrap at /usr/bin/bwrap or /bin/bwrap, and this runner's is at ${sandbox_exe}. Grant it user namespaces yourself instead."
+            exit 2
+            ;;
+    esac
+    if [ "$(stat -c '%U' "$sandbox_exe")" != "root" ]; then
+        # `chmod u+s` on a file owned by the job user grants that user's own privileges, not
+        # root's, so it would not make the sandbox work and would not mean what it appears to.
+        failure_message="\`lake-check-sandbox: ${sandbox_setup}\` will not modify ${sandbox_exe}, which is not owned by root."
+        exit 2
+    fi
+}
+
+if ! sandbox_works; then
+    case "$sandbox_setup" in
+        apparmor)
+            # Ubuntu's own mechanism: the restriction denies unprivileged user namespaces to
+            # programs whose AppArmor profile does not grant `userns`. Granting it here covers
+            # bubblewrap and the processes it starts, which inherit an unconfined profile; it does
+            # not cover the rest of the runner.
+            assert_trusted_sandbox_exe
+            if ! command -v apparmor_parser > /dev/null 2>&1; then
+                failure_message="\`lake-check-sandbox: apparmor\` needs \`apparmor_parser\`, which is not on this runner. Use \"sysctl\" or \"setuid\" instead."
+                exit 2
+            fi
+            if [ -e /etc/apparmor.d/bwrap ]; then
+                failure_message="\`lake-check-sandbox: apparmor\` will not overwrite the existing AppArmor policy at /etc/apparmor.d/bwrap. Remove it, or grant bubblewrap user namespaces yourself."
+                exit 2
+            fi
+            echo "::warning::\`lake-check-sandbox: apparmor\` is installing an AppArmor profile granting ${sandbox_exe}, and the processes it starts, permission to create user namespaces. The runner's restriction stays in force for everything else. On a persistent self-hosted runner the profile outlives this job."
+            if ! sudo tee /etc/apparmor.d/lean-action-bwrap > /dev/null <<PROFILE
+abi <abi/4.0>,
+include <tunables/global>
+
+profile lean-action-bwrap ${sandbox_exe} flags=(unconfined) {
+  userns,
+  include if exists <local/lean-action-bwrap>
+}
+PROFILE
+            then
+                failure_message="\`lake-check-sandbox: apparmor\` could not write /etc/apparmor.d/lean-action-bwrap. This runner probably does not offer passwordless sudo."
+                exit 2
+            fi
+            if ! sudo apparmor_parser -r /etc/apparmor.d/lean-action-bwrap; then
+                failure_message="\`lake-check-sandbox: apparmor\` could not load the AppArmor profile for ${sandbox_exe}. Use \"sysctl\" or \"setuid\" instead."
+                exit 2
+            fi
+            ;;
+        sysctl)
+            echo "::warning::\`lake-check-sandbox: sysctl\` is relaxing kernel.apparmor_restrict_unprivileged_userns on this runner. This affects every program on the runner, not just bubblewrap, and nothing restores it: on a persistent self-hosted runner it stays relaxed for later jobs too. \`lake-check-sandbox: apparmor\` is narrower."
+            if ! sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0; then
+                failure_message="\`lake-check-sandbox: sysctl\` could not set \`kernel.apparmor_restrict_unprivileged_userns\`. This runner either does not have that knob, in which case its sandbox is blocked by something else, or does not offer passwordless sudo."
+                exit 2
+            fi
+            ;;
+        setuid)
+            assert_trusted_sandbox_exe
+            echo "::warning::\`lake-check-sandbox: setuid\` is installing ${sandbox_exe} setuid root. The setuid bit persists on disk, so on a persistent self-hosted runner it outlives this job."
+            if ! sudo chmod u+s "$sandbox_exe"; then
+                failure_message="\`lake-check-sandbox: setuid\` could not make ${sandbox_exe} setuid root. This runner probably does not offer passwordless sudo."
+                exit 2
+            fi
+            ;;
+    esac
+fi
 
 if ! sandbox_works; then
     # The remedy depends on which half of the sandbox was refused, so name the one that fits.

@@ -420,16 +420,28 @@ adversarial input.
 
 bubblewrap needs unprivileged user namespaces, and not every runner permits them.
 
-**GitHub-hosted runners** restrict them, so `lake-check` fails there until you grant them. The
-narrowest way is an AppArmor profile covering `bwrap` alone; the blunt way is to lift the
-restriction for the whole runner:
+**GitHub-hosted runners** restrict them, so `lake-check` fails there until you grant them. Set
+`lake-check-sandbox` to have `lean-action` do it:
 
 ```yaml
-- run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 - uses: leanprover/lean-action@v1
   with:
     lake-check: "paranoid"
+    lake-check-sandbox: "apparmor"
 ```
+
+| value | effect |
+| --- | --- |
+| `"none"` (default) | Change nothing. `lake-check` fails if the sandbox cannot start. |
+| `"apparmor"` | Install an AppArmor profile granting bubblewrap, and the processes it starts, permission to create user namespaces. The restriction stays in force for everything else, so this is the narrowest option and the usual choice. |
+| `"sysctl"` | Relax `kernel.apparmor_restrict_unprivileged_userns`. Affects every program on the runner. |
+| `"setuid"` | Install `bwrap` setuid root. |
+
+All three need passwordless sudo and are applied only when the sandbox is found not to work, so a
+runner that already permits user namespaces is left untouched. None of them is undone afterwards:
+on a persistent self-hosted runner they outlive the job, so prefer configuring such runners once
+yourself and leaving this at `"none"`. `"apparmor"` and `"setuid"` refuse to act on anything but a
+root-owned distribution bubblewrap, and never on one named by `COMPARATOR_BWRAP`.
 
 **Namespace runners** fail differently: jobs run in a container whose seccomp profile denies
 `pivot_root`, for root as well as for the job user, so relaxing user namespaces does not help.
