@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- save the GitHub cache after testing and linting so their build artifacts can be reused, preserving caching after test or lint failures and skipping saves on an exact cache hit
+
 ## v1.6.1 - 2026-10-02
 
 ### Changed
