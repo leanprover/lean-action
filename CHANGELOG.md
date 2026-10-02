@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- restore the GitHub cache before automatic configuration and `mk_all-check`, so those steps can reuse cached dependencies and build artifacts
+
 ## v1.6.1 - 2026-10-02
 
 ### Changed

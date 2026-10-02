@@ -33,6 +33,7 @@ however if you encounter an issue when using a different runner, please still op
 
 ## Caching `.lake` directory with GitHub's `actions\cache`
 By default, `lean-action` uses [`actions\cache`](https://github.com/actions/cache) to cache the `.lake` directory and speed up builds.
+The GitHub cache is restored before automatic configuration and `mk_all-check`, so those steps can reuse cached dependencies and build artifacts.
 
 > [!NOTE]
 GitHub caching is distinct from Mathlib caching with `lake exe cache get`
