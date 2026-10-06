@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- new `lake-check` input to check the project with `lake check`: build it and replay the result through one or more kernels inside a sandbox, erroring on any use of a non-standard axiom. `"true"` uses Lean's own kernel; `"paranoid"` additionally runs every external checker the toolchain bundles (`leanchecker-paranoid`, `lean4lean`, `nanoda`, `con-leche` and `con-ron`), none of which has to be built. Requires a Linux runner, Lean `v4.35.0-rc1` or newer (`"paranoid"` needs `v4.35.0-rc2`), and a runner permitting the user namespaces bubblewrap needs; see the README. Default: false
+- new `lake-check-status` output parameter
+
+### Changed
+
+- `nanoda` now uses the `leanexport` and `nanoda_bin` bundled with the toolchain when it ships them, instead of installing a Rust toolchain and building lean4export and nanoda_lib from source on every run. Older toolchains keep the source-build path, and the axioms permitted are unchanged either way
+
+### Fixed
+
+- detect the module to export for `nanoda` from `defaultTargets` or the first `lean_lib`, rather than only from a `[package]` section. A current `lake init` writes no `[package]` section, so `nanoda: true` failed outright with "Could not detect module name"
+
+### Deprecated
+
+- `nanoda` and `nanoda-allow-sorry`, in favour of `lake-check: paranoid`. Note that `lake check` permits only the standard axioms, so there is no equivalent of `nanoda-allow-sorry: true`; projects carrying a `sorry` should stay on `nanoda` for now
+
 ## v1.6.1 - 2026-10-02
 
 ### Changed
