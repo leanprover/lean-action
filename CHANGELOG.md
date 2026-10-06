@@ -15,7 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `nanoda` now uses the `leanexport` and `nanoda_bin` bundled with the toolchain when it ships them, instead of installing a Rust toolchain and building lean4export and nanoda_lib from source on every run. Older toolchains keep the source-build path, and the axioms permitted are unchanged either way
-- pin the `actions/cache` steps, and all actions used by this repository's workflows, to full commit SHAs, so that `lean-action` works in organizations that require SHA-pinned actions
 
 ### Fixed
 
@@ -24,6 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 
 - `nanoda` and `nanoda-allow-sorry`, in favour of `lake-check: paranoid`. Note that `lake check` permits only the standard axioms, so there is no equivalent of `nanoda-allow-sorry: true`; projects carrying a `sorry` should stay on `nanoda` for now
+
+## v1.6.1 - 2026-10-02
+
+### Changed
+
+- pin the `actions/cache` steps, and all actions used by this repository's workflows, to full commit SHAs, so that `lean-action` works in organizations that require SHA-pinned actions
 
 ## v1.6.0 - 2026-08-22
 
