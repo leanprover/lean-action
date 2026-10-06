@@ -90,6 +90,7 @@ If `lean-action` is unable to successfully run the step, `lean-action` will fail
 - `mk_all-check`
 - `check-reservoir-eligibility`
 - `leanchecker`
+- `lake-check`
 - `nanoda`
 
 ### Automatic configuration
@@ -226,6 +227,17 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Deprecated alias for `leanchecker`.
     lean4checker: ""
 
+    # Check the project with `lake check`: build it and replay the result through one or
+    # more kernels inside a sandbox, erroring on any use of a non-standard axiom.
+    # "true" checks with Lean's own kernel. "paranoid" additionally runs every external
+    # checker bundled with the toolchain: `leanchecker-paranoid`, `lean4lean`, `nanoda`,
+    # `con-leche` and `con-ron`. None of them has to be built.
+    # Requires a Linux runner, Lean `v4.35.0-rc1`+ ("paranoid" needs `v4.35.0-rc2`+), and a
+    # runner that permits the user namespaces bubblewrap needs.
+    # Allowed values: "true" | "false" | "paranoid".
+    # Default: "false"
+    lake-check: ""
+
     # Check environment with nanoda external type checker.
     # nanoda is an independent Lean 4 type checker written in Rust.
     # Requires Rust toolchain (will be installed automatically if not present).
@@ -285,6 +297,8 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
 - `lint-status`
   - Values: "SUCCESS" | "FAILURE" | ""
 - `mk_all-status`
+  - Values: "SUCCESS" | "FAILURE" | ""
+- `lake-check-status`
   - Values: "SUCCESS" | "FAILURE" | ""
 - `nanoda-status`
   - Values: "SUCCESS" | "FAILURE" | ""
@@ -373,6 +387,71 @@ Cap the parallelism by setting `LEAN_NUM_THREADS` on the `lean-action` step:
 ```
 
 Higher values trade memory for speed.
+
+## Independent kernel checks with `lake check`
+
+`lake check` builds the project, exports it, and replays the result through a kernel, erroring on
+any use of a non-standard axiom. It treats the project as untrusted input: the code is built and
+exported inside a sandbox, and none of its `.olean` files is loaded into Lake's own address space.
+The reference manual places this among the other ways to validate a proof, in
+[Validating a Lean Proof](https://lean-lang.org/doc/reference/latest/ValidatingProofs/#validating-comparator).
+
+```yaml
+- uses: leanprover/lean-action@v1
+  with:
+    lake-check: "paranoid"
+```
+
+`lake-check: "true"` checks with Lean's own kernel. `lake-check: "paranoid"` additionally runs
+every external checker the toolchain bundles: `leanchecker-paranoid`, `lean4lean`, `nanoda`,
+`con-leche` and `con-ron`. Release toolchains ship all of them, so nothing is cloned or compiled.
+
+Only the standard axioms are permitted, so a project containing a `sorry` is rejected and there is
+no option to allow one.
+
+`lake check` builds the project itself, inside the sandbox. Whether it is *also* built on the
+runner first is the `build` input's business: leaving `build` on is faster, because `lake check`
+then starts from a populated `.lake`, while `build: false` keeps the project's code off the runner
+entirely. Note that the rest of `lean-action` runs project code on the runner, so the action as a
+whole does not give you `lake check`'s isolation; run `lake check` directly for genuinely
+adversarial input.
+
+### Making the sandbox able to start
+
+bubblewrap needs unprivileged user namespaces, and not every runner permits them.
+
+**GitHub-hosted runners** restrict them, so `lake-check` fails there until you grant them. The
+narrowest way is an AppArmor profile covering `bwrap` alone; the blunt way is to lift the
+restriction for the whole runner:
+
+```yaml
+- run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+- uses: leanprover/lean-action@v1
+  with:
+    lake-check: "paranoid"
+```
+
+**Namespace runners** fail differently: jobs run in a container whose seccomp profile denies
+`pivot_root`, for root as well as for the job user, so relaxing user namespaces does not help.
+Request a privileged container instead, where the `-with-features` suffix on the machine label is
+what makes the feature apply:
+
+```yaml
+jobs:
+  verify:
+    runs-on:
+      - nscloud-ubuntu-24.04-amd64-8x16-with-features
+      - namespace-features:container.privileged=true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-check: "paranoid"
+```
+
+Such a container permits user namespaces too, so nothing else is needed there. These labels are
+per-organisation configuration: a job whose labels your organisation does not serve sits queued
+rather than failing.
 
 ## Axiom Allowlist Audit with axiom-audit
 
