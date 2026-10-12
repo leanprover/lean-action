@@ -15,6 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `$HOME/.elan/bin` on `$GITHUB_PATH`, so this is a no-op on GitHub-hosted
   runners; on self-hosted runners it stops every job from accumulating PATH
   entries that outlive it
+## v1.6.2 - 2026-10-12
+
+### Fixed
+
+- save the GitHub cache after testing and linting so their build artifacts can be reused, preserving caching after test or lint failures and skipping saves on an exact cache hit
+
+## v1.6.1 - 2026-10-02
+
+### Changed
+
+- pin the `actions/cache` steps, and all actions used by this repository's workflows, to full commit SHAs, so that `lean-action` works in organizations that require SHA-pinned actions
 
 ## v1.6.0 - 2026-08-22
 
@@ -31,8 +42,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new `mk_all-args` input to pass arguments to `lake exe mk_all --check`, e.g. `mk_all-args: "--lib Carleson"` to restrict the check to a specific library
 - new `release.yml` workflow which automates the release process (see `RELEASING.md`)
 
+### Changed
+
+- document the `LEAN_NUM_THREADS` workaround for `leanchecker` memory exhaustion on projects with a Mathlib dependency
+
 ### Fixed
 
+- pass the `test-args` input through to `lake test`; the input was previously ignored
 - include `lake-package-directory` when hashing `lean-toolchain` and `lake-manifest.json` for the GitHub cache key, so projects whose Lake package lives in a subdirectory get a version-specific key instead of an empty one (the empty key previously caused stale, cross-version cache restores)
 - use a more portable shebang, useful for self-hosted runners
 
