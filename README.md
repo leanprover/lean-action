@@ -238,9 +238,12 @@ To be certain `lean-action` runs a step, specify the desire feature with a featu
     # Default: "false"
     lake-check: ""
 
+    # Deprecated: use `lake-check: paranoid`, except when `nanoda-allow-sorry: true` is
+    # needed; `lake check` permits only the standard axioms and cannot tolerate a `sorry`.
     # Check environment with nanoda external type checker.
     # nanoda is an independent Lean 4 type checker written in Rust.
-    # Requires Rust toolchain (will be installed automatically if not present).
+    # Uses the `leanexport` and `nanoda_bin` bundled with the toolchain when available,
+    # otherwise builds lean4export and nanoda_lib from source (installing Rust if needed).
     # Allowed values: "true" | "false".
     # Default: "false"
     nanoda: ""
