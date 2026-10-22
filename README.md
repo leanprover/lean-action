@@ -42,11 +42,10 @@ GitHub caching is distinct from Mathlib caching with `lake exe cache get`
 
 ### Mathlib cache endpoint
 `lean-action` runs `lake exe cache get` with `MATHLIB_CACHE_GET_URL` set to `https://cache.mathlib.org/mathlib4`.
-Mathlib cache clients that read this variable download from cache.mathlib.org.
-Older clients ignore it.
+Mathlib cache clients that read this variable download from that URL. Older clients ignore it.
 To use a different endpoint, set `MATHLIB_CACHE_GET_URL` in the `env` of your workflow, job, or step.
-`lean-action` keeps a value that your workflow sets.
-To use the default endpoint of the cache client, set `MATHLIB_CACHE_GET_URL` to an empty string.
+`lean-action` keeps that value.
+To use the cache client's default endpoint, set `MATHLIB_CACHE_GET_URL` to an empty string.
 `lean-action` then unsets the variable before it runs `lake exe cache get`.
 
 ### Cache keys
