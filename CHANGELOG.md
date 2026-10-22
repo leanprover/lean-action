@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - set `MATHLIB_CACHE_GET_URL` to `https://cache.mathlib.org/mathlib4` when running
   `lake exe cache get`, so Mathlib cache clients that read this variable download from
-  cache.mathlib.org. A value set by the workflow takes precedence
+  cache.mathlib.org. A value set by the workflow takes precedence. An empty value
+  unsets the variable, so the cache client uses its own default endpoint
 
 ### Fixed
 

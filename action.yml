@@ -288,7 +288,12 @@ runs:
         echo "::group::Mathlib Cache"
         # Point cache clients that read `MATHLIB_CACHE_GET_URL` at cache.mathlib.org.
         # A value set by the workflow takes precedence.
-        export MATHLIB_CACHE_GET_URL="${MATHLIB_CACHE_GET_URL:-https://cache.mathlib.org/mathlib4}"
+        # An empty value unsets the variable, so the client uses its own default.
+        if [ -z "${MATHLIB_CACHE_GET_URL+x}" ]; then
+          export MATHLIB_CACHE_GET_URL="https://cache.mathlib.org/mathlib4"
+        elif [ -z "$MATHLIB_CACHE_GET_URL" ]; then
+          unset MATHLIB_CACHE_GET_URL
+        fi
         lake exe cache get
         echo "::endgroup::"
         echo
