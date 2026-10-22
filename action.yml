@@ -286,6 +286,9 @@ runs:
       run: |
         : Get Mathlib Cache
         echo "::group::Mathlib Cache"
+        # Point cache clients that read `MATHLIB_CACHE_GET_URL` at cache.mathlib.org.
+        # A value set by the workflow takes precedence.
+        export MATHLIB_CACHE_GET_URL="${MATHLIB_CACHE_GET_URL:-https://cache.mathlib.org/mathlib4}"
         lake exe cache get
         echo "::endgroup::"
         echo
