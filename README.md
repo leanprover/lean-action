@@ -40,6 +40,14 @@ Saving is skipped when the exact cache key was restored.
 > [!NOTE]
 GitHub caching is distinct from Mathlib caching with `lake exe cache get`
 
+### Mathlib cache endpoint
+`lean-action` runs `lake exe cache get` with `MATHLIB_CACHE_GET_URL` set to `https://cache.mathlib.org/mathlib4`.
+Mathlib cache clients that read this variable download from that URL. Older clients ignore it.
+To use a different endpoint, set `MATHLIB_CACHE_GET_URL` in the `env` of your workflow, job, or step.
+`lean-action` keeps that value.
+To use the cache client's default endpoint, set `MATHLIB_CACHE_GET_URL` to an empty string.
+`lean-action` then unsets the variable before it runs `lake exe cache get`.
+
 ### Cache keys
 `lean-action` uses [cache keys](https://github.com/actions/cache?tab=readme-ov-file#creating-a-cache-key) to save and restore caches.
 
