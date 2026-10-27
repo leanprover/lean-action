@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.7.0 - 2026-10-27
+
 ### Changed
 
 - set `MATHLIB_CACHE_GET_URL` to `https://cache.mathlib.org/mathlib4` for
