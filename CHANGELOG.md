@@ -11,6 +11,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - restore the GitHub cache before automatic configuration and `mk_all-check`, so those steps can reuse cached dependencies and build artifacts
 
+## v1.7.0 - 2026-10-27
+
+### Changed
+
+- set `MATHLIB_CACHE_GET_URL` to `https://cache.mathlib.org/mathlib4` for
+  `lake exe cache get`, so Mathlib cache clients that read this variable download from
+  cache.mathlib.org. A value that the workflow sets takes precedence. An empty value
+  unsets the variable, so the cache client uses its own default endpoint
+
+### Fixed
+
+- pass `--no-modify-path` to `elan-init` so installing elan no longer edits the
+  runner's persistent environment (`HKCU\Environment\PATH` on Windows,
+  `~/.profile` and friends elsewhere). `lean-action` already puts
+  `$HOME/.elan/bin` on `$GITHUB_PATH`, so this is a no-op on GitHub-hosted
+  runners; on self-hosted runners it stops every job from accumulating PATH
+  entries that outlive it
+## v1.6.2 - 2026-10-12
+
+### Fixed
+
+- save the GitHub cache after testing and linting so their build artifacts can be reused, preserving caching after test or lint failures and skipping saves on an exact cache hit
+
 ## v1.6.1 - 2026-10-02
 
 ### Changed
@@ -32,8 +55,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new `mk_all-args` input to pass arguments to `lake exe mk_all --check`, e.g. `mk_all-args: "--lib Carleson"` to restrict the check to a specific library
 - new `release.yml` workflow which automates the release process (see `RELEASING.md`)
 
+### Changed
+
+- document the `LEAN_NUM_THREADS` workaround for `leanchecker` memory exhaustion on projects with a Mathlib dependency
+
 ### Fixed
 
+- pass the `test-args` input through to `lake test`; the input was previously ignored
 - include `lake-package-directory` when hashing `lean-toolchain` and `lake-manifest.json` for the GitHub cache key, so projects whose Lake package lives in a subdirectory get a version-specific key instead of an empty one (the empty key previously caused stale, cross-version cache restores)
 - use a more portable shebang, useful for self-hosted runners
 
