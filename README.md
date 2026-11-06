@@ -33,6 +33,7 @@ however if you encounter an issue when using a different runner, please still op
 
 ## Caching `.lake` directory with GitHub's `actions\cache`
 By default, `lean-action` uses [`actions\cache`](https://github.com/actions/cache) to cache the `.lake` directory and speed up builds.
+The GitHub cache is restored before automatic configuration and `mk_all-check`, so those steps can reuse cached dependencies and build artifacts.
 The cache is saved after building, testing, and linting, so it includes artifacts produced by all three steps.
 A test or lint failure still allows completed build artifacts to be cached; setup or build failures do not.
 Saving is skipped when the exact cache key was restored.
